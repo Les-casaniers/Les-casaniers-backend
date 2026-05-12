@@ -50,6 +50,8 @@ Route::prefix('utilisateurs')->group(function () {
     });
 });
 
+Route::post('/change-password', [UtilisateurController::class, 'changePasswordByEmail']);
+
 use App\Http\Controllers\Api\Produits\CategoryController;
 use App\Http\Controllers\Api\Produits\ProduitController;
 use App\Http\Controllers\Api\Produits\ImageProduitController;
