@@ -1,0 +1,434 @@
+# Documentation logique – Actions & tâches par table (Base de données LesCasaniers)
+
+Date : 07/05/2026  
+Projet : Les Casaniers – Backend Laravel / MySQL  
+Fichier concerné : `script.sql`
+
+## Objectif
+Cette documentation décrit, table par table, les **actions fonctionnelles** et **tâches de développement** à réaliser (API, règles métier, validations, back-office) pour répondre au cahier des charges (parcours client, configurateur guidé, devis/commande, contenus & micro‑copie).
+
+---
+
+## 1) Table `admin`
+### Rôle
+Stocker les comptes du personnel (administration, support, logistique).
+
+### Tâches à réaliser
+- Authentification Back‑Office (connexion / déconnexion) pour `admin`.
+- Gestion des rôles internes via `poste` :
+  - `admin` : gestion totale (catalogue, commandes, contenu, micro‑copie)
+  - `support` : suivi clients, devis, SAV
+  - `logistique` : préparation, expédition, statuts de livraison
+- CRUD Back‑Office : créer / activer / désactiver un membre.
+- Journaliser les actions critiques (option recommandé) : création produit, changement de prix, changement de statut commande.
+
+---
+
+## 2) Table `utilisateurs`
+### Rôle
+Stocker les comptes clients.
+
+### Tâches à réaliser
+- Parcours compte client : inscription, connexion, mot de passe oublié, suppression/désactivation.
+- Vérification unique du `courriel`.
+- Ajout optionnel d’une vérification téléphone (OTP) si prévu.
+- Gestion du statut : bloquer l’accès si `desactive`.
+- API protégée (Sanctum) : endpoint “profil client”.
+
+---
+
+## 3) Table `adresses_utilisateurs`
+### Rôle
+Adresses client (livraison/facturation), réutilisables sur devis/commande.
+
+### Tâches à réaliser
+- CRUD côté compte client : ajouter / modifier / supprimer adresses.
+- Définir l’adresse par défaut (expédition / facturation).
+- Validation : champs obligatoires (ligne1, ville, pays).
+- Lors du checkout : sélection d’une adresse existante ou création rapide.
+
+---
+
+## 4) Table `categories`
+### Rôle
+Arborescence du catalogue (Mega‑menu, pages catégories, segments Pro/Gaming/Composants…)
+
+### Tâches à réaliser
+- CRUD Back‑Office : créer / éditer / organiser (parent/enfant) + ordre (`ordre_tri`).
+- Route front : page catalogue par catégorie via `slug`.
+- Fil d’Ariane (breadcrumbs) en utilisant `parent_id`.
+- Vérifier cohérence `type` pour les entrées menu (Pro, Gaming, Composants, etc.).
+
+---
+
+## 5) Table `produits`
+### Rôle
+Données principales produits (PC, composants, périphériques, services).
+
+### Tâches à réaliser
+- CRUD Back‑Office complet :
+  - création produit (nom, slug, prix, stock, actif)
+  - édition (prix, stock, description)
+  - activation/désactivation
+- Page “fiche produit” front :
+  - affichage specs + réassurance (garantie, livraison)
+  - CTA ajouter panier / ajouter favoris
+- Gestion stock : décrémenter sur commande confirmée (selon choix métier).
+- Règles SEO : unicité slug, meta (option) + alt images.
+
+---
+
+## 6) Table `images_produits`
+### Rôle
+Images d’un produit (carrousel, miniature, image principale).
+
+### Tâches à réaliser
+- Upload & stockage (local / S3) + génération URL.
+- Définir image principale via `ordre` (0 = principale).
+- Gestion alt text.
+- Nettoyage images lors suppression produit.
+
+---
+
+## 7) Table `attributs_produits`
+### Rôle
+Spécifications techniques sous forme de paires clé/valeur.
+
+### Tâches à réaliser
+- Définir un dictionnaire de clés standard (ex: `socket`, `tdp`, `ddr_generation`, `longueur_gpu_mm`, `puissance_w`).
+- CRUD Back‑Office : ajouter/éditer attributs.
+- Utiliser ces attributs dans le configurateur & règles de compatibilité.
+- Affichage fiche produit : tableau technique (tri et libellés).
+
+---
+
+## 8) Table `avis_clients`
+### Rôle
+Avis et notes (preuve sociale).
+
+### Tâches à réaliser
+- Endpoint front : créer un avis (uniquement si utilisateur connecté + option “achat vérifié”).
+- Modération Back‑Office : publier/dépublier (`publie`).
+- Afficher moyenne et distribution des notes.
+- Micro‑copie : messages d’encouragement, erreur si double avis.
+
+---
+
+## 9) Tables `listes_favoris` & `favoris_items`
+### Rôle
+Wishlist / favoris utilisateur.
+
+### Tâches à réaliser
+- API : ajouter / retirer produit favoris.
+- Page compte “Mes favoris” : liste + bouton ajout panier.
+- Gérer le cas anonymes (option) : favoris localStorage et sync à la connexion.
+
+---
+
+## 10) Tables `paniers` & `items_panier`
+### Rôle
+Panier e-commerce (produits simples + configurations).
+
+### Tâches à réaliser
+- Logique panier :
+  - création panier actif
+  - incrément `quantite`, suppression ligne
+  - recalcul total (côté API)
+- Support d’un item de type “configuration” via `configuration_id`.
+- Statut panier :
+  - `actif` : en cours
+  - `commande` : converti en commande
+  - `abandonne` : relance (option)
+- UX : messages simples (panier vide, erreur stock, etc.).
+
+---
+
+## 11) Tables `profils_configurateur` & `etapes_configurateur`
+### Rôle
+Définir les parcours du configurateur (profil: gaming 1080p, etc.) et les étapes.
+
+### Tâches à réaliser
+- Back‑Office : CRUD profils + étapes + ordre.
+- Front configurateur :
+  - sélection du profil
+  - barre de progression basée sur `ordre`
+  - étapes obligatoires (`requis`).
+
+---
+
+## 12) Tables `configurations` & `items_configuration`
+### Rôle
+Sauvegarder une configuration (build) et ses composants.
+
+### Tâches à réaliser
+- API configurateur :
+  - créer configuration “brouillon”
+  - ajouter/remplacer un composant par `emplacement`
+  - recalculer `prix_total`
+- Gestion “oubli” : détecter emplacements manquants (ex: pas de stockage).
+- Conversion en panier : création d’un `items_panier` lié à `configuration_id`.
+- Historique (option) : dupliquer une configuration.
+
+---
+
+## 13) Table `regles_compatibilite`
+### Rôle
+Décrire les règles d’incompatibilité/vigilance (socket, DDR, puissance alim, dimensions GPU…).
+
+### Tâches à réaliser
+- Définir les règles minimales :
+  - CPU.socket = Carte mère.socket
+  - RAM.ddr_generation = Carte mère.ddr_generation
+  - PSU.puissance_w >= (CPU.tdp + GPU.tdp + marge)
+  - GPU.longueur_mm <= Boîtier.longueur_max_mm
+  - Stockage: présence d’au moins 1 disque
+- Moteur de validation :
+  - exécuter règles à chaque changement de pièce
+  - produire alertes (info/avertissement/critique)
+- Liaison avec `messages_mascotte` pour ton pédagogique.
+
+---
+
+## 14) Table `messages_mascotte`
+### Rôle
+Micro‑copy pédagogique (bulles d’aide, alertes, confirmations) par composant.
+
+### Tâches à réaliser
+- Back‑Office : CRUD messages.
+- Front configurateur : sélectionner le message selon :
+  - `emplacement_composant`
+  - gravité (astuce/avertissement/critique)
+  - ton (amical/pro/gaming)
+- Affichage contextualisé (ex: modèle CPU “F” => message “pas d’IGP”).
+
+---
+
+## 15) Table `devis`
+### Rôle
+Demande de devis générée depuis panier/configuration (B2B ou client non expert).
+
+### Tâches à réaliser
+- Formulaire de demande : nom, email, téléphone, note.
+- Création devis :
+  - associer `panier_id` et/ou `configuration_id`
+  - calculer `montant_total`
+- Workflow : `brouillon` -> `envoye` -> `accepte/refuse/expire`.
+- Notification : email/WhatsApp (option) au client + aux admins.
+
+---
+
+## 16) Tables `commandes` & `items_commande`
+### Rôle
+Commande e-commerce (après paiement / validation).
+
+### Tâches à réaliser
+- Création commande depuis panier.
+- Copier les lignes du panier vers `items_commande`.
+- Gestion des statuts :
+  - `en_attente` (créée)
+  - `payee` (paiement ok)
+  - `en_traitement` (préparation)
+  - `expediee` (en route)
+  - `terminee` (livrée)
+  - `annulee` / `remboursee`
+- Back‑Office : changer statut, renseigner infos d’expédition (option à ajouter: tracking).
+
+---
+
+## 17) Tables `contenus` & `contenus_produits_liens`
+### Rôle
+Guide du Fosa / Blog / Services + maillage interne vers produits.
+
+### Tâches à réaliser
+- Back‑Office : CRUD contenu + publication.
+- Front : listing guides / articles + page détail via `slug`.
+- Maillage interne : associer manuellement des produits (CTA) via `contenus_produits_liens`.
+- Objectif SEO : structure propre, breadcrumbs, liens vers catégories/produits.
+
+---
+
+## 18) Table `textes_ui`
+### Rôle
+Micro‑copie centralisée (boutons, erreurs, confirmations, tooltips).
+
+### Tâches à réaliser
+- Définir des clés standard (`cle_nom`) et une convention de `contexte` (ex: `configurateur.etape.cpu`).
+- Front : fallback si clé manquante (texte par défaut).
+- Back‑Office : éditer rapidement les textes (ton amical/commercial).
+- Préparer le multi-langue si besoin (`locale`).
+
+---
+
+## Checklist globale (recommandé)
+- [ ] Mettre en place les migrations Laravel correspondant à `script.sql`
+- [ ] Définir les modèles Eloquent + relations (FK)
+- [ ] Définir les policies/permissions admin vs utilisateurs
+- [ ] Créer endpoints API (auth, catalogue, panier, configurateur, devis, commande, contenus)
+- [ ] Mapper la micro‑copie et les messages mascotte côté Front (React)
+- [ ] Ajouter des seeds de données (profils configurateur, étapes, règles de compatibilité, textes UI)
+
+
+les methodes authentification admin
+
+ implémenté le système de Refresh Token pour l'authentification des administrateurs, conformément à vos exigences de sécurité.
+
+Modifications apportées :
+Configuration (.env & .env.example) :
+Ajout de SANCTUM_ACCESS_TOKEN_EXPIRES_IN=30 (30 minutes pour l'access token).
+Ajout de SANCTUM_REFRESH_TOKEN_EXPIRES_IN=10080 (1 semaine pour le refresh token).
+Service d'Authentification (AdminAuthService) :
+La méthode login génère désormais deux jetons distincts : un Access Token avec l'aptitude access et un Refresh Token avec l'aptitude refresh.
+Ajout de la méthode refreshToken qui vérifie la validité du refresh token (expiration et aptitudes) avant d'émettre un nouvel access token.
+Contrôleur API (AdminAuthController) :
+Mise à jour de la réponse de connexion pour inclure access_token, refresh_token et expires_in.
+Ajout de l'endpoint POST /admin/refresh-token.
+Mise à jour complète de la documentation Swagger pour ces nouvelles fonctionnalités.
+Routes (api.php) :
+Déclaration de la route /admin/refresh-token (accessible sans access token valide, car elle nécessite uniquement le refresh token).
+Fonctionnement :
+Connexion : L'utilisateur reçoit les deux tokens.
+Utilisation : L'access token est utilisé pour toutes les requêtes API (expire après 30 min).
+Renouvellement : Lorsque l'access token expire, le client appelle /admin/refresh-token en envoyant le refresh_token pour obtenir un nouvel access token sans forcer la reconnexion de l'utilisateur.
+render_diffs(file:///d:/asa/LesCasaniers/LesCasaniers-backend/app/Services/AdminAuthService.php) render_diffs(file:///d:/asa/LesCasaniers/LesCasaniers-backend/app/Http/Controllers/Api/AdminAuthController.php) render_diffs(file:///d:/asa/LesCasaniers/LesCasaniers-backend/routes/api.php) render_diffs(file:///d:/asa/LesCasaniers/LesCasaniers-backend/.env)
+
+
+les methodes produits
+
+le service CategoryService en implémentant toutes les fonctionnalités demandées pour la gestion du catalogue.
+
+Voici les points clés du service :
+
+Gestion CRUD Back-Office :
+Méthodes createCategory et updateCategory avec génération automatique du slug si non fourni.
+Validation stricte des données (nom, type, parent_id).
+Gestion de l'ordre via updateOrder.
+Organisation Hiérarchique :
+Le service permet d'organiser les catégories en parents/enfants.
+Vérification de cohérence : Lors de la création ou modification d'une sous-catégorie, le service vérifie et force l'alignement du type (ex: Pro, Gaming) avec celui de la catégorie parente pour garantir la structure du menu.
+Fonctionnalités Front :
+getCategoryBySlug : Pour récupérer les données d'une catégorie via l'URL.
+Fil d'Ariane (Breadcrumbs) : La méthode getBreadcrumbs génère récursivement la liste des parents pour faciliter la navigation sur le site.
+getMenuByType : Récupère les racines d'un type spécifique avec leurs enfants pour construire les méga-menus.
+Le service est prêt à être utilisé dans vos contrôleurs.
+
+render_diffs(file:///d:/asa/LesCasaniers/LesCasaniers-backend/app/Services/Produits/CategoryService.php)
+
+
+
+le service ProduitService en implémentant toutes les fonctionnalités de gestion de catalogue et de stock demandées.
+
+Voici les points clés du service :
+
+CRUD Back-Office :
+createProduit : Gère la création complète avec validation (nom, prix, stock, catégorie, type de produit). Le slug est généré automatiquement s'il n'est pas fourni.
+updateProduit : Permet l'édition flexible des champs (prix, stock, description, etc.).
+toggleStatus : Méthode dédiée pour activer ou désactiver rapidement un produit.
+Gestion des Stocks :
+decrementStock : Cette méthode permet de décrémenter le stock lors d'une commande. Elle inclut une vérification de sécurité pour s'assurer que le stock est suffisant avant l'opération, levant une exception en cas de rupture.
+Fonctionnalités Front :
+getProduitBySlug : Pour la fiche produit détaillée.
+getProduitsByCategory : Pour lister les produits d'une catégorie spécifique.
+Sécurité et Validation :
+Utilisation des repositories pour l'accès aux données.
+Validation systématique des types et des contraintes (ex: prix et stock positifs, unicité du slug).
+Le service est maintenant prêt à être intégré dans vos contrôleurs API pour le Back-Office et le Front.
+
+render_diffs(file:///d:/asa/LesCasaniers/LesCasaniers-backend/app/Services/Produits/ProduitService.php)
+
+
+le service ImageProduitService qui gère l'intégralité du cycle de vie des images produits, de l'upload à la suppression physique, avec optimisation automatique.
+
+Fonctionnalités implémentées :
+Upload et Optimisation :
+Installation et intégration de spatie/laravel-image-optimizer pour compresser les images sans perte de qualité visible lors de l'upload.
+Stockage sécurisé sur le disque public (dossier products) avec renommage automatique via UUID pour éviter les doublons et les conflits de noms.
+Génération automatique des URLs publiques.
+Gestion de l'Image Principale :
+Utilisation du champ ordre : l'image avec ordre = 0 est automatiquement considérée comme l'image principale.
+La méthode setMainImage permet de définir une nouvelle image principale en basculant l'ancienne en mode secondaire.
+SEO et Accessibilité :
+Gestion complète du champ alt pour chaque image, essentiel pour le référencement Google Images et l'accessibilité.
+Nettoyage Automatique :
+Sécurité : Suppression automatique du fichier physique sur le serveur lors de la suppression d'une image en base de données ou lors de la suppression complète d'un produit.
+Sécurité et Validation :
+Vérification des extensions autorisées (jpg, jpeg, png, webp).
+Gestion des dossiers automatisée (création du dossier de stockage si inexistant).
+Installation :
+J'ai exécuté la commande suivante pour ajouter le moteur d'optimisation :
+
+bash
+composer require spatie/laravel-image-optimizer
+Le service est maintenant prêt à être injecté dans vos contrôleurs pour gérer les galeries photos de vos produits.
+
+render_diffs(file:///d:/asa/LesCasaniers/LesCasaniers-backend/app/Services/Produits/ImageProduitService.php)
+
+le service AttributProduitService qui permet de gérer les spécifications techniques complexes des produits, essentielles pour le configurateur PC et l'affichage des fiches techniques.
+
+Fonctionnalités implémentées :
+Dictionnaire Standard :
+Mise en place d'un dictionnaire de clés techniques (socket, tdp, ddr_generation, longueur_gpu_mm, puissance_w, format_cm, etc.).
+Chaque clé est associée à un Libellé lisible et un Groupe (ex: Processeur, Énergie, Dimensions).
+Gestion Back-Office :
+Méthode syncAttributes : Permet d'ajouter ou de mettre à jour tous les attributs d'un produit en une seule opération, tout en garantissant la validation des données.
+Attribution automatique des libellés si ceux-ci ne sont pas fournis manuellement.
+Fiche Technique (Front) :
+Méthode getTechnicalSheet : Génère un tableau technique organisé par groupes (ex: toutes les infos processeur ensemble), prêt à être affiché sur le site.
+Configurateur et Compatibilité :
+Méthode getAttributeValue : Permet de récupérer rapidement la valeur d'un attribut spécifique (ex: quel est le socket de ce CPU ?) pour les futurs algorithmes de vérification de compatibilité entre composants.
+Ce service centralise toute l'intelligence technique liée aux composants PC vendus sur la plateforme.
+
+render_diffs(file:///d:/asa/LesCasaniers/LesCasaniers-backend/app/Services/Produits/AttributProduitService.php)
+
+
+les contrôleurs API pour l'ensemble du module Produits, en intégrant les services précédemment développés.
+
+Contrôleurs créés dans app/Http/Controllers/Api/Produits/ :
+CategoryController.php :
+Gestion du catalogue et du menu (public).
+CRUD administratif avec gestion de l'ordre de tri et de l'arborescence.
+Génération automatique des Breadcrumbs pour le front-end.
+ProduitController.php :
+Affichage des fiches produits détaillées (public).
+Inclusion automatique du Tableau Technique (via AttributProduitService).
+Gestion administrative complète (création, édition, activation/désactivation).
+ImageProduitController.php :
+Upload sécurisé avec validation des formats et de la taille.
+Gestion de la galerie (définir l'image principale, suppression physique des fichiers).
+AttributProduitController.php :
+Synchronisation en masse des caractéristiques techniques.
+Accès au dictionnaire des clés standard pour faciliter la saisie en Back-Office.
+Points techniques clés :
+Sécurité : Les routes de consultation sont publiques, tandis que toutes les actions de modification sont protégées par Laravel Sanctum.
+Documentation : Intégration complète de Swagger (OpenAPI) pour chaque endpoint.
+Routes : Toutes les routes ont été ajoutées dans routes/api.php, organisées par domaine (Public vs Protégé).
+Optimisation : J'ai régénéré la documentation Swagger avec php artisan l5-swagger:generate.
+Vous pouvez maintenant tester ces nouveaux endpoints via l'interface Swagger sur /api/documentation ou via votre client API.
+
+render_diffs(file:///d:/asa/LesCasaniers/LesCasaniers-backend/app/Http/Controllers/Api/Produits/CategoryController.php) render_diffs(file:///d:/asa/LesCasaniers/LesCasaniers-backend/app/Http/Controllers/Api/Produits/ProduitController.php) render_diffs(file:///d:/asa/LesCasaniers/LesCasaniers-backend/app/Http/Controllers/Api/Produits/ImageProduitController.php) render_diffs(file:///d:/asa/LesCasaniers/LesCasaniers-backend/app/Http/Controllers/Api/Produits/AttributProduitController.php) render_diffs(file:///d:/asa/LesCasaniers/LesCasaniers-backend/routes/api.php)
+
+
+
+
+les methodes authentification utilisateurs
+modèle Utilisateur pour qu'il corresponde exactement à la table SQL fournie, et j'ai implémenté toute la couche backend associée (Repository, Service, Controller et Routes) en suivant les standards du projet.
+
+Modifications apportées :
+Modèle Utilisateur.php :
+
+Mise à jour pour hériter de Authenticatable (permet l'authentification).
+Ajout des traits HasApiTokens et HasFactory.
+Définition des colonnes $fillable : prenom, nom, email, telephone, mot_de_passe, statut.
+Configuration des noms de colonnes pour les timestamps : date_creation et date_modification.
+Ajout d'un mutateur pour hacher automatiquement le mot de passe (setMotDePasseAttribute).
+Surcharge de getAuthPassword() pour utiliser la colonne mot_de_passe.
+Architecture Repository & Service :
+
+Création de UtilisateurRepositoryInterface et UtilisateurRepository pour l'accès aux données.
+Enregistrement du binding dans AppServiceProvider.
+Implémentation de UtilisateurService gérant la logique métier : inscription, connexion (avec throttle), déconnexion, rafraîchissement de token, mise à jour du profil et changement de mot de passe.
+Contrôleur & API :
+
+Mise à jour de config/auth.php pour utiliser le modèle Utilisateur à la place du modèle User par défaut.
+Création de UtilisateurController.php avec toutes les méthodes nécessaires et la documentation Swagger (OpenApi).
+Ajout des routes API sous le préfixe /utilisateurs dans routes/api.php.
+Toutes les fonctionnalités d'authentification et de gestion de compte pour les utilisateurs sont maintenant opérationnelles et alignées sur la structure de la table SQL.

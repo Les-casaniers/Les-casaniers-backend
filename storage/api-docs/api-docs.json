@@ -1,0 +1,1381 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Les Casaniers API",
+        "description": "Documentation de l'API pour le projet Les Casaniers",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000/api",
+            "description": "Serveur Principal"
+        }
+    ],
+    "paths": {
+        "/admin/register": {
+            "post": {
+                "tags": [
+                    "Admin Auth"
+                ],
+                "summary": "Creer un compte administrateur",
+                "description": "Permet de creer un nouveau compte administrateur.",
+                "operationId": "4c9ff7f9fab7f89d744513cfe5480a0f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "prenom",
+                                    "nom",
+                                    "email",
+                                    "mot_de_passe"
+                                ],
+                                "properties": {
+                                    "prenom": {
+                                        "type": "string",
+                                        "example": "Jean"
+                                    },
+                                    "nom": {
+                                        "type": "string",
+                                        "example": "Dupont"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@lescasaniers.com"
+                                    },
+                                    "telephone": {
+                                        "type": "string",
+                                        "example": "0123456789"
+                                    },
+                                    "mot_de_passe": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Secret123!"
+                                    },
+                                    "mot_de_passe_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Secret123!"
+                                    },
+                                    "poste": {
+                                        "type": "string",
+                                        "enum": [
+                                            "admin",
+                                            "support",
+                                            "logistique"
+                                        ],
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Compte cree avec succes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Compte administrateur cree avec succes"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur de validation"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur serveur"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/login": {
+            "post": {
+                "tags": [
+                    "Admin Auth"
+                ],
+                "summary": "Connexion administrateur",
+                "description": "Permet a un administrateur de se connecter via Sanctum stateful.",
+                "operationId": "ca85837b6fc19d94a39a445d949d4ec9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "mot_de_passe"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@lescasaniers.com"
+                                    },
+                                    "mot_de_passe": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Secret123!"
+                                    },
+                                    "remember": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Connexion reussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Connexion reussie"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "admin": {
+                                                    "type": "object"
+                                                },
+                                                "access_token": {
+                                                    "type": "string",
+                                                    "example": "1|Abc..."
+                                                },
+                                                "refresh_token": {
+                                                    "type": "string",
+                                                    "example": "2|Xyz..."
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                },
+                                                "expires_in": {
+                                                    "type": "integer",
+                                                    "example": 1800
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Identifiants invalides"
+                    }
+                }
+            }
+        },
+        "/admin/logout": {
+            "post": {
+                "tags": [
+                    "Admin Auth"
+                ],
+                "summary": "Deconnexion administrateur",
+                "description": "Deconnecte l'administrateur et revoque le token.",
+                "operationId": "ca3cbc352eab76d0459b48f3778c6b28",
+                "responses": {
+                    "200": {
+                        "description": "Deconnexion reussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Deconnexion reussie"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/admin/profile": {
+            "get": {
+                "tags": [
+                    "Admin Auth"
+                ],
+                "summary": "Profil administrateur connecte",
+                "description": "Retourne les informations de l'administrateur actuellement connecte.",
+                "operationId": "e5fd097638a69efd02ad36dd5b0bfd01",
+                "responses": {
+                    "200": {
+                        "description": "Succes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifie"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin Auth"
+                ],
+                "summary": "Modifier les informations de l'administrateur",
+                "description": "Permet à l'administrateur connecté de modifier ses informations personnelles.",
+                "operationId": "b6cd07a4ca5d71d28311d15d337bfb53",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "prenom",
+                                    "nom",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "prenom": {
+                                        "type": "string",
+                                        "example": "Jean"
+                                    },
+                                    "nom": {
+                                        "type": "string",
+                                        "example": "Dupont"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@lescasaniers.com"
+                                    },
+                                    "telephone": {
+                                        "type": "string",
+                                        "example": "0123456789"
+                                    },
+                                    "poste": {
+                                        "type": "string",
+                                        "enum": [
+                                            "admin",
+                                            "support",
+                                            "logistique"
+                                        ],
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profil mis à jour avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profil mis à jour avec succès"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur de validation"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "500": {
+                        "description": "Erreur serveur"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/admin/change-password": {
+            "post": {
+                "tags": [
+                    "Admin Auth"
+                ],
+                "summary": "Changer le mot de passe de l'administrateur",
+                "description": "Permet à l'administrateur de modifier son mot de passe en vérifiant l'ancien.",
+                "operationId": "f21f8985d9c64eeeb66b624c9af8958d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "new_password",
+                                    "new_password_confirmation"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "AncienMdp123!"
+                                    },
+                                    "new_password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "NouveauMdp123!"
+                                    },
+                                    "new_password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "NouveauMdp123!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Mot de passe modifié avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mot de passe modifié avec succès"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur de validation"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "500": {
+                        "description": "Erreur serveur"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/admin/refresh-token": {
+            "post": {
+                "tags": [
+                    "Admin Auth"
+                ],
+                "summary": "Renouveler l'access token via le refresh token",
+                "operationId": "33a0fb71e1dfe60c51a79595edf92994",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "refresh_token"
+                                ],
+                                "properties": {
+                                    "refresh_token": {
+                                        "type": "string",
+                                        "example": "2|Xyz..."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token renouvelé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "access_token": {
+                                                    "type": "string",
+                                                    "example": "3|NewAccess..."
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                },
+                                                "expires_in": {
+                                                    "type": "integer",
+                                                    "example": 1800
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Refresh token invalide ou expiré"
+                    }
+                }
+            }
+        },
+        "/api/produits/{produitId}/attributes/sync": {
+            "post": {
+                "tags": [
+                    "Attributs Produits"
+                ],
+                "summary": "Synchroniser les attributs d'un produit (Admin)",
+                "description": "Remplace tous les attributs existants par la nouvelle liste fournie.",
+                "operationId": "8e30dc73291b74bcf9d65732fef5a2aa",
+                "parameters": [
+                    {
+                        "name": "produitId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "properties": {
+                                        "cle_attr": {
+                                            "type": "string",
+                                            "example": "socket"
+                                        },
+                                        "valeur_attr": {
+                                            "type": "string",
+                                            "example": "LGA1700"
+                                        },
+                                        "libelle_attr": {
+                                            "type": "string",
+                                            "example": "Socket CPU"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/attributes/standard-keys": {
+            "get": {
+                "tags": [
+                    "Attributs Produits"
+                ],
+                "summary": "Récupérer le dictionnaire des clés standard (Admin)",
+                "operationId": "33e2b17d588255bb15d146c618b366ae",
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/categories": {
+            "get": {
+                "tags": [
+                    "Catégories"
+                ],
+                "summary": "Liste des catégories racines",
+                "operationId": "b77b1daca69d91daf0fb0560ae4d961f",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Catégories"
+                ],
+                "summary": "Créer une catégorie (Admin)",
+                "operationId": "336078eeb5da88674a00f6e8666ec9c5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nom",
+                                    "type"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Créé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/categories/{slug}": {
+            "get": {
+                "tags": [
+                    "Catégories"
+                ],
+                "summary": "Détails d'une catégorie par slug",
+                "operationId": "227717dda19dd9a50517424bccfb920b",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    },
+                    "404": {
+                        "description": "Non trouvé"
+                    }
+                }
+            }
+        },
+        "/api/categories/{id}": {
+            "put": {
+                "tags": [
+                    "Catégories"
+                ],
+                "summary": "Mettre à jour une catégorie (Admin)",
+                "operationId": "cf935727a14dda7603614c02178a7a38",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mis à jour"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Catégories"
+                ],
+                "summary": "Supprimer une catégorie (Admin)",
+                "operationId": "fb09c985ece1b538e0a0b16b5a77fe71",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Supprimé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/categories/reorder": {
+            "patch": {
+                "tags": [
+                    "Catégories"
+                ],
+                "summary": "Réorganiser les catégories (Admin)",
+                "operationId": "faac2cdef4134f01d01badec67a067d8",
+                "responses": {
+                    "200": {
+                        "description": "Réorganisé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/produits/{produitId}/images": {
+            "post": {
+                "tags": [
+                    "Images Produits"
+                ],
+                "summary": "Uploader une image pour un produit (Admin)",
+                "operationId": "2d691ecea4242de6eab5b975c190e469",
+                "parameters": [
+                    {
+                        "name": "produitId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "alt": {
+                                        "type": "string"
+                                    },
+                                    "ordre": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Upload réussi"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/images/{id}": {
+            "delete": {
+                "tags": [
+                    "Images Produits"
+                ],
+                "summary": "Supprimer une image (Admin)",
+                "operationId": "415ef54e96da0857d1acfb7eba08948d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Supprimé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/produits/{produitId}/images/{imageId}/set-main": {
+            "patch": {
+                "tags": [
+                    "Images Produits"
+                ],
+                "summary": "Définir une image comme principale (Admin)",
+                "operationId": "e0df1e5866fdfeafbf1a877195eecd80",
+                "parameters": [
+                    {
+                        "name": "produitId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "imageId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/produits": {
+            "get": {
+                "tags": [
+                    "Produits"
+                ],
+                "summary": "Liste des produits avec filtres",
+                "operationId": "c484df29ca10df7694b945cf5e215340",
+                "parameters": [
+                    {
+                        "name": "categorie_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "type_produit",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Produits"
+                ],
+                "summary": "Créer un produit (Admin)",
+                "operationId": "8ea9b3dfcec0aad387a97eecbe585525",
+                "responses": {
+                    "201": {
+                        "description": "Créé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/produits/{slug}": {
+            "get": {
+                "tags": [
+                    "Produits"
+                ],
+                "summary": "Fiche produit détaillée par slug",
+                "operationId": "94a07e8af5583a24e6c7f197a1bd3602",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                }
+            }
+        },
+        "/api/produits/{id}": {
+            "put": {
+                "tags": [
+                    "Produits"
+                ],
+                "summary": "Mettre à jour un produit (Admin)",
+                "operationId": "b2d7cf5d440f2ff4ae283c69b79d26b4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Produits"
+                ],
+                "summary": "Supprimer un produit (Admin)",
+                "operationId": "9d7ef95b330de9729cb8a8f2b393ef88",
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/produits/{id}/toggle-status": {
+            "patch": {
+                "tags": [
+                    "Produits"
+                ],
+                "summary": "Activer/Désactiver un produit (Admin)",
+                "operationId": "5cd9e8a5c6dc705e2fce90e904621aae",
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user": {
+            "get": {
+                "tags": [
+                    "Utilisateur"
+                ],
+                "summary": "Récupère l'utilisateur authentifié",
+                "operationId": "fd8e4e27fd1a9e98a6638cec7e2126ca",
+                "responses": {
+                    "200": {
+                        "description": "Utilisateur connecté",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "email": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/utilisateurs/register": {
+            "post": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Créer un compte utilisateur",
+                "description": "Permet de créer un nouveau compte utilisateur.",
+                "operationId": "a0e38f0c0dbc1978fcfde5e1585c261b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "prenom",
+                                    "nom",
+                                    "email",
+                                    "mot_de_passe",
+                                    "mot_de_passe_confirmation"
+                                ],
+                                "properties": {
+                                    "prenom": {
+                                        "type": "string",
+                                        "example": "Jean"
+                                    },
+                                    "nom": {
+                                        "type": "string",
+                                        "example": "Dupont"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jean.dupont@email.com"
+                                    },
+                                    "telephone": {
+                                        "type": "string",
+                                        "example": "0123456789"
+                                    },
+                                    "mot_de_passe": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Secret123!"
+                                    },
+                                    "mot_de_passe_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Secret123!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Compte créé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Compte utilisateur créé avec succès"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/utilisateurs/login": {
+            "post": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Connexion utilisateur",
+                "operationId": "51650cd441920b6f5147728df65b6cdb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "mot_de_passe"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "jean.dupont@email.com"
+                                    },
+                                    "mot_de_passe": {
+                                        "type": "string",
+                                        "example": "Secret123!"
+                                    },
+                                    "remember": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Connexion réussie"
+                    }
+                }
+            }
+        },
+        "/utilisateurs/logout": {
+            "post": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Déconnexion utilisateur",
+                "operationId": "20428bbcd9c94884013d0910e2b8e99e",
+                "responses": {
+                    "200": {
+                        "description": "Déconnexion réussie"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/utilisateurs/profile": {
+            "get": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Profil utilisateur connecté",
+                "operationId": "bb5537bef7a675c31814f9979ce53c23",
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Modifier le profil",
+                "operationId": "dc507924bcaa1d25809748142d48b5b5",
+                "responses": {
+                    "200": {
+                        "description": "Profil mis à jour"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/utilisateurs/change-password": {
+            "post": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Changer le mot de passe",
+                "operationId": "fedfc84dc3e87ddd5b371fd2f6caa28c",
+                "responses": {
+                    "200": {
+                        "description": "Mot de passe modifié"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/utilisateurs/refresh-token": {
+            "post": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Rafraîchir le token",
+                "operationId": "60c25daa93a6dc36896435e4ccc81102",
+                "responses": {
+                    "200": {
+                        "description": "Token rafraîchi"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Attributs Produits",
+            "description": "Gestion des caractéristiques techniques des produits"
+        },
+        {
+            "name": "Catégories",
+            "description": "Gestion des catégories du catalogue"
+        },
+        {
+            "name": "Images Produits",
+            "description": "Gestion des images de la galerie produit"
+        },
+        {
+            "name": "Produits",
+            "description": "Gestion des produits du catalogue"
+        },
+        {
+            "name": "Admin Auth",
+            "description": "Admin Auth"
+        },
+        {
+            "name": "Utilisateur",
+            "description": "Utilisateur"
+        },
+        {
+            "name": "Utilisateurs",
+            "description": "Utilisateurs"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "apiKey",
+                "description": "Enter token in format Bearer {token}",
+                "name": "Authorization",
+                "in": "header"
+            }
+        }
+    },
+    "security": [
+        {
+            "sanctum": []
+        }
+    ]
+}
