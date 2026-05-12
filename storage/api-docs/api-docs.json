@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "http://my-default-host.com",
+            "url": "http://127.0.0.1:8000",
             "description": "Serveur Principal"
         }
     ],
@@ -581,6 +581,616 @@
                         "description": "Refresh token invalide ou expiré"
                     }
                 }
+            }
+        },
+        "/api/produits/{produitId}/avis": {
+            "get": {
+                "tags": [
+                    "Avis Clients"
+                ],
+                "summary": "Lister les avis d'un produit",
+                "operationId": "ac60a7be16c12c131a90bc2f4df5e505",
+                "parameters": [
+                    {
+                        "name": "produitId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des avis"
+                    }
+                }
+            }
+        },
+        "/api/mes-avis": {
+            "get": {
+                "tags": [
+                    "Avis Clients"
+                ],
+                "summary": "Lister mes avis (client connecté)",
+                "operationId": "42e22c3debadd19ac4469dba8f40f49b",
+                "responses": {
+                    "200": {
+                        "description": "Mes avis"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/avis": {
+            "post": {
+                "tags": [
+                    "Avis Clients"
+                ],
+                "summary": "Ajouter un avis sur un produit",
+                "operationId": "e39f37829884a144ea88e33dedc785cd",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "produit_id",
+                                    "note"
+                                ],
+                                "properties": {
+                                    "produit_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "note": {
+                                        "type": "integer",
+                                        "maximum": 5,
+                                        "minimum": 1,
+                                        "example": 5
+                                    },
+                                    "titre": {
+                                        "type": "string",
+                                        "example": "Excellent produit !"
+                                    },
+                                    "corps": {
+                                        "type": "string",
+                                        "example": "Je suis très satisfait de ce produit..."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Avis ajouté"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/avis/{id}": {
+            "put": {
+                "tags": [
+                    "Avis Clients"
+                ],
+                "summary": "Modifier mon avis",
+                "operationId": "76a7cc42fc61b2ba2ecb36e2e9701d29",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "note": {
+                                        "type": "integer",
+                                        "maximum": 5,
+                                        "minimum": 1
+                                    },
+                                    "titre": {
+                                        "type": "string"
+                                    },
+                                    "corps": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Avis modifié"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Avis Clients"
+                ],
+                "summary": "Supprimer mon avis",
+                "operationId": "eaa7aab02c479ba3a1725f3759301faf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Avis supprimé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/avis": {
+            "get": {
+                "tags": [
+                    "Avis Clients - Admin"
+                ],
+                "summary": "Lister tous les avis (Admin)",
+                "operationId": "c426d8768fe7d83829131e8d26a3f198",
+                "responses": {
+                    "200": {
+                        "description": "Liste de tous les avis"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/avis/{id}/publier": {
+            "put": {
+                "tags": [
+                    "Avis Clients - Admin"
+                ],
+                "summary": "Publier ou dépublier un avis (Admin)",
+                "operationId": "e5318f90f6dbe93f3213ca2c7ac3b815",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "publie"
+                                ],
+                                "properties": {
+                                    "publie": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Statut modifié"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/commandes": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Lister mes commandes",
+                "description": "Récupère la liste de toutes les commandes de l'utilisateur connecté",
+                "operationId": "getCommandesList",
+                "responses": {
+                    "200": {
+                        "description": "Liste des commandes récupérée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Commandes récupérées"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Créer une nouvelle commande",
+                "description": "Crée une commande avec les produits selectionnés",
+                "operationId": "storeCommande",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "lignes",
+                                    "adresse_livraison",
+                                    "adresse_facturation"
+                                ],
+                                "properties": {
+                                    "lignes": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "produit_id",
+                                                "quantite"
+                                            ],
+                                            "properties": {
+                                                "produit_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "quantite": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "adresse_livraison": {
+                                        "type": "string",
+                                        "example": "Lot II J 83 Antananarivo"
+                                    },
+                                    "adresse_facturation": {
+                                        "type": "string",
+                                        "example": "Lot II J 83 Antananarivo"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Appeler avant livraison"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Commande créée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Commande créée"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/commandes/{id}": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Détails d'une commande",
+                "description": "Affiche les détails d'une commande spécifique",
+                "operationId": "showCommande",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la commande",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails de la commande"
+                    },
+                    "404": {
+                        "description": "Commande non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/commandes/{id}/cancel": {
+            "put": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Annuler une commande",
+                "description": "Annule une commande si elle est encore en attente ou payée",
+                "operationId": "cancelCommande",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la commande à annuler",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Commande annulée"
+                    },
+                    "400": {
+                        "description": "Commande non annulable"
+                    },
+                    "404": {
+                        "description": "Commande non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/panier": {
+            "get": {
+                "tags": [
+                    "Panier"
+                ],
+                "summary": "Voir mon panier",
+                "operationId": "cab68d9a5f069d4f4cd0c3df63da1ba7",
+                "responses": {
+                    "200": {
+                        "description": "Détails du panier"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/panier/ajouter": {
+            "post": {
+                "tags": [
+                    "Panier"
+                ],
+                "summary": "Ajouter un produit au panier",
+                "operationId": "4cf639c0d08d3dd080bd4e090202b9f2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "produit_id",
+                                    "quantite"
+                                ],
+                                "properties": {
+                                    "produit_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "quantite": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "configuration_id": {
+                                        "type": "integer",
+                                        "example": null
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Produit ajouté"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/panier/modifier/{itemId}": {
+            "put": {
+                "tags": [
+                    "Panier"
+                ],
+                "summary": "Modifier la quantité d'un item",
+                "operationId": "ef6b14b2eca048aca1b1243b73f4b051",
+                "parameters": [
+                    {
+                        "name": "itemId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "quantite"
+                                ],
+                                "properties": {
+                                    "quantite": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Quantité modifiée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/panier/supprimer/{itemId}": {
+            "delete": {
+                "tags": [
+                    "Panier"
+                ],
+                "summary": "Supprimer un item du panier",
+                "operationId": "d3550d8459892efa1fd4ded6dc0f881e",
+                "parameters": [
+                    {
+                        "name": "itemId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Item supprimé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/panier/vider": {
+            "delete": {
+                "tags": [
+                    "Panier"
+                ],
+                "summary": "Vider tout le panier",
+                "operationId": "f70ea4903f7854d4253bab47a1b81d35",
+                "responses": {
+                    "200": {
+                        "description": "Panier vidé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/produits/{produitId}/attributes/sync": {
@@ -1318,62 +1928,6 @@
                 ]
             }
         },
-        "/change-password": {
-            "post": {
-                "tags": [
-                    "Utilisateurs"
-                ],
-                "summary": "Réinitialiser le mot de passe utilisateur",
-                "description": "Réinitialise le mot de passe d'un utilisateur à partir de son email.",
-                "operationId": "e1bd1a355b46c62e480b01f3aa8efd10",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "email",
-                                    "current_password",
-                                    "new_password",
-                                    "new_password_confirmation"
-                                ],
-                                "properties": {
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "jean.dupont@email.com"
-                                    },
-                                    "current_password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "AncienMdp123!"
-                                    },
-                                    "new_password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "NouveauMdp123!"
-                                    },
-                                    "new_password_confirmation": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "NouveauMdp123!"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Mot de passe mis à jour"
-                    },
-                    "422": {
-                        "description": "Erreur de validation"
-                    }
-                }
-            }
-        },
         "/utilisateurs/refresh-token": {
             "post": {
                 "tags": [
@@ -1390,6 +1944,18 @@
         }
     },
     "tags": [
+        {
+            "name": "Avis Clients",
+            "description": "Gestion des avis clients sur les produits"
+        },
+        {
+            "name": "Commandes",
+            "description": "Gestion des commandes clients - Endpoints pour les commandes"
+        },
+        {
+            "name": "Panier",
+            "description": "Gestion du panier d'achat"
+        },
         {
             "name": "Attributs Produits",
             "description": "Gestion des caractéristiques techniques des produits"
@@ -1409,6 +1975,10 @@
         {
             "name": "Admin Auth",
             "description": "Admin Auth"
+        },
+        {
+            "name": "Avis Clients - Admin",
+            "description": "Avis Clients - Admin"
         },
         {
             "name": "Utilisateur",
