@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -59,13 +59,13 @@ use App\Http\Controllers\Api\Produits\AttributProduitController;
 
 // Routes Publiques (Front-end)
 Route::get('/categories', [CategoryController::class, 'index']);
-Route::get('/categories/{slug}', [CategoryController::class, 'show']);
+Route::get('/categories/{id}', [CategoryController::class, 'show']);
 Route::get('/produits', [ProduitController::class, 'index']);
-Route::get('/produits/{slug}', [ProduitController::class, 'show']);
+Route::get('/produits/{id}', [ProduitController::class, 'show']);
 
-// Routes Protégées (Back-office / Admin)
+// Routes ProtÃ©gÃ©es (Back-office / Admin)
 Route::middleware(['auth:sanctum'])->group(function () {
-    // Catégories
+    // CatÃ©gories
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::put('/categories/{id}', [CategoryController::class, 'update']);
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);

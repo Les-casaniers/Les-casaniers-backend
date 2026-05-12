@@ -3,7 +3,6 @@
 namespace App\Services\Produits;
 
 use App\Repositories\Category\CategoryRepositoryInterface;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
 
@@ -23,15 +22,9 @@ class CategoryService
     {
         $this->validateCategory($data);
 
-        if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['nom']);
-        }
-
-        // Vérifier la cohérence du type avec le parent
         if (!empty($data['parent_id'])) {
             $parent = $this->categoryRepository->findById($data['parent_id']);
             if ($parent && $parent->type !== $data['type']) {
-                // On peut forcer le type du parent ou lever une alerte
                 $data['type'] = $parent->type;
             }
         }
@@ -46,11 +39,6 @@ class CategoryService
     {
         $this->validateCategory($data, $id);
 
-        if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['nom']);
-        }
-
-        // Vérifier la cohérence du type
         if (!empty($data['parent_id'])) {
             $parent = $this->categoryRepository->findById($data['parent_id']);
             if ($parent && $parent->type !== $data['type']) {
@@ -70,15 +58,15 @@ class CategoryService
     }
 
     /**
-     * Route front: Récupérer une catégorie par son slug
+     * Récupérer une catégorie par ID
      */
-    public function getCategoryBySlug(string $slug)
+    public function getCategoryById(int $id)
     {
-        return $this->categoryRepository->findBySlug($slug);
+        return $this->categoryRepository->findById($id);
     }
 
     /**
-     * Fil d’Ariane (breadcrumbs)
+     * Fil d'Ariane (breadcrumbs)
      */
     public function getBreadcrumbs(int $categoryId)
     {
@@ -88,7 +76,7 @@ class CategoryService
         while ($category) {
             array_unshift($breadcrumbs, [
                 'nom' => $category->nom,
-                'slug' => $category->slug
+                'id' => $category->id,
             ]);
             $category = $category->parent_id ? $this->categoryRepository->findById($category->parent_id) : null;
         }
@@ -96,28 +84,18 @@ class CategoryService
         return $breadcrumbs;
     }
 
-    /**
-     * Récupérer l'arborescence pour le menu (par type)
-     */
     public function getMenuByType(string $type)
     {
-        // On pourrait ajouter une méthode spécifique au repository ou filtrer ici
         return $this->categoryRepository->getRoots()
             ->where('type', $type)
             ->load('enfants');
     }
 
-    /**
-     * Récupérer toutes les catégories
-     */
     public function getAllCategories()
     {
         return $this->categoryRepository->getAll();
     }
 
-    /**
-     * Organiser l'ordre de tri
-     */
     public function updateOrder(array $orders)
     {
         foreach ($orders as $id => $ordre) {
@@ -126,17 +104,13 @@ class CategoryService
         return true;
     }
 
-    /**
-     * Validation des données
-     */
     protected function validateCategory(array $data, int $id = null)
     {
         $rules = [
             'nom' => 'required|string|max:190',
-            'slug' => 'nullable|string|max:190|unique:categories,slug' . ($id ? ",$id" : ""),
             'type' => 'required|in:pro,gaming,composants,peripheriques,services,guides',
             'parent_id' => 'nullable|exists:categories,id',
-            'ordre_tri' => 'integer'
+            'ordre_tri' => 'integer',
         ];
 
         $validator = Validator::make($data, $rules);

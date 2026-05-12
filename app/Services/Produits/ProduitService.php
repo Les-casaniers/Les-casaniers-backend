@@ -4,7 +4,6 @@ namespace App\Services\Produits;
 
 use App\Repositories\Produit\ProduitRepositoryInterface;
 use App\Repositories\Category\CategoryRepositoryInterface;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
 use Exception;
@@ -29,8 +28,8 @@ class ProduitService
     {
         $this->validateProduit($data);
 
-        if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['nom']);
+        if (empty($data['reference'])) {
+            $data['reference'] = $this->generateReference();
         }
 
         // Vérifier si la catégorie existe
@@ -57,7 +56,6 @@ class ProduitService
             'categorie_id' => 'sometimes|exists:categories,id',
             'type_produit' => 'sometimes|in:pc,portable,composant,peripherique,service',
             'reference' => 'sometimes|nullable|string|max:80|unique:produits,reference,' . $id,
-            'slug' => 'sometimes|nullable|string|max:190|unique:produits,slug,' . $id,
             'devise' => 'sometimes|nullable|string|max:10',
             'actif' => 'sometimes|boolean'
         ]);
@@ -66,9 +64,7 @@ class ProduitService
             throw new ValidationException($validator);
         }
 
-        if (isset($data['nom']) && empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['nom']);
-        }
+        unset($data['reference']);
 
         return $this->produitRepository->update($id, $data);
     }
@@ -102,11 +98,11 @@ class ProduitService
     }
 
     /**
-     * Récupérer un produit par slug
+     * Récupérer un produit par ID
      */
-    public function getProduitBySlug(string $slug)
+    public function getProduitById(int $id)
     {
-        return $this->produitRepository->findBySlug($slug);
+        return $this->produitRepository->findById($id);
     }
 
     /**
@@ -150,7 +146,6 @@ class ProduitService
             'type_produit' => 'required|in:pc,portable,composant,peripherique,service',
             'prix' => 'required|numeric|min:0',
             'quantite_stock' => 'required|integer|min:0',
-            'slug' => 'nullable|string|max:190|unique:produits,slug',
             'reference' => 'nullable|string|max:80|unique:produits,reference',
             'description' => 'nullable|string',
             'description_courte' => 'nullable|string|max:500',
@@ -161,5 +156,22 @@ class ProduitService
         if ($validator->fails()) {
             throw new ValidationException($validator);
         }
+    }
+
+    /**
+     * Génère la prochaine référence séquentielle au format REF-001.
+     */
+    protected function generateReference(): string
+    {
+        $lastReference = $this->produitRepository->getLastReference();
+
+        if (!$lastReference) {
+            return 'REF-001';
+        }
+
+        $numericPart = (int) preg_replace('/^REF-/', '', $lastReference);
+        $nextNumber = $numericPart + 1;
+
+        return sprintf('REF-%03d', $nextNumber);
     }
 }

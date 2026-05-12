@@ -662,9 +662,9 @@
         "/api/categories": {
             "get": {
                 "tags": [
-                    "Catégories"
+                    "CatÃ©gories"
                 ],
-                "summary": "Liste des catégories racines",
+                "summary": "Liste des catÃ©gories racines",
                 "operationId": "b77b1daca69d91daf0fb0560ae4d961f",
                 "parameters": [
                     {
@@ -678,15 +678,15 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Succès"
+                        "description": "SuccÃ¨s"
                     }
                 }
             },
             "post": {
                 "tags": [
-                    "Catégories"
+                    "CatÃ©gories"
                 ],
-                "summary": "Créer une catégorie (Admin)",
+                "summary": "CrÃ©er une catÃ©gorie (Admin)",
                 "operationId": "336078eeb5da88674a00f6e8666ec9c5",
                 "requestBody": {
                     "required": true,
@@ -703,7 +703,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Créé"
+                        "description": "CrÃ©Ã©"
                     },
                     "422": {
                         "description": "Erreur de validation"
@@ -716,39 +716,37 @@
                 ]
             }
         },
-        "/api/categories/{slug}": {
+        "/api/categories/{id}": {
             "get": {
                 "tags": [
-                    "Catégories"
+                    "CatÃ©gories"
                 ],
-                "summary": "Détails d'une catégorie par slug",
-                "operationId": "227717dda19dd9a50517424bccfb920b",
+                "summary": "DÃ©tails d'une catÃ©gorie par id",
+                "operationId": "b4d2e4b884347f140a63d9979cb7df46",
                 "parameters": [
                     {
-                        "name": "slug",
+                        "name": "id",
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "integer"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Succès"
+                        "description": "SuccÃ¨s"
                     },
                     "404": {
-                        "description": "Non trouvé"
+                        "description": "Non trouvÃ©"
                     }
                 }
-            }
-        },
-        "/api/categories/{id}": {
+            },
             "put": {
                 "tags": [
-                    "Catégories"
+                    "CatÃ©gories"
                 ],
-                "summary": "Mettre à jour une catégorie (Admin)",
+                "summary": "Mettre Ã  jour une catÃ©gorie (Admin)",
                 "operationId": "cf935727a14dda7603614c02178a7a38",
                 "parameters": [
                     {
@@ -762,7 +760,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Mis à jour"
+                        "description": "Mis Ã  jour"
                     }
                 },
                 "security": [
@@ -773,9 +771,9 @@
             },
             "delete": {
                 "tags": [
-                    "Catégories"
+                    "CatÃ©gories"
                 ],
-                "summary": "Supprimer une catégorie (Admin)",
+                "summary": "Supprimer une catÃ©gorie (Admin)",
                 "operationId": "fb09c985ece1b538e0a0b16b5a77fe71",
                 "parameters": [
                     {
@@ -789,7 +787,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Supprimé"
+                        "description": "SupprimÃ©"
                     }
                 },
                 "security": [
@@ -802,13 +800,13 @@
         "/api/categories/reorder": {
             "patch": {
                 "tags": [
-                    "Catégories"
+                    "CatÃ©gories"
                 ],
-                "summary": "Réorganiser les catégories (Admin)",
+                "summary": "RÃ©organiser les catÃ©gories (Admin)",
                 "operationId": "faac2cdef4134f01d01badec67a067d8",
                 "responses": {
                     "200": {
-                        "description": "Réorganisé"
+                        "description": "RÃ©organisÃ©"
                     }
                 },
                 "security": [
@@ -967,7 +965,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Succès"
+                        "description": "SuccÃ¨s"
                     }
                 }
             },
@@ -975,11 +973,11 @@
                 "tags": [
                     "Produits"
                 ],
-                "summary": "Créer un produit (Admin)",
+                "summary": "CrÃ©er un produit (Admin)",
                 "operationId": "8ea9b3dfcec0aad387a97eecbe585525",
                 "responses": {
                     "201": {
-                        "description": "Créé"
+                        "description": "CrÃ©Ã©"
                     }
                 },
                 "security": [
@@ -989,36 +987,34 @@
                 ]
             }
         },
-        "/api/produits/{slug}": {
+        "/api/produits/{id}": {
             "get": {
                 "tags": [
                     "Produits"
                 ],
-                "summary": "Fiche produit détaillée par slug",
-                "operationId": "94a07e8af5583a24e6c7f197a1bd3602",
+                "summary": "Fiche produit dÃ©taillÃ©e par id",
+                "operationId": "ff2b43bfedd142d548898644030d367b",
                 "parameters": [
                     {
-                        "name": "slug",
+                        "name": "id",
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "integer"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Succès"
+                        "description": "SuccÃ¨s"
                     }
                 }
-            }
-        },
-        "/api/produits/{id}": {
+            },
             "put": {
                 "tags": [
                     "Produits"
                 ],
-                "summary": "Mettre à jour un produit (Admin)",
+                "summary": "Mettre Ã  jour un produit (Admin)",
                 "operationId": "b2d7cf5d440f2ff4ae283c69b79d26b4",
                 "parameters": [
                     {
@@ -1032,7 +1028,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Succès"
+                        "description": "SuccÃ¨s"
                     }
                 },
                 "security": [
@@ -1049,7 +1045,7 @@
                 "operationId": "9d7ef95b330de9729cb8a8f2b393ef88",
                 "responses": {
                     "200": {
-                        "description": "Succès"
+                        "description": "SuccÃ¨s"
                     }
                 },
                 "security": [
@@ -1064,11 +1060,11 @@
                 "tags": [
                     "Produits"
                 ],
-                "summary": "Activer/Désactiver un produit (Admin)",
+                "summary": "Activer/DÃ©sactiver un produit (Admin)",
                 "operationId": "5cd9e8a5c6dc705e2fce90e904621aae",
                 "responses": {
                     "200": {
-                        "description": "Succès"
+                        "description": "SuccÃ¨s"
                     }
                 },
                 "security": [
@@ -1395,8 +1391,8 @@
             "description": "Gestion des caractéristiques techniques des produits"
         },
         {
-            "name": "Catégories",
-            "description": "Gestion des catégories du catalogue"
+            "name": "CatÃ©gories",
+            "description": "Gestion des catÃ©gories du catalogue"
         },
         {
             "name": "Images Produits",

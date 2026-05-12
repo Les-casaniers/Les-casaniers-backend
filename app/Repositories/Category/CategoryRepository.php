@@ -28,11 +28,6 @@ class CategoryRepository implements CategoryRepositoryInterface
         return $this->model->find($id);
     }
 
-    public function findBySlug(string $slug)
-    {
-        return $this->model->where('slug', $slug)->first();
-    }
-
     public function create(array $data)
     {
         return $this->model->create($data);

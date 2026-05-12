@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Produits;
 
 use App\Http\Controllers\Controller;
-use App\Models\Admin;
 use App\Services\Produits\ProduitService;
 use App\Services\Produits\AttributProduitService;
 use Illuminate\Http\Request;
@@ -24,15 +23,6 @@ class ProduitController extends Controller
         $this->attributService = $attributService;
     }
 
-    private function ensureAdmin(Request $request)
-    {
-        $user = $request->user();
-        if (!$user || !($user instanceof Admin)) {
-            return response()->json(['success' => false, 'message' => 'Accès refusé'], 403);
-        }
-        return null;
-    }
-
     /**
      * @OA\Get(
      *     path="/api/produits",
@@ -41,7 +31,7 @@ class ProduitController extends Controller
      *     @OA\Parameter(name="categorie_id", in="query", @OA\Schema(type="integer")),
      *     @OA\Parameter(name="type_produit", in="query", @OA\Schema(type="string")),
      *     @OA\Parameter(name="search", in="query", @OA\Schema(type="string")),
-     *     @OA\Response(response=200, description="Succès")
+     *     @OA\Response(response=200, description="SuccÃ¨s")
      * )
      */
     public function index(Request $request)
@@ -59,19 +49,19 @@ class ProduitController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/produits/{slug}",
-     *     summary="Fiche produit détaillée par slug",
+     *     path="/api/produits/{id}",
+     *     summary="Fiche produit dÃ©taillÃ©e par id",
      *     tags={"Produits"},
-     *     @OA\Parameter(name="slug", in="path", required=true, @OA\Schema(type="string")),
-     *     @OA\Response(response=200, description="Succès")
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="SuccÃ¨s")
      * )
      */
-    public function show(string $slug)
+    public function show(int $id)
     {
-        $produit = $this->produitService->getProduitBySlug($slug);
+        $produit = $this->produitService->getProduitById($id);
         
         if (!$produit) {
-            return response()->json(['success' => false, 'message' => 'Produit non trouvé'], 404);
+            return response()->json(['success' => false, 'message' => 'Produit non trouvÃ©'], 404);
         }
 
         return response()->json([
@@ -84,17 +74,14 @@ class ProduitController extends Controller
     /**
      * @OA\Post(
      *     path="/api/produits",
-     *     summary="Créer un produit (Admin)",
+     *     summary="CrÃ©er un produit (Admin)",
      *     tags={"Produits"},
      *     security={{"sanctum": {}}},
-     *     @OA\Response(response=201, description="Créé")
+     *     @OA\Response(response=201, description="CrÃ©Ã©")
      * )
      */
     public function store(Request $request)
     {
-        if ($response = $this->ensureAdmin($request)) {
-            return $response;
-        }
         try {
             $produit = $this->produitService->createProduit($request->all());
             return response()->json(['success' => true, 'data' => $produit], 201);
@@ -108,18 +95,15 @@ class ProduitController extends Controller
     /**
      * @OA\Put(
      *     path="/api/produits/{id}",
-     *     summary="Mettre à jour un produit (Admin)",
+     *     summary="Mettre Ã  jour un produit (Admin)",
      *     tags={"Produits"},
      *     security={{"sanctum": {}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Succès")
+     *     @OA\Response(response=200, description="SuccÃ¨s")
      * )
      */
     public function update(Request $request, int $id)
     {
-        if ($response = $this->ensureAdmin($request)) {
-            return $response;
-        }
         try {
             $produit = $this->produitService->updateProduit($id, $request->all());
             return response()->json(['success' => true, 'data' => $produit]);
@@ -133,17 +117,14 @@ class ProduitController extends Controller
     /**
      * @OA\Patch(
      *     path="/api/produits/{id}/toggle-status",
-     *     summary="Activer/Désactiver un produit (Admin)",
+     *     summary="Activer/DÃ©sactiver un produit (Admin)",
      *     tags={"Produits"},
      *     security={{"sanctum": {}}},
-     *     @OA\Response(response=200, description="Succès")
+     *     @OA\Response(response=200, description="SuccÃ¨s")
      * )
      */
     public function toggleStatus(Request $request, int $id)
     {
-        if ($response = $this->ensureAdmin($request)) {
-            return $response;
-        }
         $produit = $this->produitService->toggleStatus($id, $request->boolean('actif'));
         return response()->json(['success' => true, 'data' => $produit]);
     }
@@ -154,15 +135,13 @@ class ProduitController extends Controller
      *     summary="Supprimer un produit (Admin)",
      *     tags={"Produits"},
      *     security={{"sanctum": {}}},
-     *     @OA\Response(response=200, description="Succès")
+     *     @OA\Response(response=200, description="SuccÃ¨s")
      * )
      */
-    public function destroy(Request $request, int $id)
+    public function destroy(int $id)
     {
-        if ($response = $this->ensureAdmin($request)) {
-            return $response;
-        }
         $deleted = $this->produitService->deleteProduit($id);
         return response()->json(['success' => $deleted]);
     }
 }
+

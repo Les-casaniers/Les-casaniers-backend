@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('parent_id')->nullable()->constrained('categories')->onDelete('set null');
-            $table->string('slug', 190)->unique();
             $table->string('nom', 190);
             $table->enum('type', ['pro', 'gaming', 'composants', 'peripheriques', 'services', 'guides']);
             $table->integer('ordre_tri')->default(0);

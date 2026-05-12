@@ -37,13 +37,6 @@ class ProduitRepository implements ProduitRepositoryInterface
         return $this->model->with(['categorie', 'images', 'attributs'])->find($id);
     }
 
-    public function findBySlug(string $slug)
-    {
-        return $this->model->with(['categorie', 'images', 'attributs'])
-            ->where('slug', $slug)
-            ->first();
-    }
-
     public function findByCategory(int $categoryId)
     {
         return $this->model->where('categorie_id', $categoryId)
@@ -89,5 +82,13 @@ class ProduitRepository implements ProduitRepositoryInterface
             ->limit($limit)
             ->with(['categorie', 'images'])
             ->get();
+    }
+
+    public function getLastReference(): ?string
+    {
+        return $this->model
+            ->where('reference', 'like', 'REF-%')
+            ->orderByRaw("CAST(SUBSTRING(reference, 5) AS UNSIGNED) DESC")
+            ->value('reference');
     }
 }

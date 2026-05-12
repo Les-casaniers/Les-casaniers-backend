@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 use Throwable;
 
 /**
- * @OA\Tag(name="Catégories", description="Gestion des catégories du catalogue")
+ * @OA\Tag(name="CatÃ©gories", description="Gestion des catÃ©gories du catalogue")
  */
 class CategoryController extends Controller
 {
@@ -25,7 +25,7 @@ class CategoryController extends Controller
     {
         $user = $request->user();
         if (!$user || !($user instanceof Admin)) {
-            return response()->json(['success' => false, 'message' => 'Accès refusé'], 403);
+            return response()->json(['success' => false, 'message' => 'AccÃ¨s refusÃ©'], 403);
         }
         return null;
     }
@@ -33,10 +33,10 @@ class CategoryController extends Controller
     /**
      * @OA\Get(
      *     path="/api/categories",
-     *     summary="Liste des catégories racines",
-     *     tags={"Catégories"},
+     *     summary="Liste des catÃ©gories racines",
+     *     tags={"CatÃ©gories"},
      *     @OA\Parameter(name="type", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Response(response=200, description="Succès")
+     *     @OA\Response(response=200, description="SuccÃ¨s")
      * )
      */
     public function index(Request $request)
@@ -56,20 +56,20 @@ class CategoryController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/categories/{slug}",
-     *     summary="Détails d'une catégorie par slug",
-     *     tags={"Catégories"},
-     *     @OA\Parameter(name="slug", in="path", required=true, @OA\Schema(type="string")),
-     *     @OA\Response(response=200, description="Succès"),
-     *     @OA\Response(response=404, description="Non trouvé")
+     *     path="/api/categories/{id}",
+     *     summary="DÃ©tails d'une catÃ©gorie par id",
+     *     tags={"CatÃ©gories"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="SuccÃ¨s"),
+     *     @OA\Response(response=404, description="Non trouvÃ©")
      * )
      */
-    public function show(string $slug)
+    public function show(int $id)
     {
-        $category = $this->categoryService->getCategoryBySlug($slug);
+        $category = $this->categoryService->getCategoryById($id);
         
         if (!$category) {
-            return response()->json(['success' => false, 'message' => 'Catégorie non trouvée'], 404);
+            return response()->json(['success' => false, 'message' => 'CatÃ©gorie non trouvÃ©e'], 404);
         }
 
         return response()->json([
@@ -82,11 +82,11 @@ class CategoryController extends Controller
     /**
      * @OA\Post(
      *     path="/api/categories",
-     *     summary="Créer une catégorie (Admin)",
-     *     tags={"Catégories"},
+     *     summary="CrÃ©er une catÃ©gorie (Admin)",
+     *     tags={"CatÃ©gories"},
      *     security={{"sanctum": {}}},
      *     @OA\RequestBody(required=true, @OA\JsonContent(required={"nom", "type"})),
-     *     @OA\Response(response=201, description="Créé"),
+     *     @OA\Response(response=201, description="CrÃ©Ã©"),
      *     @OA\Response(response=422, description="Erreur de validation")
      * )
      */
@@ -108,11 +108,11 @@ class CategoryController extends Controller
     /**
      * @OA\Put(
      *     path="/api/categories/{id}",
-     *     summary="Mettre à jour une catégorie (Admin)",
-     *     tags={"Catégories"},
+     *     summary="Mettre Ã  jour une catÃ©gorie (Admin)",
+     *     tags={"CatÃ©gories"},
      *     security={{"sanctum": {}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Mis à jour")
+     *     @OA\Response(response=200, description="Mis Ã  jour")
      * )
      */
     public function update(Request $request, int $id)
@@ -133,11 +133,11 @@ class CategoryController extends Controller
     /**
      * @OA\Delete(
      *     path="/api/categories/{id}",
-     *     summary="Supprimer une catégorie (Admin)",
-     *     tags={"Catégories"},
+     *     summary="Supprimer une catÃ©gorie (Admin)",
+     *     tags={"CatÃ©gories"},
      *     security={{"sanctum": {}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Supprimé")
+     *     @OA\Response(response=200, description="SupprimÃ©")
      * )
      */
     public function destroy(Request $request, int $id)
@@ -152,10 +152,10 @@ class CategoryController extends Controller
     /**
      * @OA\Patch(
      *     path="/api/categories/reorder",
-     *     summary="Réorganiser les catégories (Admin)",
-     *     tags={"Catégories"},
+     *     summary="RÃ©organiser les catÃ©gories (Admin)",
+     *     tags={"CatÃ©gories"},
      *     security={{"sanctum": {}}},
-     *     @OA\Response(response=200, description="Réorganisé")
+     *     @OA\Response(response=200, description="RÃ©organisÃ©")
      * )
      */
     public function reorder(Request $request)
@@ -167,3 +167,5 @@ class CategoryController extends Controller
         return response()->json(['success' => true]);
     }
 }
+
+

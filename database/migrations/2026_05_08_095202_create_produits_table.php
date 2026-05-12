@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('categorie_id')->constrained('categories');
             $table->string('reference', 80)->nullable()->unique();
-            $table->string('slug', 190)->unique();
             $table->string('nom', 255);
             $table->string('description_courte', 1000)->nullable();
             $table->longText('description')->nullable();
