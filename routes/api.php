@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -50,8 +50,6 @@ Route::prefix('utilisateurs')->group(function () {
     });
 });
 
-Route::post('/change-password', [UtilisateurController::class, 'changePasswordByEmail']);
-
 use App\Http\Controllers\Api\Produits\CategoryController;
 use App\Http\Controllers\Api\Produits\ProduitController;
 use App\Http\Controllers\Api\Produits\ImageProduitController;
@@ -85,4 +83,46 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Attributs
     Route::post('/produits/{produitId}/attributes/sync', [AttributProduitController::class, 'sync']);
     Route::get('/attributes/standard-keys', [AttributProduitController::class, 'getStandardKeys']);
+
+});
+
+// ========== COMMANDES CLIENT ==========
+use App\Http\Controllers\Api\Commandes\CommandeController;
+
+// Routes commandes pour les clients connectés
+Route::middleware(['auth:sanctum'])->prefix('commandes')->group(function () {
+    Route::get('/', [CommandeController::class, 'index']);              // Mes commandes
+    Route::get('/{id}', [CommandeController::class, 'show']);           // Détail commande
+    Route::post('/', [CommandeController::class, 'store']);             // Créer commande
+    Route::put('/{id}/cancel', [CommandeController::class, 'cancel']);  // Annuler commande
+});
+
+use App\Http\Controllers\Api\AvisClient\AvisClientController;
+
+// Routes publiques
+Route::get('/produits/{produitId}/avis', [AvisClientController::class, 'getAvisByProduit']);
+
+// Routes client connecté
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/mes-avis', [AvisClientController::class, 'getMesAvis']);
+    Route::post('/avis', [AvisClientController::class, 'store']);
+    Route::put('/avis/{id}', [AvisClientController::class, 'update']);
+    Route::delete('/avis/{id}', [AvisClientController::class, 'destroy']);
+});
+
+// Routes admin
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/avis', [AvisClientController::class, 'adminList']);
+    Route::put('/avis/{id}/publier', [AvisClientController::class, 'togglePublish']);
+});
+
+use App\Http\Controllers\Api\Panier\PanierController;
+
+// Routes panier (client connecté)
+Route::middleware(['auth:sanctum'])->prefix('panier')->group(function () {
+    Route::get('/', [PanierController::class, 'index']);
+    Route::post('/ajouter', [PanierController::class, 'ajouter']);
+    Route::put('/modifier/{itemId}', [PanierController::class, 'modifierQuantite']);
+    Route::delete('/supprimer/{itemId}', [PanierController::class, 'supprimer']);
+    Route::delete('/vider', [PanierController::class, 'vider']);
 });
