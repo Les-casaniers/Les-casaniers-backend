@@ -24,7 +24,7 @@ return [
         'http://127.0.0.1:8000',
         'http://172.26.160.1:8080',
         'http://localhost:8080',
-        'https://api.holines.xyz/',
+        'https://les-casaniers-frontend.vercel.app',
     ],
 
     'allowed_origins_patterns' => [],
