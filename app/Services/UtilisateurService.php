@@ -242,54 +242,6 @@ class UtilisateurService
         });
     }
 
-    /**
-     * Reset password by email (client only).
-     */
-    public function resetPasswordByEmail(array $data)
-    {
-        $validator = Validator::make($data, [
-            'email' => 'required|email:rfc,dns|max:190',
-            'current_password' => 'required|string',
-            'new_password' => [
-                'required',
-                'string',
-                'confirmed',
-                Password::min(8)->letters()->mixedCase()->numbers()->symbols(),
-            ],
-        ]);
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
-
-        $email = Str::lower(trim($data['email']));
-        $utilisateur = $this->utilisateurRepository->findByEmail($email);
-
-        if (!$utilisateur) {
-            throw ValidationException::withMessages([
-                'email' => ['Aucun compte utilisateur trouvé avec cet email.'],
-            ]);
-        }
-
-        if ($utilisateur->statut !== 'actif') {
-            throw ValidationException::withMessages([
-                'email' => ['Votre compte est désactivé. Veuillez contacter le support.'],
-            ]);
-        }
-
-        if (!Hash::check($data['current_password'], $utilisateur->getAuthPassword())) {
-            throw ValidationException::withMessages([
-                'current_password' => ['Le mot de passe actuel est incorrect.'],
-            ]);
-        }
-
-        return DB::transaction(function () use ($utilisateur, $data) {
-            return $this->utilisateurRepository->update($utilisateur->id, [
-                'mot_de_passe' => $data['new_password'],
-            ]);
-        });
-    }
-
     private function throttleKey(string $email, string $ip): string
     {
         return Str::transliterate($email.'|'.$ip);

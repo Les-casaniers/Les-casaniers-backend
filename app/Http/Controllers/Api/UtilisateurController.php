@@ -253,51 +253,6 @@ class UtilisateurController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/change-password",
-     *     summary="Réinitialiser le mot de passe utilisateur",
-     *     description="Réinitialise le mot de passe d'un utilisateur à partir de son email.",
-     *     tags={"Utilisateurs"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-    *             required={"email", "current_password", "new_password", "new_password_confirmation"},
-     *             @OA\Property(property="email", type="string", format="email", example="jean.dupont@email.com"),
-    *             @OA\Property(property="current_password", type="string", format="password", example="AncienMdp123!"),
-     *             @OA\Property(property="new_password", type="string", format="password", example="NouveauMdp123!"),
-     *             @OA\Property(property="new_password_confirmation", type="string", format="password", example="NouveauMdp123!")
-     *         )
-     *     ),
-     *     @OA\Response(response=200, description="Mot de passe mis à jour"),
-     *     @OA\Response(response=422, description="Erreur de validation")
-     * )
-     */
-    public function changePasswordByEmail(Request $request)
-    {
-        try {
-            $payload = $request->only(['email', 'current_password', 'new_password', 'new_password_confirmation']);
-            $this->utilisateurService->resetPasswordByEmail($payload);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Mot de passe mis à jour avec succès',
-            ], 200);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur de validation',
-                'errors' => $e->errors(),
-            ], 422);
-        } catch (Throwable $e) {
-            Log::error('Utilisateur reset password failed', ['error' => $e->getMessage()]);
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur serveur',
-            ], 500);
-        }
-    }
-
-    /**
-     * @OA\Post(
      *     path="/utilisateurs/refresh-token",
      *     summary="Rafraîchir le token",
      *     tags={"Utilisateurs"},
