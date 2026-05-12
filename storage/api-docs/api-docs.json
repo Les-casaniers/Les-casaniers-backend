@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "http://localhost:8000/api",
+            "url": "http://my-default-host.com",
             "description": "Serveur Principal"
         }
     ],
@@ -1316,6 +1316,62 @@
                         "sanctum": []
                     }
                 ]
+            }
+        },
+        "/change-password": {
+            "post": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Réinitialiser le mot de passe utilisateur",
+                "description": "Réinitialise le mot de passe d'un utilisateur à partir de son email.",
+                "operationId": "e1bd1a355b46c62e480b01f3aa8efd10",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "current_password",
+                                    "new_password",
+                                    "new_password_confirmation"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jean.dupont@email.com"
+                                    },
+                                    "current_password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "AncienMdp123!"
+                                    },
+                                    "new_password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "NouveauMdp123!"
+                                    },
+                                    "new_password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "NouveauMdp123!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Mot de passe mis à jour"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
             }
         },
         "/utilisateurs/refresh-token": {

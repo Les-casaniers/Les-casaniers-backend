@@ -23,6 +23,8 @@ return [
         env('FRONTEND_URL', 'http://localhost:3000'),
         'http://127.0.0.1:8000',
         'http://172.26.160.1:8080',
+        'http://localhost:8080',
+        'https://api.holines.xyz/',
     ],
 
     'allowed_origins_patterns' => [],
