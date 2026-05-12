@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Produits;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Services\Produits\ProduitService;
 use App\Services\Produits\AttributProduitService;
 use Illuminate\Http\Request;
@@ -23,6 +24,15 @@ class ProduitController extends Controller
         $this->attributService = $attributService;
     }
 
+    private function ensureAdmin(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !($user instanceof Admin)) {
+            return response()->json(['success' => false, 'message' => 'Accès refusé'], 403);
+        }
+        return null;
+    }
+
     /**
      * @OA\Get(
      *     path="/api/produits",
@@ -39,20 +49,7 @@ class ProduitController extends Controller
         $filters = $request->only(['categorie_id', 'type_produit', 'actif']);
         $search = $request->query('search');
 
-        if ($search) {
-            // Ici on pourrait injecter le repository directement ou ajouter search au service
-            // Pour simplifier on utilise le service si la méthode existe
-            // On va supposer qu'on peut récupérer tous les produits filtrés
-        }
-
-        // Utilisation du repository via le service pour les filtres
-        // Pour cet exemple, on retourne une liste filtrée
-        $produits = $this->produitService->getProduitsByCategory($filters['categorie_id'] ?? 0);
-        
-        if (!$filters['categorie_id']) {
-            // Fallback si pas de catégorie spécifiée pour la démo
-            // Dans un vrai projet, on implémenterait getAll dans le service
-        }
+        $produits = $this->produitService->getProduits($filters, $search);
 
         return response()->json([
             'success' => true,
@@ -95,6 +92,9 @@ class ProduitController extends Controller
      */
     public function store(Request $request)
     {
+        if ($response = $this->ensureAdmin($request)) {
+            return $response;
+        }
         try {
             $produit = $this->produitService->createProduit($request->all());
             return response()->json(['success' => true, 'data' => $produit], 201);
@@ -117,6 +117,9 @@ class ProduitController extends Controller
      */
     public function update(Request $request, int $id)
     {
+        if ($response = $this->ensureAdmin($request)) {
+            return $response;
+        }
         try {
             $produit = $this->produitService->updateProduit($id, $request->all());
             return response()->json(['success' => true, 'data' => $produit]);
@@ -138,6 +141,9 @@ class ProduitController extends Controller
      */
     public function toggleStatus(Request $request, int $id)
     {
+        if ($response = $this->ensureAdmin($request)) {
+            return $response;
+        }
         $produit = $this->produitService->toggleStatus($id, $request->boolean('actif'));
         return response()->json(['success' => true, 'data' => $produit]);
     }
@@ -151,8 +157,11 @@ class ProduitController extends Controller
      *     @OA\Response(response=200, description="Succès")
      * )
      */
-    public function destroy(int $id)
+    public function destroy(Request $request, int $id)
     {
+        if ($response = $this->ensureAdmin($request)) {
+            return $response;
+        }
         $deleted = $this->produitService->deleteProduit($id);
         return response()->json(['success' => $deleted]);
     }

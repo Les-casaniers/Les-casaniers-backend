@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Produits;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Services\Produits\ImageProduitService;
 use Illuminate\Http\Request;
 use Throwable;
@@ -17,6 +18,15 @@ class ImageProduitController extends Controller
     public function __construct(ImageProduitService $imageService)
     {
         $this->imageService = $imageService;
+    }
+
+    private function ensureAdmin(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !($user instanceof Admin)) {
+            return response()->json(['success' => false, 'message' => 'Accès refusé'], 403);
+        }
+        return null;
     }
 
     /**
@@ -42,6 +52,9 @@ class ImageProduitController extends Controller
      */
     public function store(Request $request, int $produitId)
     {
+        if ($response = $this->ensureAdmin($request)) {
+            return $response;
+        }
         $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
             'alt' => 'nullable|string|max:255',
@@ -71,8 +84,11 @@ class ImageProduitController extends Controller
      *     @OA\Response(response=200, description="Supprimé")
      * )
      */
-    public function destroy(int $id)
+    public function destroy(Request $request, int $id)
     {
+        if ($response = $this->ensureAdmin($request)) {
+            return $response;
+        }
         $deleted = $this->imageService->deleteImage($id);
         return response()->json(['success' => $deleted]);
     }
@@ -88,8 +104,11 @@ class ImageProduitController extends Controller
      *     @OA\Response(response=200, description="Succès")
      * )
      */
-    public function setMain(int $produitId, int $imageId)
+    public function setMain(Request $request, int $produitId, int $imageId)
     {
+        if ($response = $this->ensureAdmin($request)) {
+            return $response;
+        }
         try {
             $this->imageService->setMainImage($produitId, $imageId);
             return response()->json(['success' => true]);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Produits;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Services\Produits\CategoryService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -20,6 +21,15 @@ class CategoryController extends Controller
         $this->categoryService = $categoryService;
     }
 
+    private function ensureAdmin(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !($user instanceof Admin)) {
+            return response()->json(['success' => false, 'message' => 'Accès refusé'], 403);
+        }
+        return null;
+    }
+
     /**
      * @OA\Get(
      *     path="/api/categories",
@@ -35,10 +45,7 @@ class CategoryController extends Controller
         if ($type) {
             $categories = $this->categoryService->getMenuByType($type);
         } else {
-            // Par défaut on pourrait retourner toutes les racines
-            // Ici on utilise une méthode simple du service ou repo
-            // Pour l'exemple on prend Pro
-            $categories = $this->categoryService->getMenuByType('pro');
+            $categories = $this->categoryService->getAllCategories();
         }
         
         return response()->json([
@@ -85,6 +92,9 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        if ($response = $this->ensureAdmin($request)) {
+            return $response;
+        }
         try {
             $category = $this->categoryService->createCategory($request->all());
             return response()->json(['success' => true, 'data' => $category], 201);
@@ -107,6 +117,9 @@ class CategoryController extends Controller
      */
     public function update(Request $request, int $id)
     {
+        if ($response = $this->ensureAdmin($request)) {
+            return $response;
+        }
         try {
             $category = $this->categoryService->updateCategory($id, $request->all());
             return response()->json(['success' => true, 'data' => $category]);
@@ -127,8 +140,11 @@ class CategoryController extends Controller
      *     @OA\Response(response=200, description="Supprimé")
      * )
      */
-    public function destroy(int $id)
+    public function destroy(Request $request, int $id)
     {
+        if ($response = $this->ensureAdmin($request)) {
+            return $response;
+        }
         $deleted = $this->categoryService->deleteCategory($id);
         return response()->json(['success' => $deleted]);
     }
@@ -144,6 +160,9 @@ class CategoryController extends Controller
      */
     public function reorder(Request $request)
     {
+        if ($response = $this->ensureAdmin($request)) {
+            return $response;
+        }
         $this->categoryService->updateOrder($request->input('orders', []));
         return response()->json(['success' => true]);
     }

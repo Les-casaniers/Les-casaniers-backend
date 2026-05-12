@@ -52,8 +52,13 @@ class ProduitService
             'prix' => 'sometimes|numeric|min:0',
             'quantite_stock' => 'sometimes|integer|min:0',
             'description' => 'sometimes|nullable|string',
+            'description_courte' => 'sometimes|nullable|string|max:500',
             'nom' => 'sometimes|string|max:255',
             'categorie_id' => 'sometimes|exists:categories,id',
+            'type_produit' => 'sometimes|in:pc,portable,composant,peripherique,service',
+            'reference' => 'sometimes|nullable|string|max:80|unique:produits,reference,' . $id,
+            'slug' => 'sometimes|nullable|string|max:190|unique:produits,slug,' . $id,
+            'devise' => 'sometimes|nullable|string|max:10',
             'actif' => 'sometimes|boolean'
         ]);
 
@@ -113,6 +118,28 @@ class ProduitService
     }
 
     /**
+     * Liste des produits avec filtres et recherche
+     */
+    public function getProduits(array $filters = [], ?string $search = null)
+    {
+        $produits = $this->produitRepository->getAll($filters);
+
+        if ($search) {
+            $needle = mb_strtolower($search);
+            $produits = $produits->filter(function ($produit) use ($needle) {
+                $nom = mb_strtolower((string) $produit->nom);
+                $reference = mb_strtolower((string) $produit->reference);
+                $description = mb_strtolower((string) $produit->description);
+                return str_contains($nom, $needle)
+                    || str_contains($reference, $needle)
+                    || str_contains($description, $needle);
+            })->values();
+        }
+
+        return $produits;
+    }
+
+    /**
      * Validation pour la création
      */
     protected function validateProduit(array $data)
@@ -125,6 +152,9 @@ class ProduitService
             'quantite_stock' => 'required|integer|min:0',
             'slug' => 'nullable|string|max:190|unique:produits,slug',
             'reference' => 'nullable|string|max:80|unique:produits,reference',
+            'description' => 'nullable|string',
+            'description_courte' => 'nullable|string|max:500',
+            'devise' => 'nullable|string|max:10',
             'actif' => 'boolean'
         ]);
 

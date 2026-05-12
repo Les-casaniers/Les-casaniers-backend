@@ -17,6 +17,10 @@ class ProduitRepository implements ProduitRepositoryInterface
     {
         $query = $this->model->with(['categorie', 'images']);
 
+        if (isset($filters['categorie_id'])) {
+            $query->where('categorie_id', $filters['categorie_id']);
+        }
+
         if (isset($filters['actif'])) {
             $query->where('actif', $filters['actif']);
         }

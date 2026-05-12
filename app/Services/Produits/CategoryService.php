@@ -108,6 +108,14 @@ class CategoryService
     }
 
     /**
+     * Récupérer toutes les catégories
+     */
+    public function getAllCategories()
+    {
+        return $this->categoryRepository->getAll();
+    }
+
+    /**
      * Organiser l'ordre de tri
      */
     public function updateOrder(array $orders)

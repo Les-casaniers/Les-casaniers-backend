@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Produits;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Services\Produits\AttributProduitService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -18,6 +19,15 @@ class AttributProduitController extends Controller
     public function __construct(AttributProduitService $attributService)
     {
         $this->attributService = $attributService;
+    }
+
+    private function ensureAdmin(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !($user instanceof Admin)) {
+            return response()->json(['success' => false, 'message' => 'Accès refusé'], 403);
+        }
+        return null;
     }
 
     /**
@@ -44,6 +54,9 @@ class AttributProduitController extends Controller
      */
     public function sync(Request $request, int $produitId)
     {
+        if ($response = $this->ensureAdmin($request)) {
+            return $response;
+        }
         try {
             $attributes = $this->attributService->syncAttributes($produitId, $request->all());
             return response()->json(['success' => true, 'data' => $attributes]);
@@ -63,8 +76,11 @@ class AttributProduitController extends Controller
      *     @OA\Response(response=200, description="Succès")
      * )
      */
-    public function getStandardKeys()
+    public function getStandardKeys(Request $request)
     {
+        if ($response = $this->ensureAdmin($request)) {
+            return $response;
+        }
         return response()->json([
             'success' => true,
             'data' => $this->attributService->getStandardKeys()
