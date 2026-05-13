@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\File;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,5 +17,18 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return ['Laravel' => app()->version()];
 });
+
+Route::get('/image/{filename}', function (string $filename) {
+    $safeFilename = basename($filename);
+    $path = base_path('image' . DIRECTORY_SEPARATOR . $safeFilename);
+
+    if (!File::exists($path)) {
+        abort(404);
+    }
+
+    return response()->file($path, [
+        'Cache-Control' => 'public, max-age=604800',
+    ]);
+})->where('filename', '^[A-Za-z0-9._-]+$');
 
 require __DIR__.'/auth.php';

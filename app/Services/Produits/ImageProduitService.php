@@ -12,20 +12,20 @@ use Illuminate\Support\Str;
 class ImageProduitService
 {
     protected $imageRepository;
-    protected $frontendImagePath;
-    protected $frontendImageUrlBase;
+    protected $backendImagePath;
+    protected $backendImageUrlBase;
     protected const MAX_SIZE_WITHOUT_COMPRESSION = 1048576; // 1 Mo
 
     public function __construct(ImageProduitRepositoryInterface $imageRepository)
     {
         $this->imageRepository = $imageRepository;
 
-        $this->frontendImagePath = base_path('../Les-casaniers-frontend/image');
-        $this->frontendImageUrlBase = rtrim((string) env('FRONTEND_URL', 'http://localhost:5173'), '/') . '/image';
+        $this->backendImagePath = base_path('image');
+        $this->backendImageUrlBase = rtrim((string) env('APP_URL', 'http://localhost:8000'), '/') . '/image';
 
-        // Creation automatique du dossier s'il n'existe pas.
-        if (!File::exists($this->frontendImagePath)) {
-            File::makeDirectory($this->frontendImagePath, 0755, true);
+        // Creation automatique du dossier backend s'il n'existe pas.
+        if (!File::exists($this->backendImagePath)) {
+            File::makeDirectory($this->backendImagePath, 0755, true);
         }
     }
 
@@ -42,16 +42,16 @@ class ImageProduitService
         }
 
         $filename = Str::uuid() . '.' . $extension;
-        $targetPath = $this->frontendImagePath . DIRECTORY_SEPARATOR . $filename;
+        $backendTargetPath = $this->backendImagePath . DIRECTORY_SEPARATOR . $filename;
 
         // Compression automatique pour les fichiers > 1 Mo.
         if ($file->getSize() > self::MAX_SIZE_WITHOUT_COMPRESSION) {
-            $this->compressAndSaveImage($file, $targetPath, $extension);
+            $this->compressAndSaveImage($file, $backendTargetPath, $extension);
         } else {
-            $file->move($this->frontendImagePath, $filename);
+            $file->move($this->backendImagePath, $filename);
         }
 
-        $url = $this->frontendImageUrlBase . '/' . $filename;
+        $url = $this->backendImageUrlBase . '/' . $filename;
 
         if ($ordre === null) {
             $existingImages = $this->imageRepository->findByProduit($produitId);
@@ -119,10 +119,10 @@ class ImageProduitService
     protected function deleteImageFile(string $url)
     {
         $filename = basename((string) parse_url($url, PHP_URL_PATH));
-        $path = $this->frontendImagePath . DIRECTORY_SEPARATOR . $filename;
+        $backendPath = $this->backendImagePath . DIRECTORY_SEPARATOR . $filename;
 
-        if (File::exists($path)) {
-            File::delete($path);
+        if (File::exists($backendPath)) {
+            File::delete($backendPath);
         }
     }
 
@@ -163,6 +163,7 @@ class ImageProduitService
             Log::warning('Image compression failed, fallback to original upload: ' . $e->getMessage());
         }
 
-        $file->move($this->frontendImagePath, basename($targetPath));
+        $file->move($this->backendImagePath, basename($targetPath));
     }
+
 }
