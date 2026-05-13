@@ -91,4 +91,32 @@ class ProduitRepository implements ProduitRepositoryInterface
             ->orderByRaw("CAST(SUBSTRING(reference, 5) AS UNSIGNED) DESC")
             ->value('reference');
     }
+
+    /**
+     * Décrémentation atomique : UPDATE WHERE quantite_stock >= quantity
+     * Empêche les stocks négatifs même en cas de requêtes concurrentes.
+     */
+    public function decrementStock(int $id, int $quantity): bool
+    {
+        $affected = $this->model->newQuery()
+            ->where('id', $id)
+            ->where('quantite_stock', '>=', $quantity)
+            ->update([
+                'quantite_stock' => \DB::raw("quantite_stock - {$quantity}"),
+            ]);
+
+        return $affected > 0;
+    }
+
+    /**
+     * Restauration du stock après annulation/remboursement.
+     */
+    public function incrementStock(int $id, int $quantity): void
+    {
+        $this->model->newQuery()
+            ->where('id', $id)
+            ->update([
+                'quantite_stock' => \DB::raw("quantite_stock + {$quantity}"),
+            ]);
+    }
 }

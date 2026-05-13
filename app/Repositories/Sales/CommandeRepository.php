@@ -64,4 +64,12 @@ class CommandeRepository implements CommandeRepositoryInterface
 
         return $this->findByUuid($uuid);
     }
+
+    public function findByUuidWithLock(string $uuid)
+    {
+        return Commande::with(['utilisateur'])
+            ->where('commande_uuid', $uuid)
+            ->lockForUpdate()
+            ->get();
+    }
 }

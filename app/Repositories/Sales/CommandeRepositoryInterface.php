@@ -12,4 +12,9 @@ interface CommandeRepositoryInterface
     public function findByUuid(string $uuid);
     public function findByUuidForUser(string $uuid, int $userId);
     public function updateByUuid(string $uuid, array $data);
+
+    /**
+     * Récupère les items d'une commande par UUID avec verrou pessimiste.
+     */
+    public function findByUuidWithLock(string $uuid);
 }

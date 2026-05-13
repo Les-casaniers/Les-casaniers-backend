@@ -2,9 +2,11 @@
 
 namespace App\Services\Sales;
 
-use App\Models\Commande;
+use App\Enums\Sales\FactureStatut;
 use App\Models\Facture;
+use App\Repositories\Sales\CommandeRepositoryInterface;
 use App\Repositories\Sales\FactureRepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -12,28 +14,24 @@ use Illuminate\Validation\ValidationException;
 class FactureService
 {
     public function __construct(
-        private readonly FactureRepositoryInterface $factureRepository
+        private readonly FactureRepositoryInterface $factureRepository,
+        private readonly CommandeRepositoryInterface $commandeRepository
     ) {
     }
 
-    public function adminIndex()
-    {
-        return $this->factureRepository->all();
-    }
+    // ──────────────────────────────────────────────
+    //  Lecture
+    // ──────────────────────────────────────────────
 
-    public function indexForUser(int $userId)
+    public function index(int $userId): Collection
     {
         return $this->factureRepository->allByUser($userId);
     }
 
-    public function adminShow(int $id)
-    {
-        return $this->factureRepository->find($id);
-    }
-
-    public function showForUser(int $id, int $userId)
+    public function show(int $userId, int $id): Facture
     {
         $facture = $this->factureRepository->findForUser($id, $userId);
+
         if (!$facture) {
             throw ValidationException::withMessages([
                 'facture_id' => ['Facture introuvable.'],
@@ -43,13 +41,28 @@ class FactureService
         return $facture;
     }
 
+    public function adminIndex(): Collection
+    {
+        return $this->factureRepository->all();
+    }
+
+    public function adminShow(int $id): Facture
+    {
+        return $this->factureRepository->find($id);
+    }
+
+    // ──────────────────────────────────────────────
+    //  Création
+    // ──────────────────────────────────────────────
+
+    /**
+     * Crée une facture à partir d'une commande (par UUID).
+     * Vérifie qu'aucune facture n'existe déjà pour cette commande.
+     */
     public function createFromCommande(string $commandeUuid): Facture
     {
         return DB::transaction(function () use ($commandeUuid) {
-            $items = Commande::with('utilisateur')
-                ->where('commande_uuid', $commandeUuid)
-                ->lockForUpdate()
-                ->get();
+            $items = $this->commandeRepository->findByUuidWithLock($commandeUuid);
 
             if ($items->isEmpty()) {
                 throw ValidationException::withMessages([
@@ -59,7 +72,7 @@ class FactureService
 
             if ($this->factureRepository->findByCommandeUuid($commandeUuid)) {
                 throw ValidationException::withMessages([
-                    'commande_uuid' => ['Cette commande possede deja une facture.'],
+                    'commande_uuid' => ['Cette commande possède déjà une facture.'],
                 ]);
             }
 
@@ -68,16 +81,20 @@ class FactureService
             return $this->factureRepository->create([
                 'commande_id' => $first->id,
                 'facture_ref' => $this->factureRepository->nextReference(),
-                'statut' => 'brouillon',
+                'statut' => FactureStatut::Brouillon->value,
                 'montant_total' => $this->calculateTotal($items),
                 'devise' => $first->devise ?? 'MGA',
             ]);
         });
     }
 
+    /**
+     * Crée une facture seulement si elle n'existe pas encore pour cette commande.
+     */
     public function createFromCommandeIfMissing(string $commandeUuid): Facture
     {
         $existing = $this->factureRepository->findByCommandeUuid($commandeUuid);
+
         if ($existing) {
             return $existing;
         }
@@ -85,18 +102,26 @@ class FactureService
         return $this->createFromCommande($commandeUuid);
     }
 
+    // ──────────────────────────────────────────────
+    //  Transitions de statut
+    // ──────────────────────────────────────────────
+
+    /**
+     * Émet une facture brouillon (brouillon → émise).
+     */
     public function emit(int $id): Facture
     {
         return DB::transaction(function () use ($id) {
             $facture = $this->factureRepository->find($id);
-            if ($facture->statut !== 'brouillon') {
+
+            if (!$facture->statut->peutTransitionVers(FactureStatut::Emise)) {
                 throw ValidationException::withMessages([
-                    'statut' => ['Seule une facture brouillon peut etre emise.'],
+                    'statut' => ['Seule une facture brouillon peut être émise.'],
                 ]);
             }
 
             $updated = $this->factureRepository->update($id, [
-                'statut' => 'emise',
+                'statut' => FactureStatut::Emise->value,
                 'date_emission' => now(),
             ]);
 
@@ -106,39 +131,51 @@ class FactureService
         });
     }
 
+    /**
+     * Marque une facture émise comme payée.
+     */
     public function markPaid(int $id, ?string $method = null): Facture
     {
         return DB::transaction(function () use ($id, $method) {
             $facture = $this->factureRepository->find($id);
-            if ($facture->statut !== 'emise') {
+
+            if (!$facture->statut->peutTransitionVers(FactureStatut::Payee)) {
                 throw ValidationException::withMessages([
-                    'statut' => ['Seule une facture emise peut etre marquee comme payee.'],
+                    'statut' => ['Seule une facture émise peut être marquée comme payée.'],
                 ]);
             }
 
             return $this->factureRepository->update($id, [
-                'statut' => 'payee',
+                'statut' => FactureStatut::Payee->value,
                 'methode_paiement' => $method,
                 'date_paiement' => now(),
             ]);
         });
     }
 
+    /**
+     * Annule une facture (impossible si déjà payée).
+     */
     public function cancel(int $id): Facture
     {
         return DB::transaction(function () use ($id) {
             $facture = $this->factureRepository->find($id);
-            if ($facture->statut === 'payee') {
+
+            if (!$facture->statut->estAnnulable()) {
                 throw ValidationException::withMessages([
-                    'statut' => ['Une facture payee ne peut pas etre annulee.'],
+                    'statut' => ['Cette facture ne peut pas être annulée.'],
                 ]);
             }
 
             return $this->factureRepository->update($id, [
-                'statut' => 'annulee',
+                'statut' => FactureStatut::Annulee->value,
             ]);
         });
     }
+
+    // ──────────────────────────────────────────────
+    //  Document PDF
+    // ──────────────────────────────────────────────
 
     public function documentPathForAdmin(int $id): string
     {
@@ -149,16 +186,20 @@ class FactureService
 
     public function documentPathForUser(int $id, int $userId): string
     {
-        $facture = $this->showForUser($id, $userId);
+        $facture = $this->show($userId, $id);
 
         return $this->ensureDocument($facture);
     }
 
+    // ──────────────────────────────────────────────
+    //  Méthodes privées
+    // ──────────────────────────────────────────────
+
     private function ensureDocument(Facture $facture): string
     {
-        if ($facture->statut === 'brouillon') {
+        if (!$facture->statut->estTelechargeable()) {
             throw ValidationException::withMessages([
-                'statut' => ['La facture doit etre emise avant telechargement.'],
+                'statut' => ['La facture doit être émise avant téléchargement.'],
             ]);
         }
 
@@ -172,9 +213,8 @@ class FactureService
     private function generateDocument(int $factureId): string
     {
         $facture = $this->factureRepository->find($factureId);
-        $items = Commande::with('utilisateur')
-            ->where('commande_uuid', $facture->commande->commande_uuid)
-            ->get();
+        $commande = $facture->commande;
+        $items = $this->commandeRepository->findByUuid($commande->commande_uuid);
 
         $pdf = $this->renderPdf($facture, $items);
         $path = 'factures/' . $facture->facture_ref . '.pdf';
@@ -188,13 +228,14 @@ class FactureService
     private function calculateTotal($items): float
     {
         $first = $items->first();
+
         if ($first && (float) $first->total > 0) {
             return (float) $first->total;
         }
 
-        $sousTotal = (float) $items->sum(function ($item) {
-            return ((float) $item->prix_unitaire) * ((int) $item->quantite);
-        });
+        $sousTotal = (float) $items->sum(
+            fn ($item) => ((float) $item->prix_unitaire) * ((int) $item->quantite)
+        );
 
         return $sousTotal + (float) ($first->livraison ?? 0);
     }
@@ -206,7 +247,7 @@ class FactureService
 
         $lines = [
             'Facture ' . $facture->facture_ref,
-            'Statut: ' . $facture->statut,
+            'Statut: ' . ($facture->statut instanceof FactureStatut ? $facture->statut->label() : $facture->statut),
             'Date emission: ' . (optional($facture->date_emission)->format('d/m/Y H:i') ?? '-'),
             'Commande: ' . ($commande->commande_uuid ?? '-'),
             'Client: ' . trim(($client->prenom ?? '') . ' ' . ($client->nom ?? '')) . ' - ' . ($client->email ?? '-'),

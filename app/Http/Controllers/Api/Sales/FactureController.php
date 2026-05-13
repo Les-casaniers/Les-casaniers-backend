@@ -20,7 +20,7 @@ class FactureController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data' => $this->factureService->indexForUser((int) $request->user()->id),
+            'data' => $this->factureService->index((int) $request->user()->id),
         ], 200);
     }
 
@@ -29,7 +29,7 @@ class FactureController extends Controller
         try {
             return response()->json([
                 'success' => true,
-                'data' => $this->factureService->showForUser($id, (int) $request->user()->id),
+                'data' => $this->factureService->show((int) $request->user()->id, $id),
             ], 200);
         } catch (ValidationException $e) {
             return response()->json(['success' => false, 'errors' => $e->errors()], 422);

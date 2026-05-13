@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Sales\CommandeStatut;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -32,7 +33,12 @@ class Commande extends Model
     ];
 
     protected $casts = [
+        'statut' => CommandeStatut::class,
         'meta_json' => 'array',
+        'sous_total' => 'decimal:2',
+        'livraison' => 'decimal:2',
+        'total' => 'decimal:2',
+        'prix_unitaire' => 'decimal:2',
     ];
 
     const CREATED_AT = 'date_creation';
@@ -51,6 +57,11 @@ class Commande extends Model
     public function devis()
     {
         return $this->belongsTo(Devis::class);
+    }
+
+    public function produit()
+    {
+        return $this->belongsTo(Produit::class);
     }
 
     public function facture()

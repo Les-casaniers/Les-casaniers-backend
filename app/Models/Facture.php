@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Sales\FactureStatut;
 use Illuminate\Database\Eloquent\Model;
 
 class Facture extends Model
@@ -24,6 +25,7 @@ class Facture extends Model
     const UPDATED_AT = 'date_modification';
 
     protected $casts = [
+        'statut' => FactureStatut::class,
         'montant_total' => 'decimal:2',
         'date_emission' => 'datetime',
         'date_paiement' => 'datetime',
