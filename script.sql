@@ -133,6 +133,63 @@ CREATE TABLE images_produits (
   CONSTRAINT fk_images_produits_produit FOREIGN KEY (produit_id) REFERENCES produits(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+
+CREATE TABLE `configurations` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+
+  -- Produit concerné (un produit peut avoir plusieurs configurations)
+  `produit_id` BIGINT UNSIGNED NOT NULL,
+
+  -- Utilisateur propriétaire (NULL si invité)
+  `utilisateur_id` BIGINT UNSIGNED NULL,
+
+  -- Type / nom de configuration (liste + champ libre via "autre")
+  `nom_configuration` ENUM(
+    'cpu','carte_mere','gpu','ram','ssd','hdd','stockage','alimentation','boitier',
+    'refroidissement','ventilateur','ecran','clavier','souris','os','reseau','autre'
+  ) NOT NULL,
+
+  -- Champ libre seulement si nom_configuration = 'autre'
+  `nom_configuration_autre` VARCHAR(190) NULL,
+
+  `devise` CHAR(3) NULL DEFAULT 'MGA',
+
+  -- Prix total calculé
+  `prix_total` DECIMAL(12,2) NULL DEFAULT 0.00,
+
+  -- Liste des composants en JSON
+  `composants_json` JSON NOT NULL,
+
+  `date_creation` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modification` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (`id`),
+
+  KEY `idx_config_produit` (`produit_id`),
+  KEY `idx_config_user` (`utilisateur_id`),
+
+  CONSTRAINT `fk_config_produit`
+    FOREIGN KEY (`produit_id`)
+    REFERENCES `produits` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+
+  CONSTRAINT `fk_config_pc_utilisateur`
+    FOREIGN KEY (`utilisateur_id`)
+    REFERENCES `utilisateurs` (`id`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
+
+  CONSTRAINT `chk_nom_configuration_autre`
+    CHECK (
+      (`nom_configuration` = 'autre' AND `nom_configuration_autre` IS NOT NULL AND `nom_configuration_autre` <> '')
+      OR
+      (`nom_configuration` <> 'autre' AND `nom_configuration_autre` IS NULL)
+    )
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
 -- Table: attributs_produits
 -- Description: paires clé/valeur pour les spécifications (ex: socket, TDP, DDR)
 -- Colonnes:
@@ -150,6 +207,8 @@ CREATE TABLE attributs_produits (
   CONSTRAINT fk_attributs_produits_produit FOREIGN KEY (produit_id) REFERENCES produits(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+
+
 -- Table: avis_clients
 -- Description: retours et notes des clients pour la preuve sociale
 -- Colonnes:
@@ -163,7 +222,6 @@ CREATE TABLE avis_clients (
   produit_id BIGINT UNSIGNED NOT NULL,
   utilisateur_id BIGINT UNSIGNED NULL,
   note TINYINT UNSIGNED NOT NULL,
-  titre VARCHAR(190) NULL,
   corps TEXT NULL,
   publie TINYINT(1) NOT NULL DEFAULT 0,
   date_creation TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
@@ -238,72 +296,7 @@ CREATE TABLE paniers (
   UNIQUE KEY uq_panier_item (utilisateur_id, statut, produit_id, configuration_id)
 ) ENGINE=InnoDB;
 
--- =========================
--- CONFIGURATEUR (PROFIL / ETAPES / CONFIGURATION / COMPATIBILITE)
--- Table: profils_configurateur
--- Description: profils préconfigurés (Gaming 1080p, Bureautique, etc.)
--- Table: etapes_configurateur
--- Description: étapes du configurateur (ex: cpu, carte_mere, ram...)
--- Table: configurations
--- Description: builds sauvegardées par l'utilisateur
--- Table: items_configuration
--- Description: composants sélectionnés pour une configuration
--- =========================
-CREATE TABLE `configurations` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 
-  -- Produit concerné (un produit peut avoir plusieurs configurations)
-  `produit_id` BIGINT UNSIGNED NOT NULL,
-
-  -- Utilisateur propriétaire (NULL si invité)
-  `utilisateur_id` BIGINT UNSIGNED NULL,
-
-  -- Type / nom de configuration (liste + champ libre via "autre")
-  `nom_configuration` ENUM(
-    'cpu','carte_mere','gpu','ram','ssd','hdd','stockage','alimentation','boitier',
-    'refroidissement','ventilateur','ecran','clavier','souris','os','reseau','autre'
-  ) NOT NULL,
-
-  -- Champ libre seulement si nom_configuration = 'autre'
-  `nom_configuration_autre` VARCHAR(190) NULL,
-
-  `devise` CHAR(3) NULL DEFAULT 'MGA',
-
-  -- Prix total calculé
-  `prix_total` DECIMAL(12,2) NULL DEFAULT 0.00,
-
-  -- Liste des composants en JSON
-  `composants_json` JSON NOT NULL,
-
-  `date_creation` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modification` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-  PRIMARY KEY (`id`),
-
-  KEY `idx_config_produit` (`produit_id`),
-  KEY `idx_config_user` (`utilisateur_id`),
-
-  CONSTRAINT `fk_config_produit`
-    FOREIGN KEY (`produit_id`)
-    REFERENCES `produits` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-
-  CONSTRAINT `fk_config_pc_utilisateur`
-    FOREIGN KEY (`utilisateur_id`)
-    REFERENCES `utilisateurs` (`id`)
-    ON DELETE SET NULL
-    ON UPDATE CASCADE,
-
-  CONSTRAINT `chk_nom_configuration_autre`
-    CHECK (
-      (`nom_configuration` = 'autre' AND `nom_configuration_autre` IS NOT NULL AND `nom_configuration_autre` <> '')
-      OR
-      (`nom_configuration` <> 'autre' AND `nom_configuration_autre` IS NULL)
-    )
-) ENGINE=InnoDB
-  DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci;
 
 
 -- =========================
@@ -417,6 +410,74 @@ CREATE TABLE `commandes` (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
 
+
+CREATE TABLE `commandes` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+
+  -- identifiant pour regrouper les items d'une même commande
+  `commande_uuid` CHAR(36) NOT NULL,
+
+  `utilisateur_id` BIGINT UNSIGNED NULL,
+  `panier_id` BIGINT UNSIGNED NULL,
+  `devis_id` BIGINT UNSIGNED NULL,
+
+  `statut` ENUM('en_attente','payee','en_traitement','expediee','terminee','annulee','remboursee')
+    NOT NULL DEFAULT 'en_attente',
+
+  `sous_total` DECIMAL(12,2) NULL DEFAULT 0.00,
+  `livraison` DECIMAL(12,2) NULL DEFAULT 0.00,
+  `total` DECIMAL(12,2) NULL DEFAULT 0.00,
+  `devise` CHAR(3) NOT NULL DEFAULT 'MGA',
+
+  `adresse_expedition_id` BIGINT UNSIGNED NULL,
+  `adresse_facturation_id` BIGINT UNSIGNED NULL,
+
+  -- item
+  `produit_id` BIGINT UNSIGNED NULL,
+  `titre` VARCHAR(255) NOT NULL,
+  `reference` VARCHAR(80) NULL,
+  `prix_unitaire` DECIMAL(12,2) NULL DEFAULT 0.00,
+  `quantite` INT UNSIGNED NOT NULL DEFAULT 1,
+  `meta_json` JSON NULL,
+
+  `date_creation` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modification` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (`id`),
+
+  KEY `idx_commande_uuid` (`commande_uuid`),
+  KEY `idx_commande_user` (`utilisateur_id`),
+  KEY `idx_commande_statut` (`statut`),
+  KEY `idx_commande_panier` (`panier_id`),
+  KEY `idx_commande_devis` (`devis_id`),
+  KEY `idx_commande_produit` (`produit_id`),
+
+  CONSTRAINT `fk_commandes_utilisateur`
+    FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+
+  CONSTRAINT `fk_commandes_panier`
+    FOREIGN KEY (`panier_id`) REFERENCES `paniers` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+
+  CONSTRAINT `fk_commandes_devis`
+    FOREIGN KEY (`devis_id`) REFERENCES `devis` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+
+  CONSTRAINT `fk_commandes_adresse_exped`
+    FOREIGN KEY (`adresse_expedition_id`) REFERENCES `adresses_utilisateurs` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+
+  CONSTRAINT `fk_commandes_adresse_fact`
+    FOREIGN KEY (`adresse_facturation_id`) REFERENCES `adresses_utilisateurs` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+
+  CONSTRAINT `fk_commandes_produit`
+    FOREIGN KEY (`produit_id`) REFERENCES `produits` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
 -- =========================
 -- CONTENU: GUIDE DU FOSA / BLOG / SERVICES (maillage interne)
 -- Table: contenus
