@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Produits\ImageProduitController;
 use App\Http\Controllers\Api\Produits\ProduitController;
 use App\Http\Controllers\Api\Sales\CommandeController;
 use App\Http\Controllers\Api\Sales\DevisController;
+use App\Http\Controllers\Api\Sales\FactureController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UtilisateurController;
 use Illuminate\Support\Facades\Route;
@@ -97,6 +98,12 @@ Route::middleware(['auth:sanctum'])->prefix('devis')->group(function () {
     Route::delete('/{id}', [DevisController::class, 'destroy']);
 });
 
+Route::middleware(['auth:sanctum'])->prefix('factures')->group(function () {
+    Route::get('/', [FactureController::class, 'index']);
+    Route::get('/{id}', [FactureController::class, 'show']);
+    Route::get('/{id}/download', [FactureController::class, 'download']);
+});
+
 // Avis routes
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/mes-avis', [AvisClientController::class, 'getMesAvis']);
@@ -122,6 +129,13 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/commandes/{uuid}/cancel', [CommandeController::class, 'adminCancel']);
     Route::get('/devis', [DevisController::class, 'adminIndex']);
     Route::post('/devis', [DevisController::class, 'adminStore']);
+    Route::get('/factures', [FactureController::class, 'adminIndex']);
+    Route::post('/factures', [FactureController::class, 'adminStore']);
+    Route::get('/factures/{id}', [FactureController::class, 'adminShow']);
+    Route::post('/factures/{id}/emettre', [FactureController::class, 'adminEmit']);
+    Route::post('/factures/{id}/payer', [FactureController::class, 'adminMarkPaid']);
+    Route::post('/factures/{id}/annuler', [FactureController::class, 'adminCancel']);
+    Route::get('/factures/{id}/download', [FactureController::class, 'adminDownload']);
     Route::get('/utilisateurs/{utilisateurId}/adresses', [AdresseController::class, 'adminIndexByUser']);
     Route::post('/utilisateurs/{utilisateurId}/adresses', [AdresseController::class, 'adminStoreForUser']);
     Route::put('/utilisateurs/{utilisateurId}/adresses/{id}', [AdresseController::class, 'adminUpdateForUser']);

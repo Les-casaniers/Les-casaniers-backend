@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Sales;
 
 use App\Http\Controllers\Controller;
 use App\Services\Sales\CommandeService;
+use App\Services\Sales\FactureService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -17,7 +18,8 @@ use Throwable;
 class CommandeController extends Controller
 {
     public function __construct(
-        private readonly CommandeService $commandeService
+        private readonly CommandeService $commandeService,
+        private readonly FactureService $factureService
     ) {
     }
 
@@ -123,6 +125,9 @@ class CommandeController extends Controller
             ]);
 
             $data = $this->commandeService->updateStatus((int) $request->user()->id, $uuid, $validated['statut']);
+            if ($validated['statut'] === 'payee') {
+                $this->factureService->createFromCommandeIfMissing($uuid);
+            }
 
             return response()->json(['success' => true, 'data' => $data], 200);
         } catch (ValidationException $e) {
@@ -197,6 +202,9 @@ class CommandeController extends Controller
             ]);
 
             $data = $this->commandeService->adminUpdateStatus($uuid, $validated['statut']);
+            if ($validated['statut'] === 'payee') {
+                $this->factureService->createFromCommandeIfMissing($uuid);
+            }
 
             return response()->json(['success' => true, 'data' => $data], 200);
         } catch (ValidationException $e) {

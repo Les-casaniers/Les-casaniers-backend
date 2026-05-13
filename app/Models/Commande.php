@@ -52,4 +52,9 @@ class Commande extends Model
     {
         return $this->belongsTo(Devis::class);
     }
+
+    public function facture()
+    {
+        return $this->hasOne(Facture::class, 'commande_id');
+    }
 }
