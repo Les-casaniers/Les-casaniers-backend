@@ -8,11 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::disableForeignKeyConstraints();
+        
         Schema::create('devis', function (Blueprint $table) {
             $table->id();
             $table->foreignId('utilisateur_id')->nullable()->constrained('utilisateurs')->onDelete('set null');
             $table->foreignId('panier_id')->nullable()->constrained('paniers')->onDelete('set null');
-            $table->foreignId('configuration_id')->nullable()->constrained('configurations')->onDelete('set null');
+            $table->unsignedBigInteger('configuration_id')->nullable(); // ← Modifier ici
+            // $table->foreignId('configuration_id')->nullable()->constrained('configurations')->onDelete('set null');
             $table->enum('statut', ['brouillon', 'envoye', 'accepte', 'refuse', 'expire'])->default('brouillon');
             $table->string('nom_client', 190);
             $table->string('email_client', 190);
@@ -24,10 +27,10 @@ return new class extends Migration
             $table->timestamp('date_modification')->nullable()->useCurrentOnUpdate();
             $table->timestamps();
             
-            $table->index('utilisateur_id');
-            $table->index('statut');
-            $table->index('email_client');
+            $table->index('configuration_id');
         });
+        
+        Schema::enableForeignKeyConstraints();
     }
 
     public function down(): void
