@@ -23,6 +23,15 @@ class CommandeService
         return $this->commandeRepository->allByUser($userId);
     }
 
+    public function adminIndex(?string $statut = null)
+    {
+        if ($statut) {
+            return $this->commandeRepository->allByStatus($statut);
+        }
+
+        return $this->commandeRepository->all();
+    }
+
     public function show(int $userId, string $uuid)
     {
         $commande = $this->commandeRepository->findByUuidForUser($uuid, $userId);
@@ -34,6 +43,29 @@ class CommandeService
 
         return [
             'items' => $this->commandeRepository->findByUuid($uuid),
+            'resume' => [
+                'commande_uuid' => $uuid,
+                'statut' => $commande->statut,
+                'sous_total' => $commande->sous_total,
+                'livraison' => $commande->livraison,
+                'total' => $commande->total,
+                'devise' => $commande->devise,
+            ],
+        ];
+    }
+
+    public function adminShow(string $uuid)
+    {
+        $items = $this->commandeRepository->findByUuid($uuid);
+        $commande = $items->first();
+        if (!$commande) {
+            throw ValidationException::withMessages([
+                'commande_uuid' => ['Commande introuvable.'],
+            ]);
+        }
+
+        return [
+            'items' => $items,
             'resume' => [
                 'commande_uuid' => $uuid,
                 'statut' => $commande->statut,
@@ -117,6 +149,29 @@ class CommandeService
     public function cancel(int $userId, string $uuid)
     {
         return $this->updateStatus($userId, $uuid, 'annulee');
+    }
+
+    public function adminUpdateStatus(string $uuid, string $newStatus)
+    {
+        $commande = $this->commandeRepository->findByUuid($uuid)->first();
+        if (!$commande) {
+            throw ValidationException::withMessages([
+                'commande_uuid' => ['Commande introuvable.'],
+            ]);
+        }
+
+        if (!$this->canTransition($commande->statut, $newStatus)) {
+            throw ValidationException::withMessages([
+                'statut' => ['Transition de statut non autorisee.'],
+            ]);
+        }
+
+        return $this->commandeRepository->updateByUuid($uuid, ['statut' => $newStatus]);
+    }
+
+    public function adminCancel(string $uuid)
+    {
+        return $this->adminUpdateStatus($uuid, 'annulee');
     }
 
     public function calculateSousTotal(array $items): float

@@ -6,6 +6,21 @@ use App\Models\Devis;
 
 class DevisRepository implements DevisRepositoryInterface
 {
+    public function all()
+    {
+        return Devis::with(['utilisateur', 'panier'])
+            ->latest('id')
+            ->get();
+    }
+
+    public function allByStatus(string $statut)
+    {
+        return Devis::with(['utilisateur', 'panier'])
+            ->where('statut', $statut)
+            ->latest('id')
+            ->get();
+    }
+
     public function allByUser(int $userId)
     {
         return Devis::with(['utilisateur', 'panier'])

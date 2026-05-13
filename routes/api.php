@@ -110,6 +110,22 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     Route::get('/avis', [AvisClientController::class, 'adminList']);
     Route::put('/avis/{id}/publier', [AvisClientController::class, 'togglePublish']);
+    Route::post('/utilisateurs', [UtilisateurController::class, 'adminStore']);
+    Route::get('/utilisateurs', [UtilisateurController::class, 'adminIndex']);
+    Route::get('/utilisateurs/{id}', [UtilisateurController::class, 'adminShow']);
+    Route::put('/utilisateurs/{id}', [UtilisateurController::class, 'adminUpdate']);
+    Route::delete('/utilisateurs/{id}', [UtilisateurController::class, 'adminDestroy']);
+    Route::get('/commandes', [CommandeController::class, 'adminIndex']);
+    Route::post('/commandes', [CommandeController::class, 'adminStore']);
+    Route::get('/commandes/{uuid}', [CommandeController::class, 'adminShow']);
+    Route::patch('/commandes/{uuid}/statut', [CommandeController::class, 'adminUpdateStatus']);
+    Route::post('/commandes/{uuid}/cancel', [CommandeController::class, 'adminCancel']);
+    Route::get('/devis', [DevisController::class, 'adminIndex']);
+    Route::post('/devis', [DevisController::class, 'adminStore']);
+    Route::get('/utilisateurs/{utilisateurId}/adresses', [AdresseController::class, 'adminIndexByUser']);
+    Route::post('/utilisateurs/{utilisateurId}/adresses', [AdresseController::class, 'adminStoreForUser']);
+    Route::put('/utilisateurs/{utilisateurId}/adresses/{id}', [AdresseController::class, 'adminUpdateForUser']);
+    Route::delete('/utilisateurs/{utilisateurId}/adresses/{id}', [AdresseController::class, 'adminDestroyForUser']);
 });
 
 // Panier routes
@@ -140,10 +156,10 @@ Route::middleware(['auth:sanctum'])->prefix('configurations')->group(function ()
 Route::middleware(['auth:sanctum'])->prefix('adresses')->group(function () {
     Route::get('/', [AdresseController::class, 'index']);
     Route::post('/', [AdresseController::class, 'store']);
+    Route::get('/defaut/expedition', [AdresseController::class, 'getDefaultExpedition']);
     Route::get('/{id}', [AdresseController::class, 'show']);
     Route::put('/{id}', [AdresseController::class, 'update']);
     Route::put('/{id}/defaut-expedition', [AdresseController::class, 'setDefaultExpedition']);
-    Route::get('/defaut/expedition', [AdresseController::class, 'getDefaultExpedition']);
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('adresses')->group(function () {

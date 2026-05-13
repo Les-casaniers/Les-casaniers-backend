@@ -23,6 +23,15 @@ class DevisService
         return $this->devisRepository->allByUser($userId);
     }
 
+    public function adminIndex(?string $statut = null)
+    {
+        if ($statut) {
+            return $this->devisRepository->allByStatus($statut);
+        }
+
+        return $this->devisRepository->all();
+    }
+
     public function show(int $userId, int $devisId)
     {
         $devis = $this->devisRepository->findByIdForUser($devisId, $userId);

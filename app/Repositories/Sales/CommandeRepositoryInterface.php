@@ -4,6 +4,8 @@ namespace App\Repositories\Sales;
 
 interface CommandeRepositoryInterface
 {
+    public function all();
+    public function allByStatus(string $statut);
     public function allByUser(int $userId);
     public function allByUserAndStatus(int $userId, string $statut);
     public function create(array $data);

@@ -6,6 +6,21 @@ use App\Models\Commande;
 
 class CommandeRepository implements CommandeRepositoryInterface
 {
+    public function all()
+    {
+        return Commande::with(['utilisateur', 'panier', 'devis'])
+            ->latest()
+            ->get();
+    }
+
+    public function allByStatus(string $statut)
+    {
+        return Commande::with(['utilisateur', 'panier', 'devis'])
+            ->where('statut', $statut)
+            ->latest()
+            ->get();
+    }
+
     public function allByUser(int $userId)
     {
         return Commande::with(['utilisateur', 'panier', 'devis'])
