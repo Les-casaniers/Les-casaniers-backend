@@ -5,22 +5,28 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class AvisClient extends Model
+class Configuration extends Model
 {
     use HasFactory;
 
-    protected $table = 'avis_clients';
+    protected $table = 'configurations';
 
     protected $fillable = [
         'produit_id',
         'utilisateur_id',
-        'note',
-        'corps',
-        'publie',
+        'nom_configuration',
+        'nom_configuration_autre',
+        'devise',
+        'prix_total',
+        'composants_json',
+    ];
+
+    protected $casts = [
+        'composants_json' => 'array',
     ];
 
     const CREATED_AT = 'date_creation';
-    const UPDATED_AT = null;
+    const UPDATED_AT = 'date_modification';
 
     public function produit()
     {

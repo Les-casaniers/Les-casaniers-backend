@@ -41,6 +41,36 @@ class AppServiceProvider extends ServiceProvider
             \App\Repositories\UtilisateurRepositoryInterface::class,
             \App\Repositories\UtilisateurRepository::class
         );
+
+        $this->app->bind(
+            \App\Repositories\Favoris\FavoriRepositoryInterface::class,
+            \App\Repositories\Favoris\FavoriRepository::class
+        );
+
+        $this->app->bind(
+            \App\Repositories\Paniers\PanierRepositoryInterface::class,
+            \App\Repositories\Paniers\PanierRepository::class
+        );
+
+        $this->app->bind(
+            \App\Repositories\Configurations\ConfigurationRepositoryInterface::class,
+            \App\Repositories\Configurations\ConfigurationRepository::class
+        );
+
+        $this->app->bind(
+            \App\Repositories\Sales\DevisRepositoryInterface::class,
+            \App\Repositories\Sales\DevisRepository::class
+        );
+
+        $this->app->bind(
+            \App\Repositories\Sales\CommandeRepositoryInterface::class,
+            \App\Repositories\Sales\CommandeRepository::class
+        );
+
+        $this->app->bind(
+            \App\Repositories\AvisClients\AvisClientRepositoryInterface::class,
+            \App\Repositories\AvisClients\AvisClientRepository::class
+        );
     }
 
     /**

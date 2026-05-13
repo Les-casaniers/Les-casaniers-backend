@@ -10,17 +10,37 @@ return new class extends Migration
     {
         Schema::create('avis_clients', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('produit_id')->constrained('produits')->onDelete('cascade');
-            $table->foreignId('utilisateur_id')->nullable()->constrained('utilisateurs')->onDelete('set null');
-            $table->tinyInteger('note')->unsigned();
-            $table->string('titre', 190)->nullable();
+
+            // Relations
+            $table->foreignId('produit_id')
+                ->constrained('produits')
+                ->cascadeOnDelete();
+
+            $table->foreignId('utilisateur_id')
+                ->nullable()
+                ->constrained('utilisateurs')
+                ->nullOnDelete();
+
+            // Avis
+            $table->unsignedTinyInteger('note');
             $table->text('corps')->nullable();
+
+            // Publication (0 = en attente, 1 = publié)
             $table->boolean('publie')->default(false);
-            $table->timestamp('date_creation')->nullable()->useCurrent();
-            
+
+            // Date création custom
+            $table->timestamp('date_creation')->useCurrent();
+
+            // Pas de update automatique
+            $table->timestamp('date_modification')->nullable();
+
+            // Index
             $table->index('produit_id');
             $table->index('utilisateur_id');
             $table->index('publie');
+
+            // Optionnel : éviter doublon avis utilisateur sur produit
+            $table->unique(['produit_id', 'utilisateur_id']);
         });
     }
 
