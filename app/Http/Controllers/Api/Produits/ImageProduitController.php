@@ -56,7 +56,7 @@ class ImageProduitController extends Controller
             return $response;
         }
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240',
             'alt' => 'nullable|string|max:255',
             'ordre' => 'nullable|integer'
         ]);

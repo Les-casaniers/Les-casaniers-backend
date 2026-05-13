@@ -3,26 +3,29 @@
 namespace App\Services\Produits;
 
 use App\Repositories\ImageProduit\ImageProduitRepositoryInterface;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Spatie\LaravelImageOptimizer\Facades\ImageOptimizer;
 use Exception;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ImageProduitService
 {
     protected $imageRepository;
-    protected $disk = 'public';
-    protected $folder = 'products';
+    protected $frontendImagePath;
+    protected $frontendImageUrlBase;
+    protected const MAX_SIZE_WITHOUT_COMPRESSION = 1048576; // 1 Mo
 
     public function __construct(ImageProduitRepositoryInterface $imageRepository)
     {
         $this->imageRepository = $imageRepository;
-        
-        // Création du dossier s'il n'existe pas
-        if (!Storage::disk($this->disk)->exists($this->folder)) {
-            Storage::disk($this->disk)->makeDirectory($this->folder);
+
+        $this->frontendImagePath = base_path('../Les-casaniers-frontend/image');
+        $this->frontendImageUrlBase = rtrim((string) env('FRONTEND_URL', 'http://localhost:5173'), '/') . '/image';
+
+        // Creation automatique du dossier s'il n'existe pas.
+        if (!File::exists($this->frontendImagePath)) {
+            File::makeDirectory($this->frontendImagePath, 0755, true);
         }
     }
 
@@ -31,56 +34,49 @@ class ImageProduitService
      */
     public function uploadImage(int $produitId, UploadedFile $file, string $alt = null, int $ordre = null)
     {
-        // Validation basique (devrait être faite dans le contrôleur aussi)
         $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
-        if (!in_array(strtolower($file->getClientOriginalExtension()), $allowedExtensions)) {
-            throw new Exception("Format de fichier non autorisé. Utilisez jpg, jpeg, png ou webp.");
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        if (!in_array($extension, $allowedExtensions, true)) {
+            throw new Exception("Format de fichier non autorise. Utilisez jpg, jpeg, png ou webp.");
         }
 
-        // Renommage sécurisé
-        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-        
-        // Stockage
-        $path = $file->storeAs($this->folder, $filename, $this->disk);
-        $fullPath = Storage::disk($this->disk)->path($path);
+        $filename = Str::uuid() . '.' . $extension;
+        $targetPath = $this->frontendImagePath . DIRECTORY_SEPARATOR . $filename;
 
-        // Optimisation de l'image
-        try {
-            ImageOptimizer::optimize($fullPath);
-        } catch (\Exception $e) {
-            \Log::warning("Image optimization failed: " . $e->getMessage());
+        // Compression automatique pour les fichiers > 1 Mo.
+        if ($file->getSize() > self::MAX_SIZE_WITHOUT_COMPRESSION) {
+            $this->compressAndSaveImage($file, $targetPath, $extension);
+        } else {
+            $file->move($this->frontendImagePath, $filename);
         }
 
-        // Génération de l'URL
-        $url = Storage::disk($this->disk)->url($path);
+        $url = $this->frontendImageUrlBase . '/' . $filename;
 
-        // Définir l'ordre si non spécifié (0 par défaut si première image)
         if ($ordre === null) {
             $existingImages = $this->imageRepository->findByProduit($produitId);
-            $ordre = ($existingImages->count() === 0) ? 0 : ($existingImages->max('ordre') + 1);
+            $ordre = ($existingImages->count() === 0) ? 0 : ((int) $existingImages->max('ordre') + 1);
         }
 
-        // Création en base de données
         return $this->imageRepository->create([
             'produit_id' => $produitId,
             'url' => $url,
             'alt' => $alt ?: "Image produit {$produitId}",
-            'ordre' => $ordre
+            'ordre' => $ordre,
         ]);
     }
 
     /**
-     * Définir une image comme principale (ordre = 0)
+     * Definir une image comme principale (ordre = 0)
      */
     public function setMainImage(int $produitId, int $imageId)
     {
         $images = $this->imageRepository->findByProduit($produitId);
-        
+
         foreach ($images as $img) {
             if ($img->id === $imageId) {
                 $this->imageRepository->update($img->id, ['ordre' => 0]);
-            } else if ($img->ordre === 0) {
-                // L'ancienne image principale devient secondaire
+            } elseif ($img->ordre === 0) {
                 $this->imageRepository->update($img->id, ['ordre' => 1]);
             }
         }
@@ -89,12 +85,12 @@ class ImageProduitService
     }
 
     /**
-     * Suppression d'une image (base de données + fichier)
+     * Suppression d'une image (base de donnees + fichier)
      */
     public function deleteImage(int $imageId)
     {
         $image = $this->imageRepository->findById($imageId);
-        
+
         if ($image) {
             $this->deleteImageFile($image->url);
             return $this->imageRepository->delete($imageId);
@@ -104,12 +100,12 @@ class ImageProduitService
     }
 
     /**
-     * Suppression de toutes les images d'un produit (ex: lors de la suppression du produit)
+     * Suppression de toutes les images d'un produit
      */
     public function deleteAllProductImages(int $produitId)
     {
         $images = $this->imageRepository->findByProduit($produitId);
-        
+
         foreach ($images as $image) {
             $this->deleteImage($image->id);
         }
@@ -122,20 +118,51 @@ class ImageProduitService
      */
     protected function deleteImageFile(string $url)
     {
-        // On extrait le nom du fichier depuis l'URL
-        $filename = basename(parse_url($url, PHP_URL_PATH));
-        $path = $this->folder . '/' . $filename;
-        
-        if (Storage::disk($this->disk)->exists($path)) {
-            Storage::disk($this->disk)->delete($path);
+        $filename = basename((string) parse_url($url, PHP_URL_PATH));
+        $path = $this->frontendImagePath . DIRECTORY_SEPARATOR . $filename;
+
+        if (File::exists($path)) {
+            File::delete($path);
         }
     }
 
     /**
-     * Mise à jour du texte ALT
+     * Mise a jour du texte ALT
      */
     public function updateAlt(int $imageId, string $alt)
     {
         return $this->imageRepository->update($imageId, ['alt' => $alt]);
+    }
+
+    protected function compressAndSaveImage(UploadedFile $file, string $targetPath, string $extension): void
+    {
+        $sourcePath = $file->getRealPath();
+
+        try {
+            if (in_array($extension, ['jpg', 'jpeg'], true) && function_exists('imagecreatefromjpeg')) {
+                $image = imagecreatefromjpeg($sourcePath);
+                imagejpeg($image, $targetPath, 75);
+                imagedestroy($image);
+                return;
+            }
+
+            if ($extension === 'png' && function_exists('imagecreatefrompng')) {
+                $image = imagecreatefrompng($sourcePath);
+                imagepng($image, $targetPath, 7);
+                imagedestroy($image);
+                return;
+            }
+
+            if ($extension === 'webp' && function_exists('imagecreatefromwebp')) {
+                $image = imagecreatefromwebp($sourcePath);
+                imagewebp($image, $targetPath, 75);
+                imagedestroy($image);
+                return;
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Image compression failed, fallback to original upload: ' . $e->getMessage());
+        }
+
+        $file->move($this->frontendImagePath, basename($targetPath));
     }
 }
