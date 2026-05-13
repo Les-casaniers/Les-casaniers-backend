@@ -126,3 +126,40 @@ Route::middleware(['auth:sanctum'])->prefix('panier')->group(function () {
     Route::delete('/supprimer/{itemId}', [PanierController::class, 'supprimer']);
     Route::delete('/vider', [PanierController::class, 'vider']);
 });
+
+use App\Http\Controllers\Api\Devis\DevisController;
+
+// Routes devis (client connecté)
+Route::middleware(['auth:sanctum'])->prefix('devis')->group(function () {
+    Route::get('/', [DevisController::class, 'index']);              // Mes devis
+    Route::post('/creer', [DevisController::class, 'creer']);        // Créer un devis
+    Route::get('/{id}', [DevisController::class, 'show']);           // Voir un devis
+    Route::put('/{id}/envoyer', [DevisController::class, 'envoyer']); // Envoyer un devis
+    Route::delete('/{id}', [DevisController::class, 'destroy']);     // Supprimer un devis
+});
+
+use App\Http\Controllers\Api\Configurateur\ProfilConfigurateurController;
+
+// Routes publiques pour les profils configurateur
+Route::get('/profils-configurateur', [ProfilConfigurateurController::class, 'index']);
+Route::get('/profils-configurateur/{slug}', [ProfilConfigurateurController::class, 'show']);
+
+// Routes admin (protégées)
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::post('/profils-configurateur', [ProfilConfigurateurController::class, 'store']);
+    Route::put('/profils-configurateur/{id}', [ProfilConfigurateurController::class, 'update']);
+    Route::delete('/profils-configurateur/{id}', [ProfilConfigurateurController::class, 'destroy']);
+});
+
+use App\Http\Controllers\Api\Adresse\AdresseController;
+
+// Routes adresses (client connecté)
+Route::middleware(['auth:sanctum'])->prefix('adresses')->group(function () {
+    Route::get('/', [AdresseController::class, 'index']);
+    Route::post('/', [AdresseController::class, 'store']);
+    Route::get('/{id}', [AdresseController::class, 'show']);
+    Route::put('/{id}', [AdresseController::class, 'update']);
+    Route::delete('/{id}', [AdresseController::class, 'destroy']);
+    Route::put('/{id}/defaut-expedition', [AdresseController::class, 'setDefaultExpedition']);
+    Route::get('/defaut/expedition', [AdresseController::class, 'getDefaultExpedition']);
+});

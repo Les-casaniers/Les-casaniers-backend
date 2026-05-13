@@ -16,9 +16,4 @@ class ProfilConfigurateur extends Model
         'emplacements' => 'array',
         'actif' => 'boolean'
     ];
-    
-    public function configurations()
-    {
-        return $this->hasMany(Configuration::class, 'profil_id');
-    }
 }

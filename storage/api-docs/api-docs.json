@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "http://localhost:8000/api",
+            "url": "http://127.0.0.1:8000",
             "description": "Serveur Principal"
         }
     ],
@@ -583,6 +583,280 @@
                 }
             }
         },
+        "/api/adresses": {
+            "get": {
+                "tags": [
+                    "Adresses"
+                ],
+                "summary": "Lister mes adresses",
+                "operationId": "79c46d69e8b484148f1e6986c101ce8c",
+                "responses": {
+                    "200": {
+                        "description": "Liste des adresses"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Adresses"
+                ],
+                "summary": "Ajouter une nouvelle adresse",
+                "operationId": "a6af838d1ea402b1c94aff04d52cbdde",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nom_complet",
+                                    "adresse_ligne1",
+                                    "ville",
+                                    "pays"
+                                ],
+                                "properties": {
+                                    "etiquette": {
+                                        "type": "string",
+                                        "example": "Maison"
+                                    },
+                                    "nom_complet": {
+                                        "type": "string",
+                                        "example": "Jean Dupont"
+                                    },
+                                    "telephone": {
+                                        "type": "string",
+                                        "example": "0341234567"
+                                    },
+                                    "adresse_ligne1": {
+                                        "type": "string",
+                                        "example": "Lot II J 83"
+                                    },
+                                    "adresse_ligne2": {
+                                        "type": "string",
+                                        "example": "Ambohijatovo"
+                                    },
+                                    "ville": {
+                                        "type": "string",
+                                        "example": "Antananarivo"
+                                    },
+                                    "region": {
+                                        "type": "string",
+                                        "example": "Analamanga"
+                                    },
+                                    "code_postal": {
+                                        "type": "string",
+                                        "example": "101"
+                                    },
+                                    "pays": {
+                                        "type": "string",
+                                        "example": "Madagascar"
+                                    },
+                                    "par_defaut_expedition": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "par_defaut_facturation": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Adresse créée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/adresses/{id}": {
+            "get": {
+                "tags": [
+                    "Adresses"
+                ],
+                "summary": "Voir une adresse",
+                "operationId": "b8ea39b91edba86d2acc646312355d17",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails de l'adresse"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Adresses"
+                ],
+                "summary": "Modifier une adresse",
+                "operationId": "7ccb2009ecd41b413af57e30f13dbf32",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "etiquette": {
+                                        "type": "string"
+                                    },
+                                    "nom_complet": {
+                                        "type": "string"
+                                    },
+                                    "telephone": {
+                                        "type": "string"
+                                    },
+                                    "adresse_ligne1": {
+                                        "type": "string"
+                                    },
+                                    "adresse_ligne2": {
+                                        "type": "string"
+                                    },
+                                    "ville": {
+                                        "type": "string"
+                                    },
+                                    "region": {
+                                        "type": "string"
+                                    },
+                                    "code_postal": {
+                                        "type": "string"
+                                    },
+                                    "pays": {
+                                        "type": "string"
+                                    },
+                                    "par_defaut_expedition": {
+                                        "type": "boolean"
+                                    },
+                                    "par_defaut_facturation": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Adresse modifiée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Adresses"
+                ],
+                "summary": "Supprimer une adresse",
+                "operationId": "ed2bd9f9e36c22219543926cc563becb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Adresse supprimée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/adresses/{id}/defaut-expedition": {
+            "put": {
+                "tags": [
+                    "Adresses"
+                ],
+                "summary": "Définir comme adresse par défaut pour l'expédition",
+                "operationId": "3e5259df8d60c1f3cc56197dbd038835",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Adresse par défaut définie"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/adresses/defaut/expedition": {
+            "get": {
+                "tags": [
+                    "Adresses"
+                ],
+                "summary": "Obtenir l'adresse par défaut pour l'expédition",
+                "operationId": "77edbffce8ddc328c2d73649803f2ae5",
+                "responses": {
+                    "200": {
+                        "description": "Adresse par défaut"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/produits/{produitId}/avis": {
             "get": {
                 "tags": [
@@ -1022,6 +1296,106 @@
                     },
                     "404": {
                         "description": "Commande non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/profils-configurateur": {
+            "get": {
+                "tags": [
+                    "Profils Configurateur"
+                ],
+                "summary": "Liste des profils disponibles",
+                "operationId": "36bf8b10bff57b51128ac3320b70b6ab",
+                "responses": {
+                    "200": {
+                        "description": "Liste des profils"
+                    }
+                }
+            }
+        },
+        "/api/profils-configurateur/{slug}": {
+            "get": {
+                "tags": [
+                    "Profils Configurateur"
+                ],
+                "summary": "Détails d'un profil",
+                "operationId": "faa7ee5511fc1a21ebcc972db1df8840",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails du profil"
+                    },
+                    "404": {
+                        "description": "Profil non trouvé"
+                    }
+                }
+            }
+        },
+        "/api/admin/profils-configurateur": {
+            "post": {
+                "tags": [
+                    "Profils Configurateur - Admin"
+                ],
+                "summary": "Créer un profil (Admin)",
+                "operationId": "14a259eb51e4a0d660e9b21867080ee4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nom",
+                                    "emplacements"
+                                ],
+                                "properties": {
+                                    "nom": {
+                                        "type": "string",
+                                        "example": "Gaming Haut de gamme"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Config pour gaming 4K ultra"
+                                    },
+                                    "emplacements": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "processeur",
+                                            "carte_mere",
+                                            "ram",
+                                            "stockage",
+                                            "carte_graphique"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Profil créé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
                     }
                 },
                 "security": [
@@ -2169,12 +2543,20 @@
     },
     "tags": [
         {
+            "name": "Adresses",
+            "description": "Gestion des adresses utilisateurs"
+        },
+        {
             "name": "Avis Clients",
             "description": "Gestion des avis clients sur les produits"
         },
         {
             "name": "Commandes",
             "description": "Gestion des commandes clients - Endpoints pour les commandes"
+        },
+        {
+            "name": "Profils Configurateur",
+            "description": "Templates pour configurer des PC sur mesure"
         },
         {
             "name": "Devis",
@@ -2207,6 +2589,10 @@
         {
             "name": "Avis Clients - Admin",
             "description": "Avis Clients - Admin"
+        },
+        {
+            "name": "Profils Configurateur - Admin",
+            "description": "Profils Configurateur - Admin"
         },
         {
             "name": "Devis - Admin",
