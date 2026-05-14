@@ -27,6 +27,7 @@ class ProduitService
     public function createProduit(array $data)
     {
         $this->validateProduit($data);
+        $data['est_dispo'] = ((int) ($data['quantite_stock'] ?? 0)) > 0;
 
         if (empty($data['reference'])) {
             $data['reference'] = $this->generateReference();
@@ -57,7 +58,8 @@ class ProduitService
             'type_produit' => 'sometimes|in:pc,portable,composant,peripherique,service',
             'reference' => 'sometimes|nullable|string|max:80|unique:produits,reference,' . $id,
             'devise' => 'sometimes|nullable|string|max:10',
-            'actif' => 'sometimes|boolean'
+            'actif' => 'sometimes|boolean',
+            'est_dispo' => 'sometimes|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -65,6 +67,7 @@ class ProduitService
         }
 
         unset($data['reference']);
+        unset($data['est_dispo']);
 
         return $this->produitRepository->update($id, $data);
     }
@@ -78,23 +81,39 @@ class ProduitService
     }
 
     /**
-     * Gestion du stock: décrémenter sur commande confirmée
+     * Gestion du stock : décrémente atomiquement sur commande confirmée.
+     * Utilise une requête SQL atomique pour éviter les race conditions.
+     *
+     * @throws \Exception Si le stock est insuffisant.
      */
-    public function decrementStock(int $id, int $quantity)
+    public function decrementStock(int $produitId, int $quantity): void
     {
-        $produit = $this->produitRepository->findById($id);
-        
-        if (!$produit) {
-            throw new Exception("Produit introuvable.");
+        if ($quantity <= 0) {
+            return;
         }
 
-        if ($produit->quantite_stock < $quantity) {
-            throw new Exception("Stock insuffisant pour le produit: {$produit->nom}");
+        $success = $this->produitRepository->decrementStock($produitId, $quantity);
+
+        if (!$success) {
+            $produit = $this->produitRepository->findById($produitId);
+            $nom = $produit?->nom ?? "ID #{$produitId}";
+            $stockActuel = $produit?->quantite_stock ?? 0;
+            throw new Exception(
+                "Stock insuffisant pour \"{$nom}\" (demandé: {$quantity}, disponible: {$stockActuel})."
+            );
+        }
+    }
+
+    /**
+     * Gestion du stock : restaure le stock après annulation ou remboursement.
+     */
+    public function restoreStock(int $produitId, int $quantity): void
+    {
+        if ($quantity <= 0) {
+            return;
         }
 
-        $newStock = $produit->quantite_stock - $quantity;
-        
-        return $this->produitRepository->update($id, ['quantite_stock' => $newStock]);
+        $this->produitRepository->incrementStock($produitId, $quantity);
     }
 
     /**
@@ -150,7 +169,8 @@ class ProduitService
             'description' => 'nullable|string',
             'description_courte' => 'nullable|string|max:500',
             'devise' => 'nullable|string|max:10',
-            'actif' => 'boolean'
+            'actif' => 'boolean',
+            'est_dispo' => 'sometimes|boolean',
         ]);
 
         if ($validator->fails()) {

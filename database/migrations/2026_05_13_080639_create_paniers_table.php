@@ -8,56 +8,63 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('paniers', function (Blueprint $table) {
-            $table->id();
+        if (!Schema::hasTable("paniers")) {
+            Schema::create("paniers", function (Blueprint $table) {
+                $table->id();
 
-            // Utilisateur (nullable = invité)
-            $table->foreignId('utilisateur_id')
-                ->nullable()
-                ->constrained('utilisateurs')
-                ->nullOnDelete();
-
-            // Statut du panier
-            $table->enum('statut', ['actif', 'commande', 'abandonne'])
-                ->default('actif');
-
-            // Produits ou configuration PC
-            $table->foreignId('produit_id')
-                ->nullable()
-                ->constrained('produits')
-                ->nullOnDelete();
-
-            // $table->foreignId('configuration_id')
-            //     ->nullable()
-            //     ->constrained('configurations_pc')
-            //     ->nullOnDelete();
-
-            $table->foreignId('configuration_id')
+                // Utilisateur (nullable = invité)
+                $table->foreignId("utilisateur_id")
                     ->nullable()
-                    ->constrained('configurations')
+                    ->constrained("utilisateurs")
                     ->nullOnDelete();
 
-            // Données item panier
-            $table->string('titre');
-            $table->decimal('prix_unitaire', 12, 2)->nullable();
-            $table->unsignedInteger('quantite')->default(1);
+                // Statut du panier
+                $table->enum("statut", ["actif", "commande", "abandonne"])
+                    ->default("actif");
+            });
+        }
 
-            // Dates
-            $table->timestamp('date_creation')->useCurrent();
-            $table->timestamp('date_modification')->useCurrent()->useCurrentOnUpdate();
+        Schema::table("paniers", function (Blueprint $table) {
+            // Add new columns if they don't exist
+            if (!Schema::hasColumn("paniers", "produit_id")) {
+                $table->foreignId("produit_id")
+                    ->nullable()
+                    ->constrained("produits")
+                    ->nullOnDelete();
+            }
+            if (!Schema::hasColumn("paniers", "configuration_id")) {
+                // configurations table is created in a later migration.
+                // Keep column now, attach FK later.
+                $table->unsignedBigInteger("configuration_id")->nullable();
+            }
+            if (!Schema::hasColumn("paniers", "titre")) {
+                $table->string("titre");
+            }
+            if (!Schema::hasColumn("paniers", "prix_unitaire")) {
+                $table->decimal("prix_unitaire", 12, 2)->nullable();
+            }
+            if (!Schema::hasColumn("paniers", "quantite")) {
+                $table->unsignedInteger("quantite")->default(1);
+            }
+            if (!Schema::hasColumn("paniers", "date_creation")) {
+                $table->timestamp("date_creation")->useCurrent();
+            }
+            if (!Schema::hasColumn("paniers", "date_modification")) {
+                $table->timestamp("date_modification")->useCurrent()->useCurrentOnUpdate();
+            }
 
             // Empêche doublons panier
             $table->unique([
-                'utilisateur_id',
-                'statut',
-                'produit_id',
-                'configuration_id'
-            ], 'uq_panier_item');
+                "utilisateur_id",
+                "statut",
+                "produit_id",
+                "configuration_id"
+            ], "uq_panier_item");
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('paniers');
+        Schema::dropIfExists("paniers");
     }
 };

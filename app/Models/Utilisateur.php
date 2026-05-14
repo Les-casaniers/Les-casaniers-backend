@@ -45,4 +45,11 @@ class Utilisateur extends Authenticatable
     {
         return $this->mot_de_passe;
     }
+
+    public function adresses()
+    {
+        return $this->hasMany(AdresseUtilisateur::class, 'utilisateur_id')
+            ->orderByDesc('par_defaut_expedition')
+            ->orderByDesc('date_creation');
+    }
 }

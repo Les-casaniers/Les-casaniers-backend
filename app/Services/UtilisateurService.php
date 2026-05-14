@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\UtilisateurRepositoryInterface;
+use App\Services\AdminNotificationService;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -18,10 +19,14 @@ use Carbon\Carbon;
 class UtilisateurService
 {
     protected $utilisateurRepository;
+    protected $notificationService;
 
-    public function __construct(UtilisateurRepositoryInterface $utilisateurRepository)
-    {
+    public function __construct(
+        UtilisateurRepositoryInterface $utilisateurRepository,
+        AdminNotificationService $notificationService
+    ) {
         $this->utilisateurRepository = $utilisateurRepository;
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -56,7 +61,21 @@ class UtilisateurService
         ];
 
         return DB::transaction(function () use ($payload) {
-            return $this->utilisateurRepository->create($payload);
+            $utilisateur = $this->utilisateurRepository->create($payload);
+
+            // Notifier l'admin d'une nouvelle inscription
+            try {
+                $this->notificationService->notifyNewUser(
+                    $payload['prenom'],
+                    $payload['nom'],
+                    $payload['email']
+                );
+            } catch (\Throwable $e) {
+                // Ne pas bloquer l'inscription si la notification échoue
+                \Illuminate\Support\Facades\Log::warning('Notification new user failed', ['error' => $e->getMessage()]);
+            }
+
+            return $utilisateur;
         });
     }
 
@@ -245,5 +264,50 @@ class UtilisateurService
     private function throttleKey(string $email, string $ip): string
     {
         return Str::transliterate($email.'|'.$ip);
+    }
+
+    public function getAllClients()
+    {
+        return $this->utilisateurRepository->getAll();
+    }
+
+    public function getClientById(int $id)
+    {
+        $client = $this->utilisateurRepository->findById($id);
+        if (!$client) {
+            throw ValidationException::withMessages([
+                'id' => ['Client introuvable.'],
+            ]);
+        }
+
+        return $client;
+    }
+
+    public function adminUpdateClient(int $id, array $data)
+    {
+        $client = $this->utilisateurRepository->findById($id);
+        if (!$client) {
+            throw ValidationException::withMessages([
+                'id' => ['Client introuvable.'],
+            ]);
+        }
+
+        return DB::transaction(function () use ($id, $data) {
+            return $this->utilisateurRepository->update($id, $data);
+        });
+    }
+
+    public function deleteClient(int $id): void
+    {
+        $client = $this->utilisateurRepository->findById($id);
+        if (!$client) {
+            throw ValidationException::withMessages([
+                'id' => ['Client introuvable.'],
+            ]);
+        }
+
+        DB::transaction(function () use ($id) {
+            $this->utilisateurRepository->delete($id);
+        });
     }
 }

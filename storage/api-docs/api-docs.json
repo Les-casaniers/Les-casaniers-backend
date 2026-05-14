@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "http://127.0.0.1:8000",
+            "url": "http://localhost:8000/api",
             "description": "Serveur Principal"
         }
     ],
@@ -583,13 +583,13 @@
                 }
             }
         },
-        "/api/adresses": {
+        "/adresses": {
             "get": {
                 "tags": [
                     "Adresses"
                 ],
                 "summary": "Lister mes adresses",
-                "operationId": "79c46d69e8b484148f1e6986c101ce8c",
+                "operationId": "7d1468b43512bfabbd64736c1efe3090",
                 "responses": {
                     "200": {
                         "description": "Liste des adresses"
@@ -605,73 +605,11 @@
                 "tags": [
                     "Adresses"
                 ],
-                "summary": "Ajouter une nouvelle adresse",
-                "operationId": "a6af838d1ea402b1c94aff04d52cbdde",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "nom_complet",
-                                    "adresse_ligne1",
-                                    "ville",
-                                    "pays"
-                                ],
-                                "properties": {
-                                    "etiquette": {
-                                        "type": "string",
-                                        "example": "Maison"
-                                    },
-                                    "nom_complet": {
-                                        "type": "string",
-                                        "example": "Jean Dupont"
-                                    },
-                                    "telephone": {
-                                        "type": "string",
-                                        "example": "0341234567"
-                                    },
-                                    "adresse_ligne1": {
-                                        "type": "string",
-                                        "example": "Lot II J 83"
-                                    },
-                                    "adresse_ligne2": {
-                                        "type": "string",
-                                        "example": "Ambohijatovo"
-                                    },
-                                    "ville": {
-                                        "type": "string",
-                                        "example": "Antananarivo"
-                                    },
-                                    "region": {
-                                        "type": "string",
-                                        "example": "Analamanga"
-                                    },
-                                    "code_postal": {
-                                        "type": "string",
-                                        "example": "101"
-                                    },
-                                    "pays": {
-                                        "type": "string",
-                                        "example": "Madagascar"
-                                    },
-                                    "par_defaut_expedition": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
-                                    "par_defaut_facturation": {
-                                        "type": "boolean",
-                                        "example": false
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
+                "summary": "Ajouter une adresse",
+                "operationId": "f8e0a1c7d45078421b756795b7b3d13c",
                 "responses": {
                     "201": {
-                        "description": "Adresse créée"
+                        "description": "Adresse creee"
                     }
                 },
                 "security": [
@@ -681,13 +619,13 @@
                 ]
             }
         },
-        "/api/adresses/{id}": {
+        "/adresses/{id}": {
             "get": {
                 "tags": [
                     "Adresses"
                 ],
                 "summary": "Voir une adresse",
-                "operationId": "b8ea39b91edba86d2acc646312355d17",
+                "operationId": "40bba0f951416b00c7d358acdf8fd9a4",
                 "parameters": [
                     {
                         "name": "id",
@@ -700,7 +638,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Détails de l'adresse"
+                        "description": "Detail adresse"
                     }
                 },
                 "security": [
@@ -714,7 +652,7 @@
                     "Adresses"
                 ],
                 "summary": "Modifier une adresse",
-                "operationId": "7ccb2009ecd41b413af57e30f13dbf32",
+                "operationId": "f2ff993017501f74607a3e1f5095751b",
                 "parameters": [
                     {
                         "name": "id",
@@ -725,54 +663,9 @@
                         }
                     }
                 ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "etiquette": {
-                                        "type": "string"
-                                    },
-                                    "nom_complet": {
-                                        "type": "string"
-                                    },
-                                    "telephone": {
-                                        "type": "string"
-                                    },
-                                    "adresse_ligne1": {
-                                        "type": "string"
-                                    },
-                                    "adresse_ligne2": {
-                                        "type": "string"
-                                    },
-                                    "ville": {
-                                        "type": "string"
-                                    },
-                                    "region": {
-                                        "type": "string"
-                                    },
-                                    "code_postal": {
-                                        "type": "string"
-                                    },
-                                    "pays": {
-                                        "type": "string"
-                                    },
-                                    "par_defaut_expedition": {
-                                        "type": "boolean"
-                                    },
-                                    "par_defaut_facturation": {
-                                        "type": "boolean"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
                 "responses": {
                     "200": {
-                        "description": "Adresse modifiée"
+                        "description": "Adresse modifiee"
                     }
                 },
                 "security": [
@@ -786,7 +679,7 @@
                     "Adresses"
                 ],
                 "summary": "Supprimer une adresse",
-                "operationId": "ed2bd9f9e36c22219543926cc563becb",
+                "operationId": "6a9c12bfbd8a2e08d8dbe5c48bcd5dfa",
                 "parameters": [
                     {
                         "name": "id",
@@ -799,55 +692,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Adresse supprimée"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/adresses/{id}/defaut-expedition": {
-            "put": {
-                "tags": [
-                    "Adresses"
-                ],
-                "summary": "Définir comme adresse par défaut pour l'expédition",
-                "operationId": "3e5259df8d60c1f3cc56197dbd038835",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Adresse par défaut définie"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/adresses/defaut/expedition": {
-            "get": {
-                "tags": [
-                    "Adresses"
-                ],
-                "summary": "Obtenir l'adresse par défaut pour l'expédition",
-                "operationId": "77edbffce8ddc328c2d73649803f2ae5",
-                "responses": {
-                    "200": {
-                        "description": "Adresse par défaut"
+                        "description": "Adresse supprimee"
                     }
                 },
                 "security": [
@@ -1130,202 +975,6 @@
                 ]
             }
         },
-        "/api/devis-express": {
-            "post": {
-                "tags": [
-                    "Devis Express"
-                ],
-                "summary": "Soumettre une demande de devis express",
-                "operationId": "c171e267c450c008536538c0fe9a9192",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "nom",
-                                    "email",
-                                    "telephone",
-                                    "besoin"
-                                ],
-                                "properties": {
-                                    "nom": {
-                                        "type": "string",
-                                        "example": "Jean Rakoto"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "example": "jean@email.com"
-                                    },
-                                    "telephone": {
-                                        "type": "string",
-                                        "example": "0341234567"
-                                    },
-                                    "entreprise": {
-                                        "type": "string",
-                                        "example": "Ma Société"
-                                    },
-                                    "besoin": {
-                                        "type": "string",
-                                        "example": "PC Gaming sur-mesure"
-                                    },
-                                    "budget": {
-                                        "type": "string",
-                                        "example": "2 000 000 - 3 500 000 Ar"
-                                    },
-                                    "date_souhaitee": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-12-31"
-                                    },
-                                    "message": {
-                                        "type": "string",
-                                        "example": "Besoin d'un PC gaming puissant"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Demande soumise avec succès"
-                    },
-                    "422": {
-                        "description": "Erreur de validation"
-                    }
-                }
-            }
-        },
-        "/api/admin/devis-express": {
-            "get": {
-                "tags": [
-                    "Devis Express - Admin"
-                ],
-                "summary": "Lister toutes les demandes (Admin)",
-                "operationId": "00db741f855cc06e9bb36e204b0309ab",
-                "responses": {
-                    "200": {
-                        "description": "Liste des demandes"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/admin/devis-express/{id}": {
-            "get": {
-                "tags": [
-                    "Devis Express - Admin"
-                ],
-                "summary": "Voir une demande (Admin)",
-                "operationId": "11c71c2ea1fe66bdc8effc670bb48de5",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Détails de la demande"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Devis Express - Admin"
-                ],
-                "summary": "Supprimer une demande (Admin)",
-                "operationId": "c97d705bc434f9b55f85ced75a1165ca",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Demande supprimée"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/admin/devis-express/{id}/statut": {
-            "put": {
-                "tags": [
-                    "Devis Express - Admin"
-                ],
-                "summary": "Changer le statut d'une demande (Admin)",
-                "operationId": "c3a150301bf7b857a8df527a78b2f297",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "statut"
-                                ],
-                                "properties": {
-                                    "statut": {
-                                        "type": "string",
-                                        "enum": [
-                                            "en_attente",
-                                            "traite",
-                                            "repondu",
-                                            "archive"
-                                        ]
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Statut mis à jour"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
         "/favoris": {
             "get": {
                 "tags": [
@@ -1428,7 +1077,7 @@
         "/panier": {
             "get": {
                 "tags": [
-                    "Panier"
+                    "Favoris"
                 ],
                 "summary": "Lister le panier actif",
                 "operationId": "362602e942ed32cd1352f03d392ab106",
@@ -1450,7 +1099,7 @@
         "/panier/ajouter": {
             "post": {
                 "tags": [
-                    "Panier"
+                    "Favoris"
                 ],
                 "summary": "Ajouter un article au panier",
                 "operationId": "e1cfaf97b15143dc201045f683ba0be7",
@@ -2463,277 +2112,6 @@
                 ]
             }
         },
-        "/devis": {
-            "get": {
-                "tags": [
-                    "Devis"
-                ],
-                "summary": "Lister les devis",
-                "operationId": "722cce85dc9c2bdb276edd94e31efe78",
-                "parameters": [
-                    {
-                        "name": "statut",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Liste des devis"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Devis"
-                ],
-                "summary": "Créer un devis",
-                "operationId": "05b74a3603e9864ee619cd70de4af6b4",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "panier_id": {
-                                        "type": "integer",
-                                        "example": 1,
-                                        "nullable": true
-                                    },
-                                    "note": {
-                                        "type": "string",
-                                        "example": "Merci de valider rapidement",
-                                        "nullable": true
-                                    },
-                                    "devise": {
-                                        "type": "string",
-                                        "example": "MGA"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Devis créé"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/devis/{id}": {
-            "get": {
-                "tags": [
-                    "Devis"
-                ],
-                "summary": "Détail d'un devis",
-                "operationId": "f4dbedbb79f50111e17c64657750878a",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Détail devis"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Devis"
-                ],
-                "summary": "Modifier un devis brouillon",
-                "operationId": "8714db62861dd1876bb0dfd6f0ab0ce0",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Devis modifié"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Devis"
-                ],
-                "summary": "Supprimer un devis brouillon",
-                "operationId": "84eca015bd72ad0c2d0df0a26ade05df",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Devis supprimé"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/devis/{id}/envoyer": {
-            "post": {
-                "tags": [
-                    "Devis"
-                ],
-                "summary": "Envoyer un devis",
-                "operationId": "5eb5aecff107257528c11192f2385c96",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Devis envoyé"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/devis/{id}/accepter": {
-            "post": {
-                "tags": [
-                    "Devis"
-                ],
-                "summary": "Accepter un devis",
-                "operationId": "7b9ffd50c586b10da014731cb712d216",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Devis accepté et converti en commande"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/devis/{id}/refuser": {
-            "post": {
-                "tags": [
-                    "Devis"
-                ],
-                "summary": "Refuser un devis",
-                "operationId": "1a76546279245977c190d645eaa6b440",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Devis refusé"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/devis/{id}/expirer": {
-            "post": {
-                "tags": [
-                    "Devis"
-                ],
-                "summary": "Expirer un devis",
-                "operationId": "c785cfa1781ab597fd6de808db49e9ce",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Devis expiré"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
         "/api/user": {
             "get": {
                 "tags": [
@@ -3003,10 +2381,6 @@
             "description": "Templates pour configurer des PC sur mesure"
         },
         {
-            "name": "Devis Express",
-            "description": "Demandes de devis rapides"
-        },
-        {
             "name": "Favoris",
             "description": "Gestion des produits favoris des utilisateurs"
         },
@@ -3039,20 +2413,12 @@
             "description": "Gestion des commandes clients"
         },
         {
-            "name": "Devis",
-            "description": "Gestion des devis clients"
-        },
-        {
             "name": "Admin Auth",
             "description": "Admin Auth"
         },
         {
             "name": "Profils Configurateur - Admin",
             "description": "Profils Configurateur - Admin"
-        },
-        {
-            "name": "Devis Express - Admin",
-            "description": "Devis Express - Admin"
         },
         {
             "name": "Utilisateur",

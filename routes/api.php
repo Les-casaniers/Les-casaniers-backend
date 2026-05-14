@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\Adresse\AdresseController;
 use App\Http\Controllers\Api\AdminAuthController;
+use App\Http\Controllers\Api\AdminNotificationController;
 use App\Http\Controllers\Api\AvisClients\AvisClientController;
 use App\Http\Controllers\Api\Favoris\FavorisController;
 use App\Http\Controllers\Api\Paniers\PanierController;
@@ -11,6 +13,7 @@ use App\Http\Controllers\Api\Produits\ImageProduitController;
 use App\Http\Controllers\Api\Produits\ProduitController;
 use App\Http\Controllers\Api\Sales\CommandeController;
 use App\Http\Controllers\Api\Sales\DevisController;
+use App\Http\Controllers\Api\Sales\FactureController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UtilisateurController;
 use Illuminate\Support\Facades\Route;
@@ -97,6 +100,12 @@ Route::middleware(['auth:sanctum'])->prefix('devis')->group(function () {
     Route::delete('/{id}', [DevisController::class, 'destroy']);
 });
 
+Route::middleware(['auth:sanctum'])->prefix('factures')->group(function () {
+    Route::get('/', [FactureController::class, 'index']);
+    Route::get('/{id}', [FactureController::class, 'show']);
+    Route::get('/{id}/download', [FactureController::class, 'download']);
+});
+
 // Avis routes
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/mes-avis', [AvisClientController::class, 'getMesAvis']);
@@ -110,6 +119,37 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     Route::get('/avis', [AvisClientController::class, 'adminList']);
     Route::put('/avis/{id}/publier', [AvisClientController::class, 'togglePublish']);
+    Route::post('/utilisateurs', [UtilisateurController::class, 'adminStore']);
+    Route::get('/utilisateurs', [UtilisateurController::class, 'adminIndex']);
+    Route::get('/utilisateurs/{id}', [UtilisateurController::class, 'adminShow']);
+    Route::put('/utilisateurs/{id}', [UtilisateurController::class, 'adminUpdate']);
+    Route::delete('/utilisateurs/{id}', [UtilisateurController::class, 'adminDestroy']);
+    Route::get('/commandes', [CommandeController::class, 'adminIndex']);
+    Route::post('/commandes', [CommandeController::class, 'adminStore']);
+    Route::get('/commandes/{uuid}', [CommandeController::class, 'adminShow']);
+    Route::patch('/commandes/{uuid}/statut', [CommandeController::class, 'adminUpdateStatus']);
+    Route::post('/commandes/{uuid}/cancel', [CommandeController::class, 'adminCancel']);
+    Route::get('/devis', [DevisController::class, 'adminIndex']);
+    Route::post('/devis', [DevisController::class, 'adminStore']);
+    Route::get('/factures', [FactureController::class, 'adminIndex']);
+    Route::post('/factures', [FactureController::class, 'adminStore']);
+    Route::get('/factures/{id}', [FactureController::class, 'adminShow']);
+    Route::post('/factures/{id}/emettre', [FactureController::class, 'adminEmit']);
+    Route::post('/factures/{id}/payer', [FactureController::class, 'adminMarkPaid']);
+    Route::post('/factures/{id}/annuler', [FactureController::class, 'adminCancel']);
+    Route::get('/factures/{id}/download', [FactureController::class, 'adminDownload']);
+    Route::get('/utilisateurs/{utilisateurId}/adresses', [AdresseController::class, 'adminIndexByUser']);
+    Route::post('/utilisateurs/{utilisateurId}/adresses', [AdresseController::class, 'adminStoreForUser']);
+    Route::put('/utilisateurs/{utilisateurId}/adresses/{id}', [AdresseController::class, 'adminUpdateForUser']);
+    Route::delete('/utilisateurs/{utilisateurId}/adresses/{id}', [AdresseController::class, 'adminDestroyForUser']);
+
+    // ─── Notifications admin ────────────────────────────────
+    Route::get('/notifications', [AdminNotificationController::class, 'index']);
+    Route::get('/notifications/count', [AdminNotificationController::class, 'count']);
+    Route::patch('/notifications/lire-tout', [AdminNotificationController::class, 'markAllAsRead']);
+    Route::patch('/notifications/{id}/lire', [AdminNotificationController::class, 'markAsRead']);
+    Route::delete('/notifications/all', [AdminNotificationController::class, 'destroyAll']);
+    Route::delete('/notifications/{id}', [AdminNotificationController::class, 'destroy']);
 });
 
 // Panier routes
@@ -143,7 +183,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::delete('/profils-configurateur/{id}', [ProfilConfigurateurController::class, 'destroy']);
 });
 
-use App\Http\Controllers\Api\Adresse\AdresseController;
+
 
 // Routes adresses (client connecté)
 Route::middleware(['auth:sanctum'])->prefix('adresses')->group(function () {
@@ -169,6 +209,20 @@ Route::middleware(['auth:sanctum'])->prefix('configurations')->group(function ()
     Route::put('/{id}', [ConfigurationController::class, 'update']);
     Route::delete('/{id}', [ConfigurationController::class, 'destroy']);
 
+});
+
+// Adresses routes
+Route::middleware(['auth:sanctum'])->prefix('adresses')->group(function () {
+    Route::get('/', [AdresseController::class, 'index']);
+    Route::post('/', [AdresseController::class, 'store']);
+    Route::get('/defaut/expedition', [AdresseController::class, 'getDefaultExpedition']);
+    Route::get('/{id}', [AdresseController::class, 'show']);
+    Route::put('/{id}', [AdresseController::class, 'update']);
+    Route::put('/{id}/defaut-expedition', [AdresseController::class, 'setDefaultExpedition']);
+});
+
+Route::middleware(['auth:sanctum', 'admin'])->prefix('adresses')->group(function () {
+    Route::delete('/{id}', [AdresseController::class, 'destroy']);
 });
 
 

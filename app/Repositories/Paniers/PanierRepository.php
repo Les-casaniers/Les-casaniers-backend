@@ -49,4 +49,26 @@ class PanierRepository implements PanierRepositoryInterface
             ->where('statut', 'actif')
             ->delete();
     }
+
+    public function getActiveItemsWithProduit(int $userId)
+    {
+        return Panier::with('produit')
+            ->where('utilisateur_id', $userId)
+            ->where('statut', 'actif')
+            ->get();
+    }
+
+    public function markActiveAsCommande(int $userId): int
+    {
+        return Panier::where('utilisateur_id', $userId)
+            ->where('statut', 'actif')
+            ->update(['statut' => 'commande']);
+    }
+
+    public function findById(int $id, int $userId)
+    {
+        return Panier::where('id', $id)
+            ->where('utilisateur_id', $userId)
+            ->first();
+    }
 }

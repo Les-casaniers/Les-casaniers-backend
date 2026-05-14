@@ -21,7 +21,14 @@ class Produit extends Model
         'prix',
         'devise',
         'quantite_stock',
+        'est_dispo',
         'actif'
+    ];
+
+    protected $casts = [
+        'actif' => 'boolean',
+        'est_dispo' => 'boolean',
+        'quantite_stock' => 'integer',
     ];
 
     const CREATED_AT = 'date_creation';
@@ -40,5 +47,10 @@ class Produit extends Model
     public function attributs()
     {
         return $this->hasMany(AttributProduit::class, 'produit_id');
+    }
+
+    public function configurations()
+    {
+        return $this->hasMany(Configuration::class, 'produit_id');
     }
 }
