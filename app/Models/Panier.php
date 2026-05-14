@@ -36,6 +36,6 @@ class Panier extends Model
 
     public function configuration()
     {
-        return $this->belongsTo(ConfigurationPc::class, 'configuration_id');
+        return $this->belongsTo(Configuration::class, 'configuration_id');
     }
 }

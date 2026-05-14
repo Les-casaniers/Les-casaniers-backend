@@ -411,73 +411,38 @@ CREATE TABLE `commandes` (
   COLLATE=utf8mb4_unicode_ci;
 
 
-CREATE TABLE `commandes` (
+
+CREATE TABLE `factures` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 
-  -- identifiant pour regrouper les items d'une même commande
-  `commande_uuid` CHAR(36) NOT NULL,
+  -- 1 facture appartient à 1 commande
+  `commande_id` BIGINT UNSIGNED NOT NULL,
 
-  `utilisateur_id` BIGINT UNSIGNED NULL,
-  `panier_id` BIGINT UNSIGNED NULL,
-  `devis_id` BIGINT UNSIGNED NULL,
+  `facture_ref` VARCHAR(30) NOT NULL, -- ex: FAC-2026-000001
+  `statut` ENUM('brouillon','emise','payee','annulee') NOT NULL DEFAULT 'brouillon',
 
-  `statut` ENUM('en_attente','payee','en_traitement','expediee','terminee','annulee','remboursee')
-    NOT NULL DEFAULT 'en_attente',
-
-  `sous_total` DECIMAL(12,2) NULL DEFAULT 0.00,
-  `livraison` DECIMAL(12,2) NULL DEFAULT 0.00,
-  `total` DECIMAL(12,2) NULL DEFAULT 0.00,
-  `devise` CHAR(3) NOT NULL DEFAULT 'MGA',
-
-  `adresse_expedition_id` BIGINT UNSIGNED NULL,
-  `adresse_facturation_id` BIGINT UNSIGNED NULL,
-
-  -- item
-  `produit_id` BIGINT UNSIGNED NULL,
-  `titre` VARCHAR(255) NOT NULL,
-  `reference` VARCHAR(80) NULL,
-  `prix_unitaire` DECIMAL(12,2) NULL DEFAULT 0.00,
-  `quantite` INT UNSIGNED NOT NULL DEFAULT 1,
-  `meta_json` JSON NULL,
-
+  `date_emission` TIMESTAMP NULL,
   `date_creation` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modification` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
   PRIMARY KEY (`id`),
 
-  KEY `idx_commande_uuid` (`commande_uuid`),
-  KEY `idx_commande_user` (`utilisateur_id`),
-  KEY `idx_commande_statut` (`statut`),
-  KEY `idx_commande_panier` (`panier_id`),
-  KEY `idx_commande_devis` (`devis_id`),
-  KEY `idx_commande_produit` (`produit_id`),
+  UNIQUE KEY `uq_facture_ref` (`facture_ref`),
 
-  CONSTRAINT `fk_commandes_utilisateur`
-    FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`)
-    ON DELETE SET NULL ON UPDATE CASCADE,
+  -- empêche d'avoir 2 factures pour la même commande (si tu veux 1 seule facture)
+  UNIQUE KEY `uq_facture_commande` (`commande_id`),
 
-  CONSTRAINT `fk_commandes_panier`
-    FOREIGN KEY (`panier_id`) REFERENCES `paniers` (`id`)
-    ON DELETE SET NULL ON UPDATE CASCADE,
+  KEY `idx_facture_statut` (`statut`),
+  KEY `idx_facture_commande` (`commande_id`),
 
-  CONSTRAINT `fk_commandes_devis`
-    FOREIGN KEY (`devis_id`) REFERENCES `devis` (`id`)
-    ON DELETE SET NULL ON UPDATE CASCADE,
-
-  CONSTRAINT `fk_commandes_adresse_exped`
-    FOREIGN KEY (`adresse_expedition_id`) REFERENCES `adresses_utilisateurs` (`id`)
-    ON DELETE SET NULL ON UPDATE CASCADE,
-
-  CONSTRAINT `fk_commandes_adresse_fact`
-    FOREIGN KEY (`adresse_facturation_id`) REFERENCES `adresses_utilisateurs` (`id`)
-    ON DELETE SET NULL ON UPDATE CASCADE,
-
-  CONSTRAINT `fk_commandes_produit`
-    FOREIGN KEY (`produit_id`) REFERENCES `produits` (`id`)
-    ON DELETE SET NULL ON UPDATE CASCADE
+  CONSTRAINT `fk_factures_commande`
+    FOREIGN KEY (`commande_id`) REFERENCES `commandes` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
+
 -- =========================
 -- CONTENU: GUIDE DU FOSA / BLOG / SERVICES (maillage interne)
 -- Table: contenus

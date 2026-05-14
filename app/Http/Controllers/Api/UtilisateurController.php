@@ -285,4 +285,124 @@ class UtilisateurController extends Controller
             ], 500);
         }
     }
+
+    public function adminIndex(Request $request)
+    {
+        try {
+            $clients = $this->utilisateurService->getAllClients();
+            return response()->json([
+                'success' => true,
+                'data' => $clients,
+            ], 200);
+        } catch (Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur serveur',
+            ], 500);
+        }
+    }
+
+    public function adminStore(Request $request)
+    {
+        try {
+            $payload = $request->only([
+                'prenom',
+                'nom',
+                'email',
+                'telephone',
+                'mot_de_passe',
+                'mot_de_passe_confirmation',
+            ]);
+
+            $client = $this->utilisateurService->register($payload);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Client cree avec succes',
+                'data' => $client,
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur serveur',
+            ], 500);
+        }
+    }
+
+    public function adminShow(int $id)
+    {
+        try {
+            $client = $this->utilisateurService->getClientById($id);
+            return response()->json([
+                'success' => true,
+                'data' => $client,
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors(),
+            ], 404);
+        } catch (Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur serveur',
+            ], 500);
+        }
+    }
+
+    public function adminUpdate(Request $request, int $id)
+    {
+        try {
+            $validated = $request->validate([
+                'prenom' => 'sometimes|required|string|max:100',
+                'nom' => 'sometimes|required|string|max:100',
+                'email' => 'sometimes|required|email:rfc,dns|max:190|unique:utilisateurs,email,' . $id,
+                'telephone' => 'nullable|string|max:30',
+                'statut' => 'sometimes|required|in:actif,desactive',
+            ]);
+
+            $client = $this->utilisateurService->adminUpdateClient($id, $validated);
+            return response()->json([
+                'success' => true,
+                'message' => 'Client mis à jour avec succès',
+                'data' => $client,
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur serveur',
+            ], 500);
+        }
+    }
+
+    public function adminDestroy(int $id)
+    {
+        try {
+            $this->utilisateurService->deleteClient($id);
+            return response()->json([
+                'success' => true,
+                'message' => 'Client supprimé avec succès',
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors(),
+            ], 404);
+        } catch (Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur serveur',
+            ], 500);
+        }
+    }
 }

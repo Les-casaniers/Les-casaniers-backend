@@ -8,12 +8,14 @@ class UtilisateurRepository implements UtilisateurRepositoryInterface
 {
     public function getAll()
     {
-        return Utilisateur::all();
+        return Utilisateur::with('adresses')
+            ->orderByDesc('date_creation')
+            ->get();
     }
 
     public function findById($id)
     {
-        return Utilisateur::find($id);
+        return Utilisateur::with('adresses')->find($id);
     }
 
     public function create(array $data)

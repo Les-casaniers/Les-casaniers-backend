@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "http://127.0.0.1:8000",
+            "url": "http://localhost:8000/api",
             "description": "Serveur Principal"
         }
     ],
@@ -583,13 +583,13 @@
                 }
             }
         },
-        "/api/adresses": {
+        "/adresses": {
             "get": {
                 "tags": [
                     "Adresses"
                 ],
                 "summary": "Lister mes adresses",
-                "operationId": "79c46d69e8b484148f1e6986c101ce8c",
+                "operationId": "7d1468b43512bfabbd64736c1efe3090",
                 "responses": {
                     "200": {
                         "description": "Liste des adresses"
@@ -605,73 +605,11 @@
                 "tags": [
                     "Adresses"
                 ],
-                "summary": "Ajouter une nouvelle adresse",
-                "operationId": "a6af838d1ea402b1c94aff04d52cbdde",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "nom_complet",
-                                    "adresse_ligne1",
-                                    "ville",
-                                    "pays"
-                                ],
-                                "properties": {
-                                    "etiquette": {
-                                        "type": "string",
-                                        "example": "Maison"
-                                    },
-                                    "nom_complet": {
-                                        "type": "string",
-                                        "example": "Jean Dupont"
-                                    },
-                                    "telephone": {
-                                        "type": "string",
-                                        "example": "0341234567"
-                                    },
-                                    "adresse_ligne1": {
-                                        "type": "string",
-                                        "example": "Lot II J 83"
-                                    },
-                                    "adresse_ligne2": {
-                                        "type": "string",
-                                        "example": "Ambohijatovo"
-                                    },
-                                    "ville": {
-                                        "type": "string",
-                                        "example": "Antananarivo"
-                                    },
-                                    "region": {
-                                        "type": "string",
-                                        "example": "Analamanga"
-                                    },
-                                    "code_postal": {
-                                        "type": "string",
-                                        "example": "101"
-                                    },
-                                    "pays": {
-                                        "type": "string",
-                                        "example": "Madagascar"
-                                    },
-                                    "par_defaut_expedition": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
-                                    "par_defaut_facturation": {
-                                        "type": "boolean",
-                                        "example": false
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
+                "summary": "Ajouter une adresse",
+                "operationId": "f8e0a1c7d45078421b756795b7b3d13c",
                 "responses": {
                     "201": {
-                        "description": "Adresse créée"
+                        "description": "Adresse creee"
                     }
                 },
                 "security": [
@@ -681,13 +619,13 @@
                 ]
             }
         },
-        "/api/adresses/{id}": {
+        "/adresses/{id}": {
             "get": {
                 "tags": [
                     "Adresses"
                 ],
                 "summary": "Voir une adresse",
-                "operationId": "b8ea39b91edba86d2acc646312355d17",
+                "operationId": "40bba0f951416b00c7d358acdf8fd9a4",
                 "parameters": [
                     {
                         "name": "id",
@@ -700,7 +638,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Détails de l'adresse"
+                        "description": "Detail adresse"
                     }
                 },
                 "security": [
@@ -714,7 +652,7 @@
                     "Adresses"
                 ],
                 "summary": "Modifier une adresse",
-                "operationId": "7ccb2009ecd41b413af57e30f13dbf32",
+                "operationId": "f2ff993017501f74607a3e1f5095751b",
                 "parameters": [
                     {
                         "name": "id",
@@ -725,54 +663,9 @@
                         }
                     }
                 ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "etiquette": {
-                                        "type": "string"
-                                    },
-                                    "nom_complet": {
-                                        "type": "string"
-                                    },
-                                    "telephone": {
-                                        "type": "string"
-                                    },
-                                    "adresse_ligne1": {
-                                        "type": "string"
-                                    },
-                                    "adresse_ligne2": {
-                                        "type": "string"
-                                    },
-                                    "ville": {
-                                        "type": "string"
-                                    },
-                                    "region": {
-                                        "type": "string"
-                                    },
-                                    "code_postal": {
-                                        "type": "string"
-                                    },
-                                    "pays": {
-                                        "type": "string"
-                                    },
-                                    "par_defaut_expedition": {
-                                        "type": "boolean"
-                                    },
-                                    "par_defaut_facturation": {
-                                        "type": "boolean"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
                 "responses": {
                     "200": {
-                        "description": "Adresse modifiée"
+                        "description": "Adresse modifiee"
                     }
                 },
                 "security": [
@@ -786,7 +679,7 @@
                     "Adresses"
                 ],
                 "summary": "Supprimer une adresse",
-                "operationId": "ed2bd9f9e36c22219543926cc563becb",
+                "operationId": "6a9c12bfbd8a2e08d8dbe5c48bcd5dfa",
                 "parameters": [
                     {
                         "name": "id",
@@ -799,7 +692,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Adresse supprimée"
+                        "description": "Adresse supprimee"
                     }
                 },
                 "security": [
@@ -809,61 +702,13 @@
                 ]
             }
         },
-        "/api/adresses/{id}/defaut-expedition": {
-            "put": {
-                "tags": [
-                    "Adresses"
-                ],
-                "summary": "Définir comme adresse par défaut pour l'expédition",
-                "operationId": "3e5259df8d60c1f3cc56197dbd038835",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Adresse par défaut définie"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/adresses/defaut/expedition": {
-            "get": {
-                "tags": [
-                    "Adresses"
-                ],
-                "summary": "Obtenir l'adresse par défaut pour l'expédition",
-                "operationId": "77edbffce8ddc328c2d73649803f2ae5",
-                "responses": {
-                    "200": {
-                        "description": "Adresse par défaut"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/produits/{produitId}/avis": {
+        "/produits/{produitId}/avis": {
             "get": {
                 "tags": [
                     "Avis Clients"
                 ],
-                "summary": "Lister les avis d'un produit",
-                "operationId": "ac60a7be16c12c131a90bc2f4df5e505",
+                "summary": "Lister les avis publiés d'un produit",
+                "operationId": "ffb65f7a7c4b32c641adbcedfdd1cac7",
                 "parameters": [
                     {
                         "name": "produitId",
@@ -876,93 +721,18 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Liste des avis"
+                        "description": "Liste avis publiés"
                     }
                 }
             }
         },
-        "/api/mes-avis": {
+        "/avis/{id}": {
             "get": {
                 "tags": [
                     "Avis Clients"
                 ],
-                "summary": "Lister mes avis (client connecté)",
-                "operationId": "42e22c3debadd19ac4469dba8f40f49b",
-                "responses": {
-                    "200": {
-                        "description": "Mes avis"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/avis": {
-            "post": {
-                "tags": [
-                    "Avis Clients"
-                ],
-                "summary": "Ajouter un avis sur un produit",
-                "operationId": "e39f37829884a144ea88e33dedc785cd",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "produit_id",
-                                    "note"
-                                ],
-                                "properties": {
-                                    "produit_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "note": {
-                                        "type": "integer",
-                                        "maximum": 5,
-                                        "minimum": 1,
-                                        "example": 5
-                                    },
-                                    "titre": {
-                                        "type": "string",
-                                        "example": "Excellent produit !"
-                                    },
-                                    "corps": {
-                                        "type": "string",
-                                        "example": "Je suis très satisfait de ce produit..."
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Avis ajouté"
-                    },
-                    "422": {
-                        "description": "Erreur de validation"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/avis/{id}": {
-            "put": {
-                "tags": [
-                    "Avis Clients"
-                ],
-                "summary": "Modifier mon avis",
-                "operationId": "76a7cc42fc61b2ba2ecb36e2e9701d29",
+                "summary": "Détail d'un avis",
+                "operationId": "f1bb77c15525d2170cd98402feed197e",
                 "parameters": [
                     {
                         "name": "id",
@@ -973,29 +743,33 @@
                         }
                     }
                 ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "note": {
-                                        "type": "integer",
-                                        "maximum": 5,
-                                        "minimum": 1
-                                    },
-                                    "titre": {
-                                        "type": "string"
-                                    },
-                                    "corps": {
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
+                "responses": {
+                    "200": {
+                        "description": "Détail avis"
                     }
                 },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Avis Clients"
+                ],
+                "summary": "Modifier un avis",
+                "operationId": "9fc8c2a54220702afc127759988cfac8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Avis modifié"
@@ -1011,8 +785,8 @@
                 "tags": [
                     "Avis Clients"
                 ],
-                "summary": "Supprimer mon avis",
-                "operationId": "eaa7aab02c479ba3a1725f3759301faf",
+                "summary": "Supprimer un avis",
+                "operationId": "c991fb3b1a8ee88164721c6c959ee81f",
                 "parameters": [
                     {
                         "name": "id",
@@ -1035,16 +809,16 @@
                 ]
             }
         },
-        "/api/admin/avis": {
+        "/mes-avis": {
             "get": {
                 "tags": [
-                    "Avis Clients - Admin"
+                    "Avis Clients"
                 ],
-                "summary": "Lister tous les avis (Admin)",
-                "operationId": "c426d8768fe7d83829131e8d26a3f198",
+                "summary": "Mes avis",
+                "operationId": "e633522713d2a96721dcec25b5a309f6",
                 "responses": {
                     "200": {
-                        "description": "Liste de tous les avis"
+                        "description": "Mes avis"
                     }
                 },
                 "security": [
@@ -1054,144 +828,34 @@
                 ]
             }
         },
-        "/api/admin/avis/{id}/publier": {
-            "put": {
-                "tags": [
-                    "Avis Clients - Admin"
-                ],
-                "summary": "Publier ou dépublier un avis (Admin)",
-                "operationId": "e5318f90f6dbe93f3213ca2c7ac3b815",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "publie"
-                                ],
-                                "properties": {
-                                    "publie": {
-                                        "type": "boolean",
-                                        "example": true
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Statut modifié"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/commandes": {
-            "get": {
-                "tags": [
-                    "Commandes"
-                ],
-                "summary": "Lister mes commandes",
-                "description": "Récupère la liste de toutes les commandes de l'utilisateur connecté",
-                "operationId": "getCommandesList",
-                "responses": {
-                    "200": {
-                        "description": "Liste des commandes récupérée avec succès",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "type": "object"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Commandes récupérées"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Non authentifié"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
+        "/avis": {
             "post": {
                 "tags": [
-                    "Commandes"
+                    "Avis Clients"
                 ],
-                "summary": "Créer une nouvelle commande",
-                "description": "Crée une commande avec les produits selectionnés",
-                "operationId": "storeCommande",
+                "summary": "Ajouter un avis",
+                "operationId": "3a042ccb7675902fe8b039697aa02818",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "lignes",
-                                    "adresse_livraison",
-                                    "adresse_facturation"
+                                    "produit_id",
+                                    "note"
                                 ],
                                 "properties": {
-                                    "lignes": {
-                                        "type": "array",
-                                        "items": {
-                                            "required": [
-                                                "produit_id",
-                                                "quantite"
-                                            ],
-                                            "properties": {
-                                                "produit_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "quantite": {
-                                                    "type": "integer",
-                                                    "example": 2
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
+                                    "produit_id": {
+                                        "type": "integer",
+                                        "example": 1
                                     },
-                                    "adresse_livraison": {
-                                        "type": "string",
-                                        "example": "Lot II J 83 Antananarivo"
+                                    "note": {
+                                        "type": "integer",
+                                        "example": 5
                                     },
-                                    "adresse_facturation": {
+                                    "corps": {
                                         "type": "string",
-                                        "example": "Lot II J 83 Antananarivo"
-                                    },
-                                    "notes": {
-                                        "type": "string",
-                                        "example": "Appeler avant livraison"
+                                        "example": "Très bon produit"
                                     }
                                 },
                                 "type": "object"
@@ -1201,101 +865,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Commande créée avec succès",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "type": "object"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Commande créée"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Erreur de validation"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/commandes/{id}": {
-            "get": {
-                "tags": [
-                    "Commandes"
-                ],
-                "summary": "Détails d'une commande",
-                "description": "Affiche les détails d'une commande spécifique",
-                "operationId": "showCommande",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID de la commande",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Détails de la commande"
-                    },
-                    "404": {
-                        "description": "Commande non trouvée"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/commandes/{id}/cancel": {
-            "put": {
-                "tags": [
-                    "Commandes"
-                ],
-                "summary": "Annuler une commande",
-                "description": "Annule une commande si elle est encore en attente ou payée",
-                "operationId": "cancelCommande",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID de la commande à annuler",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Commande annulée"
-                    },
-                    "400": {
-                        "description": "Commande non annulable"
-                    },
-                    "404": {
-                        "description": "Commande non trouvée"
+                        "description": "Avis créé"
                     }
                 },
                 "security": [
@@ -1405,16 +975,19 @@
                 ]
             }
         },
-        "/api/devis": {
+        "/favoris": {
             "get": {
                 "tags": [
-                    "Devis"
+                    "Favoris"
                 ],
-                "summary": "Lister mes devis (client)",
-                "operationId": "10665ca68b1ce82c066cf4460e1da6f1",
+                "summary": "Lister mes favoris",
+                "operationId": "185b6c920bfdcdb08dbb8b3666120c1a",
                 "responses": {
                     "200": {
-                        "description": "Liste des devis"
+                        "description": "Liste des favoris récupérée"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
                     }
                 },
                 "security": [
@@ -1422,40 +995,25 @@
                         "sanctum": []
                     }
                 ]
-            }
-        },
-        "/api/devis/creer": {
+            },
             "post": {
                 "tags": [
-                    "Devis"
+                    "Favoris"
                 ],
-                "summary": "Créer un devis à partir du panier",
-                "operationId": "90f23b9a603dd6b2f158af15b1868d5f",
+                "summary": "Ajouter un produit aux favoris",
+                "operationId": "c569cb9b93085f04a52c52063005548e",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "nom_client",
-                                    "email_client"
+                                    "produit_id"
                                 ],
                                 "properties": {
-                                    "nom_client": {
-                                        "type": "string",
-                                        "example": "Jean Dupont"
-                                    },
-                                    "email_client": {
-                                        "type": "string",
-                                        "example": "jean@email.com"
-                                    },
-                                    "telephone_client": {
-                                        "type": "string",
-                                        "example": "0341234567"
-                                    },
-                                    "note": {
-                                        "type": "string",
-                                        "example": "Besoin d'une livraison rapide"
+                                    "produit_id": {
+                                        "type": "integer",
+                                        "example": 12
                                     }
                                 },
                                 "type": "object"
@@ -1465,7 +1023,13 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Devis créé"
+                        "description": "Favori ajouté"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
                     }
                 },
                 "security": [
@@ -1475,43 +1039,16 @@
                 ]
             }
         },
-        "/api/devis/{id}": {
-            "get": {
-                "tags": [
-                    "Devis"
-                ],
-                "summary": "Voir un devis",
-                "operationId": "92f9c884b317e1c76a7c657e4ce04397",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Détails du devis"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
+        "/favoris/{produitId}": {
             "delete": {
                 "tags": [
-                    "Devis"
+                    "Favoris"
                 ],
-                "summary": "Supprimer un devis (uniquement brouillon)",
-                "operationId": "e8ee0dfc128b6c205417e7cfe6115268",
+                "summary": "Supprimer un produit des favoris",
+                "operationId": "5dbfc42c6d3d4ae4e54358ddde84b6d1",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "produitId",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1521,7 +1058,13 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Devis supprimé"
+                        "description": "Favori supprimé"
+                    },
+                    "404": {
+                        "description": "Favori non trouvé"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
                     }
                 },
                 "security": [
@@ -1531,118 +1074,19 @@
                 ]
             }
         },
-        "/api/devis/{id}/envoyer": {
-            "put": {
-                "tags": [
-                    "Devis"
-                ],
-                "summary": "Envoyer un devis (changer statut à 'envoye')",
-                "operationId": "b4873e27384da74aca8d2cd9c50a0b63",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Devis envoyé"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/admin/devis": {
-            "get": {
-                "tags": [
-                    "Devis - Admin"
-                ],
-                "summary": "Lister tous les devis (Admin)",
-                "operationId": "2b9c4b396ecd8d66d0fc3ec5eb645c95",
-                "responses": {
-                    "200": {
-                        "description": "Liste des devis"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/admin/devis/{id}/statut": {
-            "put": {
-                "tags": [
-                    "Devis - Admin"
-                ],
-                "summary": "Changer le statut d'un devis (Admin)",
-                "operationId": "24ad5a52629ca13d9ac34ffa238ccf1d",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "statut"
-                                ],
-                                "properties": {
-                                    "statut": {
-                                        "type": "string",
-                                        "enum": [
-                                            "brouillon",
-                                            "envoye",
-                                            "accepte",
-                                            "refuse",
-                                            "expire"
-                                        ]
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Statut modifié"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/panier": {
+        "/panier": {
             "get": {
                 "tags": [
                     "Panier"
                 ],
-                "summary": "Voir mon panier",
-                "operationId": "cab68d9a5f069d4f4cd0c3df63da1ba7",
+                "summary": "Lister le panier actif",
+                "operationId": "362602e942ed32cd1352f03d392ab106",
                 "responses": {
                     "200": {
-                        "description": "Détails du panier"
+                        "description": "Panier récupéré"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
                     }
                 },
                 "security": [
@@ -1652,34 +1096,30 @@
                 ]
             }
         },
-        "/api/panier/ajouter": {
+        "/panier/ajouter": {
             "post": {
                 "tags": [
                     "Panier"
                 ],
-                "summary": "Ajouter un produit au panier",
-                "operationId": "4cf639c0d08d3dd080bd4e090202b9f2",
+                "summary": "Ajouter un article au panier",
+                "operationId": "e1cfaf97b15143dc201045f683ba0be7",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "produit_id",
-                                    "quantite"
+                                    "produit_id"
                                 ],
                                 "properties": {
                                     "produit_id": {
                                         "type": "integer",
-                                        "example": 1
+                                        "example": 12
                                     },
                                     "quantite": {
                                         "type": "integer",
+                                        "minimum": 1,
                                         "example": 1
-                                    },
-                                    "configuration_id": {
-                                        "type": "integer",
-                                        "example": null
                                     }
                                 },
                                 "type": "object"
@@ -1689,7 +1129,10 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Produit ajouté"
+                        "description": "Article ajouté"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
                     }
                 },
                 "security": [
@@ -1699,13 +1142,13 @@
                 ]
             }
         },
-        "/api/panier/modifier/{itemId}": {
+        "/panier/modifier/{itemId}": {
             "put": {
                 "tags": [
                     "Panier"
                 ],
-                "summary": "Modifier la quantité d'un item",
-                "operationId": "ef6b14b2eca048aca1b1243b73f4b051",
+                "summary": "Modifier la quantité d'un article",
+                "operationId": "2ce49b4c52536ac882a07ecf576cd998",
                 "parameters": [
                     {
                         "name": "itemId",
@@ -1727,6 +1170,7 @@
                                 "properties": {
                                     "quantite": {
                                         "type": "integer",
+                                        "minimum": 1,
                                         "example": 2
                                     }
                                 },
@@ -1738,6 +1182,9 @@
                 "responses": {
                     "200": {
                         "description": "Quantité modifiée"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
                     }
                 },
                 "security": [
@@ -1747,13 +1194,13 @@
                 ]
             }
         },
-        "/api/panier/supprimer/{itemId}": {
+        "/panier/supprimer/{itemId}": {
             "delete": {
                 "tags": [
                     "Panier"
                 ],
-                "summary": "Supprimer un item du panier",
-                "operationId": "d3550d8459892efa1fd4ded6dc0f881e",
+                "summary": "Supprimer un article du panier",
+                "operationId": "4b1e95228b750f182ce0352aeb5e9f10",
                 "parameters": [
                     {
                         "name": "itemId",
@@ -1766,7 +1213,10 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Item supprimé"
+                        "description": "Article supprimé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
                     }
                 },
                 "security": [
@@ -1776,13 +1226,13 @@
                 ]
             }
         },
-        "/api/panier/vider": {
+        "/panier/vider": {
             "delete": {
                 "tags": [
                     "Panier"
                 ],
-                "summary": "Vider tout le panier",
-                "operationId": "f70ea4903f7854d4253bab47a1b81d35",
+                "summary": "Vider le panier actif",
+                "operationId": "d2da95c221b3b821bba7b2450747ba37",
                 "responses": {
                     "200": {
                         "description": "Panier vidé"
@@ -2019,6 +1469,196 @@
                 "responses": {
                     "200": {
                         "description": "RÃ©organisÃ©"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/configurations": {
+            "get": {
+                "tags": [
+                    "Configurations"
+                ],
+                "summary": "Lister les configurations de l'utilisateur connecté",
+                "operationId": "e23373a51afa8339bf8af25471cac707",
+                "responses": {
+                    "200": {
+                        "description": "Liste récupérée"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Configurations"
+                ],
+                "summary": "Créer une configuration",
+                "operationId": "5a4dd3063775505f6cfff7d51d427192",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "produit_id",
+                                    "nom_configuration",
+                                    "composants_json"
+                                ],
+                                "properties": {
+                                    "produit_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "nom_configuration": {
+                                        "type": "string",
+                                        "example": "cpu"
+                                    },
+                                    "nom_configuration_autre": {
+                                        "type": "string",
+                                        "example": null,
+                                        "nullable": true
+                                    },
+                                    "devise": {
+                                        "type": "string",
+                                        "example": "MGA"
+                                    },
+                                    "composants_json": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "nom": {
+                                                    "type": "string",
+                                                    "example": "Ryzen 7 7800X3D"
+                                                },
+                                                "prix": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1250000
+                                                },
+                                                "quantite": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Configuration créée"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/configurations/{id}": {
+            "put": {
+                "tags": [
+                    "Configurations"
+                ],
+                "summary": "Modifier une configuration",
+                "operationId": "ee6bd8f4ee8baaad0246d2e96e0919a3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nom_configuration": {
+                                        "type": "string",
+                                        "example": "gpu"
+                                    },
+                                    "nom_configuration_autre": {
+                                        "type": "string",
+                                        "example": null,
+                                        "nullable": true
+                                    },
+                                    "devise": {
+                                        "type": "string",
+                                        "example": "MGA"
+                                    },
+                                    "composants_json": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Configuration mise à jour"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Configurations"
+                ],
+                "summary": "Supprimer une configuration",
+                "operationId": "0f0ac3092a01757805aabf844db8c465",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Configuration supprimée"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
                     }
                 },
                 "security": [
@@ -2277,6 +1917,192 @@
                 "responses": {
                     "200": {
                         "description": "SuccÃ¨s"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/commandes": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Lister les commandes",
+                "operationId": "6f8948e6ee0e6bbe8fa3c8a4e0ef0684",
+                "parameters": [
+                    {
+                        "name": "statut",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste commandes"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Créer une commande depuis le panier actif",
+                "operationId": "c3fb50ee921008d3be1d6ea6568b4722",
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "livraison": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 15000
+                                    },
+                                    "devise": {
+                                        "type": "string",
+                                        "example": "MGA"
+                                    },
+                                    "adresse_expedition_id": {
+                                        "type": "integer",
+                                        "example": null,
+                                        "nullable": true
+                                    },
+                                    "adresse_facturation_id": {
+                                        "type": "integer",
+                                        "example": null,
+                                        "nullable": true
+                                    },
+                                    "meta_json": {
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Commande créée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/commandes/{uuid}": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Détail d'une commande",
+                "operationId": "864127c2e8fe73d323a7d9d8cd4fcdf6",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détail commande"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/commandes/{uuid}/statut": {
+            "patch": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Changer le statut d'une commande",
+                "operationId": "ca46e83692bdc3ca9b22e0767333d40d",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "statut"
+                                ],
+                                "properties": {
+                                    "statut": {
+                                        "type": "string",
+                                        "example": "payee"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Statut modifié"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/commandes/{uuid}/cancel": {
+            "post": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Annuler une commande",
+                "operationId": "9f5ab1580f2642056ed71a74ebfac90a",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Commande annulée"
                     }
                 },
                 "security": [
@@ -2548,23 +2374,19 @@
         },
         {
             "name": "Avis Clients",
-            "description": "Gestion des avis clients sur les produits"
-        },
-        {
-            "name": "Commandes",
-            "description": "Gestion des commandes clients - Endpoints pour les commandes"
+            "description": "Gestion des avis clients et modération"
         },
         {
             "name": "Profils Configurateur",
             "description": "Templates pour configurer des PC sur mesure"
         },
         {
-            "name": "Devis",
-            "description": "Gestion des devis"
+            "name": "Favoris",
+            "description": "Gestion des produits favoris des utilisateurs"
         },
         {
             "name": "Panier",
-            "description": "Gestion du panier d'achat"
+            "description": "Gestion du panier client"
         },
         {
             "name": "Attributs Produits",
@@ -2575,6 +2397,10 @@
             "description": "Gestion des catÃ©gories du catalogue"
         },
         {
+            "name": "Configurations",
+            "description": "Gestion des configurations personnalisées des produits"
+        },
+        {
             "name": "Images Produits",
             "description": "Gestion des images de la galerie produit"
         },
@@ -2583,20 +2409,16 @@
             "description": "Gestion des produits du catalogue"
         },
         {
+            "name": "Commandes",
+            "description": "Gestion des commandes clients"
+        },
+        {
             "name": "Admin Auth",
             "description": "Admin Auth"
         },
         {
-            "name": "Avis Clients - Admin",
-            "description": "Avis Clients - Admin"
-        },
-        {
             "name": "Profils Configurateur - Admin",
             "description": "Profils Configurateur - Admin"
-        },
-        {
-            "name": "Devis - Admin",
-            "description": "Devis - Admin"
         },
         {
             "name": "Utilisateur",

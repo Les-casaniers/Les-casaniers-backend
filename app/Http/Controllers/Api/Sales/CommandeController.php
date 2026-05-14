@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Sales;
 
 use App\Http\Controllers\Controller;
 use App\Services\Sales\CommandeService;
+use App\Services\Sales\FactureService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -17,7 +18,8 @@ use Throwable;
 class CommandeController extends Controller
 {
     public function __construct(
-        private readonly CommandeService $commandeService
+        private readonly CommandeService $commandeService,
+        private readonly FactureService $factureService
     ) {
     }
 
@@ -123,6 +125,9 @@ class CommandeController extends Controller
             ]);
 
             $data = $this->commandeService->updateStatus((int) $request->user()->id, $uuid, $validated['statut']);
+            if ($validated['statut'] === 'payee') {
+                $this->factureService->createFromCommandeIfMissing($uuid);
+            }
 
             return response()->json(['success' => true, 'data' => $data], 200);
         } catch (ValidationException $e) {
@@ -144,6 +149,73 @@ class CommandeController extends Controller
     {
         try {
             $data = $this->commandeService->cancel((int) $request->user()->id, $uuid);
+            return response()->json(['success' => true, 'data' => $data], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['success' => false, 'errors' => $e->errors()], 422);
+        }
+    }
+
+    public function adminIndex(Request $request)
+    {
+        $data = $this->commandeService->adminIndex($request->query('statut'));
+
+        return response()->json(['success' => true, 'data' => $data], 200);
+    }
+
+    public function adminStore(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'utilisateur_id' => ['required', 'integer', 'exists:utilisateurs,id'],
+                'livraison' => ['nullable', 'numeric', 'min:0'],
+                'devise' => ['nullable', 'string', 'size:3'],
+                'adresse_expedition_id' => ['nullable', 'integer'],
+                'adresse_facturation_id' => ['nullable', 'integer'],
+                'meta_json' => ['nullable', 'array'],
+            ]);
+
+            $data = $this->commandeService->createFromPanier((int) $validated['utilisateur_id'], $validated);
+
+            return response()->json(['success' => true, 'data' => $data], 201);
+        } catch (ValidationException $e) {
+            return response()->json(['success' => false, 'errors' => $e->errors()], 422);
+        } catch (Throwable $e) {
+            return response()->json(['success' => false, 'message' => 'Erreur serveur'], 500);
+        }
+    }
+
+    public function adminShow(string $uuid)
+    {
+        try {
+            $data = $this->commandeService->adminShow($uuid);
+            return response()->json(['success' => true, 'data' => $data], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['success' => false, 'errors' => $e->errors()], 422);
+        }
+    }
+
+    public function adminUpdateStatus(Request $request, string $uuid)
+    {
+        try {
+            $validated = $request->validate([
+                'statut' => ['required', 'string', 'in:en_attente,payee,en_traitement,expediee,terminee,annulee,remboursee'],
+            ]);
+
+            $data = $this->commandeService->adminUpdateStatus($uuid, $validated['statut']);
+            if ($validated['statut'] === 'payee') {
+                $this->factureService->createFromCommandeIfMissing($uuid);
+            }
+
+            return response()->json(['success' => true, 'data' => $data], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['success' => false, 'errors' => $e->errors()], 422);
+        }
+    }
+
+    public function adminCancel(string $uuid)
+    {
+        try {
+            $data = $this->commandeService->adminCancel($uuid);
             return response()->json(['success' => true, 'data' => $data], 200);
         } catch (ValidationException $e) {
             return response()->json(['success' => false, 'errors' => $e->errors()], 422);

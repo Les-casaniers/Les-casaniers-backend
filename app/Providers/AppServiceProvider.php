@@ -68,8 +68,18 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
+            \App\Repositories\Sales\FactureRepositoryInterface::class,
+            \App\Repositories\Sales\FactureRepository::class
+        );
+
+        $this->app->bind(
             \App\Repositories\AvisClients\AvisClientRepositoryInterface::class,
             \App\Repositories\AvisClients\AvisClientRepository::class
+        );
+
+        $this->app->bind(
+            \App\Repositories\Adresse\AdresseRepositoryInterface::class,
+            \App\Repositories\Adresse\AdresseRepository::class
         );
     }
 

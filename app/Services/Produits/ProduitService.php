@@ -78,23 +78,39 @@ class ProduitService
     }
 
     /**
-     * Gestion du stock: décrémenter sur commande confirmée
+     * Gestion du stock : décrémente atomiquement sur commande confirmée.
+     * Utilise une requête SQL atomique pour éviter les race conditions.
+     *
+     * @throws \Exception Si le stock est insuffisant.
      */
-    public function decrementStock(int $id, int $quantity)
+    public function decrementStock(int $produitId, int $quantity): void
     {
-        $produit = $this->produitRepository->findById($id);
-        
-        if (!$produit) {
-            throw new Exception("Produit introuvable.");
+        if ($quantity <= 0) {
+            return;
         }
 
-        if ($produit->quantite_stock < $quantity) {
-            throw new Exception("Stock insuffisant pour le produit: {$produit->nom}");
+        $success = $this->produitRepository->decrementStock($produitId, $quantity);
+
+        if (!$success) {
+            $produit = $this->produitRepository->findById($produitId);
+            $nom = $produit?->nom ?? "ID #{$produitId}";
+            $stockActuel = $produit?->quantite_stock ?? 0;
+            throw new Exception(
+                "Stock insuffisant pour \"{$nom}\" (demandé: {$quantity}, disponible: {$stockActuel})."
+            );
+        }
+    }
+
+    /**
+     * Gestion du stock : restaure le stock après annulation ou remboursement.
+     */
+    public function restoreStock(int $produitId, int $quantity): void
+    {
+        if ($quantity <= 0) {
+            return;
         }
 
-        $newStock = $produit->quantite_stock - $quantity;
-        
-        return $this->produitRepository->update($id, ['quantite_stock' => $newStock]);
+        $this->produitRepository->incrementStock($produitId, $quantity);
     }
 
     /**

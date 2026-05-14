@@ -246,4 +246,49 @@ class UtilisateurService
     {
         return Str::transliterate($email.'|'.$ip);
     }
+
+    public function getAllClients()
+    {
+        return $this->utilisateurRepository->getAll();
+    }
+
+    public function getClientById(int $id)
+    {
+        $client = $this->utilisateurRepository->findById($id);
+        if (!$client) {
+            throw ValidationException::withMessages([
+                'id' => ['Client introuvable.'],
+            ]);
+        }
+
+        return $client;
+    }
+
+    public function adminUpdateClient(int $id, array $data)
+    {
+        $client = $this->utilisateurRepository->findById($id);
+        if (!$client) {
+            throw ValidationException::withMessages([
+                'id' => ['Client introuvable.'],
+            ]);
+        }
+
+        return DB::transaction(function () use ($id, $data) {
+            return $this->utilisateurRepository->update($id, $data);
+        });
+    }
+
+    public function deleteClient(int $id): void
+    {
+        $client = $this->utilisateurRepository->findById($id);
+        if (!$client) {
+            throw ValidationException::withMessages([
+                'id' => ['Client introuvable.'],
+            ]);
+        }
+
+        DB::transaction(function () use ($id) {
+            $this->utilisateurRepository->delete($id);
+        });
+    }
 }
