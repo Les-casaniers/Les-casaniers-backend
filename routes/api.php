@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Adresse\AdresseController;
 use App\Http\Controllers\Api\AdminAuthController;
+use App\Http\Controllers\Api\AdminNotificationController;
 use App\Http\Controllers\Api\AvisClients\AvisClientController;
 use App\Http\Controllers\Api\Favoris\FavorisController;
 use App\Http\Controllers\Api\Paniers\PanierController;
@@ -140,6 +141,14 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/utilisateurs/{utilisateurId}/adresses', [AdresseController::class, 'adminStoreForUser']);
     Route::put('/utilisateurs/{utilisateurId}/adresses/{id}', [AdresseController::class, 'adminUpdateForUser']);
     Route::delete('/utilisateurs/{utilisateurId}/adresses/{id}', [AdresseController::class, 'adminDestroyForUser']);
+
+    // ─── Notifications admin ────────────────────────────────
+    Route::get('/notifications', [AdminNotificationController::class, 'index']);
+    Route::get('/notifications/count', [AdminNotificationController::class, 'count']);
+    Route::patch('/notifications/lire-tout', [AdminNotificationController::class, 'markAllAsRead']);
+    Route::patch('/notifications/{id}/lire', [AdminNotificationController::class, 'markAsRead']);
+    Route::delete('/notifications/all', [AdminNotificationController::class, 'destroyAll']);
+    Route::delete('/notifications/{id}', [AdminNotificationController::class, 'destroy']);
 });
 
 // Panier routes
