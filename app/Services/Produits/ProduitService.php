@@ -27,6 +27,7 @@ class ProduitService
     public function createProduit(array $data)
     {
         $this->validateProduit($data);
+        $data['est_dispo'] = ((int) ($data['quantite_stock'] ?? 0)) > 0;
 
         if (empty($data['reference'])) {
             $data['reference'] = $this->generateReference();
@@ -57,7 +58,8 @@ class ProduitService
             'type_produit' => 'sometimes|in:pc,portable,composant,peripherique,service',
             'reference' => 'sometimes|nullable|string|max:80|unique:produits,reference,' . $id,
             'devise' => 'sometimes|nullable|string|max:10',
-            'actif' => 'sometimes|boolean'
+            'actif' => 'sometimes|boolean',
+            'est_dispo' => 'sometimes|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -65,6 +67,7 @@ class ProduitService
         }
 
         unset($data['reference']);
+        unset($data['est_dispo']);
 
         return $this->produitRepository->update($id, $data);
     }
@@ -166,7 +169,8 @@ class ProduitService
             'description' => 'nullable|string',
             'description_courte' => 'nullable|string|max:500',
             'devise' => 'nullable|string|max:10',
-            'actif' => 'boolean'
+            'actif' => 'boolean',
+            'est_dispo' => 'sometimes|boolean',
         ]);
 
         if ($validator->fails()) {

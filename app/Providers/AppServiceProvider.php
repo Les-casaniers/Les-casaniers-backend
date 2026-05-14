@@ -81,6 +81,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Repositories\Adresse\AdresseRepositoryInterface::class,
             \App\Repositories\Adresse\AdresseRepository::class
         );
+
+        $this->app->bind(
+            \App\Repositories\AdminNotification\AdminNotificationRepositoryInterface::class,
+            \App\Repositories\AdminNotification\AdminNotificationRepository::class
+        );
     }
 
     /**

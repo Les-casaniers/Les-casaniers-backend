@@ -29,12 +29,16 @@ class ProduitRepository implements ProduitRepositoryInterface
             $query->where('type_produit', $filters['type_produit']);
         }
 
+        if (isset($filters['est_dispo'])) {
+            $query->where('est_dispo', $filters['est_dispo']);
+        }
+
         return $query->get();
     }
 
     public function findById(int $id)
     {
-        return $this->model->with(['categorie', 'images', 'attributs'])->find($id);
+        return $this->model->with(['categorie', 'images', 'attributs', 'configurations'])->find($id);
     }
 
     public function findByCategory(int $categoryId)
@@ -46,6 +50,9 @@ class ProduitRepository implements ProduitRepositoryInterface
 
     public function create(array $data)
     {
+        if (array_key_exists('quantite_stock', $data) && !array_key_exists('est_dispo', $data)) {
+            $data['est_dispo'] = ((int) $data['quantite_stock']) > 0;
+        }
         return $this->model->create($data);
     }
 
@@ -53,6 +60,9 @@ class ProduitRepository implements ProduitRepositoryInterface
     {
         $produit = $this->findById($id);
         if ($produit) {
+            if (array_key_exists('quantite_stock', $data) && !array_key_exists('est_dispo', $data)) {
+                $data['est_dispo'] = ((int) $data['quantite_stock']) > 0;
+            }
             $produit->update($data);
             return $produit;
         }
@@ -103,6 +113,7 @@ class ProduitRepository implements ProduitRepositoryInterface
             ->where('quantite_stock', '>=', $quantity)
             ->update([
                 'quantite_stock' => \DB::raw("quantite_stock - {$quantity}"),
+                'est_dispo' => \DB::raw("CASE WHEN (quantite_stock - {$quantity}) > 0 THEN 1 ELSE 0 END"),
             ]);
 
         return $affected > 0;
@@ -117,6 +128,7 @@ class ProduitRepository implements ProduitRepositoryInterface
             ->where('id', $id)
             ->update([
                 'quantite_stock' => \DB::raw("quantite_stock + {$quantity}"),
+                'est_dispo' => \DB::raw("CASE WHEN (quantite_stock + {$quantity}) > 0 THEN 1 ELSE 0 END"),
             ]);
     }
 }

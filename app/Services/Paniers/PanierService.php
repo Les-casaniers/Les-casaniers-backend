@@ -32,6 +32,12 @@ class PanierService
             ]);
         }
 
+        if (!$produit->actif || !$produit->est_dispo || (int) $produit->quantite_stock <= 0) {
+            throw ValidationException::withMessages([
+                'produit_id' => ['Ce produit est indisponible et ne peut pas être ajouté au panier.'],
+            ]);
+        }
+
         $existing = $this->panierRepository->findItem([
             'utilisateur_id' => $utilisateurId,
             'statut' => 'actif',
@@ -41,8 +47,20 @@ class PanierService
 
         if ($existing) {
             $newQuantity = (int) $existing->quantite + (int) ($payload['quantite'] ?? 1);
+            if ($newQuantity > (int) $produit->quantite_stock) {
+                throw ValidationException::withMessages([
+                    'quantite' => ["Stock insuffisant (disponible: {$produit->quantite_stock})."],
+                ]);
+            }
             $this->panierRepository->updateQuantity((int) $existing->id, $newQuantity);
         } else {
+            $requestedQuantity = (int) ($payload['quantite'] ?? 1);
+            if ($requestedQuantity > (int) $produit->quantite_stock) {
+                throw ValidationException::withMessages([
+                    'quantite' => ["Stock insuffisant (disponible: {$produit->quantite_stock})."],
+                ]);
+            }
+
             $this->panierRepository->create([
                 'utilisateur_id' => $utilisateurId,
                 'statut' => 'actif',
@@ -50,7 +68,7 @@ class PanierService
                 'configuration_id' => null,
                 'titre' => $produit->nom,
                 'prix_unitaire' => $produit->prix,
-                'quantite' => (int) ($payload['quantite'] ?? 1),
+                'quantite' => $requestedQuantity,
             ]);
         }
 
@@ -64,6 +82,21 @@ class PanierService
             throw ValidationException::withMessages([
                 'item_id' => ['Article du panier introuvable.'],
             ]);
+        }
+
+        if ($item->produit_id) {
+            $produit = Produit::find($item->produit_id);
+            if (!$produit || !$produit->actif || !$produit->est_dispo || (int) $produit->quantite_stock <= 0) {
+                throw ValidationException::withMessages([
+                    'produit_id' => ['Ce produit est indisponible.'],
+                ]);
+            }
+
+            if ($quantite > (int) $produit->quantite_stock) {
+                throw ValidationException::withMessages([
+                    'quantite' => ["Stock insuffisant (disponible: {$produit->quantite_stock})."],
+                ]);
+            }
         }
 
         $this->panierRepository->updateQuantity($itemId, $quantite);

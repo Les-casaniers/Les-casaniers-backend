@@ -6,6 +6,7 @@ use App\Enums\Sales\FactureStatut;
 use App\Models\Facture;
 use App\Repositories\Sales\CommandeRepositoryInterface;
 use App\Repositories\Sales\FactureRepositoryInterface;
+use App\Services\AdminNotificationService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -15,7 +16,8 @@ class FactureService
 {
     public function __construct(
         private readonly FactureRepositoryInterface $factureRepository,
-        private readonly CommandeRepositoryInterface $commandeRepository
+        private readonly CommandeRepositoryInterface $commandeRepository,
+        private readonly AdminNotificationService $notificationService
     ) {
     }
 
@@ -78,13 +80,25 @@ class FactureService
 
             $first = $items->first();
 
-            return $this->factureRepository->create([
+            $facture = $this->factureRepository->create([
                 'commande_id' => $first->id,
                 'facture_ref' => $this->factureRepository->nextReference(),
-                'statut' => FactureStatut::Brouillon->value,
+                'statut'      => FactureStatut::Brouillon->value,
                 'montant_total' => $this->calculateTotal($items),
-                'devise' => $first->devise ?? 'MGA',
+                'devise'      => $first->devise ?? 'MGA',
             ]);
+
+            // Notifier l'admin de la création de la facture
+            try {
+                $this->notificationService->notifyFactureCreated(
+                    $facture->facture_ref,
+                    $commandeUuid
+                );
+            } catch (\Throwable $e) {
+                Log::warning('Notification facture created failed', ['error' => $e->getMessage()]);
+            }
+
+            return $facture;
         });
     }
 
@@ -145,11 +159,24 @@ class FactureService
                 ]);
             }
 
-            return $this->factureRepository->update($id, [
-                'statut' => FactureStatut::Payee->value,
+            $facture = $this->factureRepository->update($id, [
+                'statut'           => FactureStatut::Payee->value,
                 'methode_paiement' => $method,
-                'date_paiement' => now(),
+                'date_paiement'    => now(),
             ]);
+
+            // Notifier l'admin du paiement reçu
+            try {
+                $this->notificationService->notifyPaiementRecu(
+                    $facture->facture_ref,
+                    (float) $facture->montant_total,
+                    $facture->devise ?? 'MGA'
+                );
+            } catch (\Throwable $e) {
+                Log::warning('Notification paiement failed', ['error' => $e->getMessage()]);
+            }
+
+            return $facture;
         });
     }
 

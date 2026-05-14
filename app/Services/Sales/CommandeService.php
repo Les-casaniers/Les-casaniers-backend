@@ -5,6 +5,7 @@ namespace App\Services\Sales;
 use App\Enums\Sales\CommandeStatut;
 use App\Repositories\Paniers\PanierRepositoryInterface;
 use App\Repositories\Sales\CommandeRepositoryInterface;
+use App\Services\AdminNotificationService;
 use App\Services\Produits\ProduitService;
 use App\Traits\CalculatesLineItems;
 use Illuminate\Database\Eloquent\Collection;
@@ -32,6 +33,7 @@ class CommandeService
         private readonly CommandeRepositoryInterface $commandeRepository,
         private readonly PanierRepositoryInterface $panierRepository,
         private readonly ProduitService $produitService,
+        private readonly AdminNotificationService $notificationService,
     ) {
     }
 
@@ -88,6 +90,13 @@ class CommandeService
             foreach ($itemsPanier as $item) {
                 if ($item->produit_id) {
                     $produit = $this->produitService->getProduitById($item->produit_id);
+                    if ($produit && (!$produit->actif || !$produit->est_dispo || (int) $produit->quantite_stock <= 0)) {
+                        throw ValidationException::withMessages([
+                            'stock' => [
+                                "Le produit \"{$produit->nom}\" est indisponible."
+                            ],
+                        ]);
+                    }
                     if ($produit && $produit->quantite_stock < ($item->quantite ?? 1)) {
                         throw ValidationException::withMessages([
                             'stock' => [
@@ -128,6 +137,21 @@ class CommandeService
             }
 
             $this->panierRepository->markActiveAsCommande($userId);
+
+            // Notifier l'admin de la nouvelle commande
+            try {
+                $items = $this->commandeRepository->findByUuid($uuid);
+                $commande = $items->first();
+                $clientNom = trim(($commande->utilisateur->prenom ?? '') . ' ' . ($commande->utilisateur->nom ?? ''));
+                $this->notificationService->notifyNewCommande(
+                    $uuid,
+                    $total,
+                    $devise,
+                    $clientNom ?: 'Client'
+                );
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Notification new commande failed', ['error' => $e->getMessage()]);
+            }
 
             return [
                 'commande_uuid' => $uuid,
@@ -183,7 +207,7 @@ class CommandeService
      */
     private function applyStatusTransition(string $uuid, CommandeStatut $current, CommandeStatut $cible): Collection
     {
-        return DB::transaction(function () use ($uuid, $current, $cible) {
+        $result = DB::transaction(function () use ($uuid, $current, $cible) {
             $items = $this->commandeRepository->findByUuidWithLock($uuid);
 
             // Décrémentation du stock : uniquement lors du passage à "payée"
@@ -198,6 +222,24 @@ class CommandeService
 
             return $this->commandeRepository->updateByUuid($uuid, ['statut' => $cible->value]);
         });
+
+        // Notifier l'admin du changement de statut (hors transaction pour ne pas bloquer)
+        try {
+            $this->notificationService->notifyCommandeStatusChange(
+                $uuid,
+                $current->value,
+                $cible->value
+            );
+
+            // Vérifier les stocks bas après décrémentation
+            if ($cible === CommandeStatut::Payee && $current === CommandeStatut::EnAttente) {
+                $this->checkLowStockAfterDecrement($uuid);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Notification commande status failed', ['error' => $e->getMessage()]);
+        }
+
+        return $result;
     }
 
     /**
@@ -283,5 +325,36 @@ class CommandeService
                 'devise' => $commande->devise,
             ],
         ];
+    }
+
+    /**
+     * Vérifie les niveaux de stock après décrémentation et notifie
+     * l'admin si un produit est en stock faible (≤ 5) ou en rupture.
+     */
+    private function checkLowStockAfterDecrement(string $uuid): void
+    {
+        $items = $this->commandeRepository->findByUuid($uuid);
+
+        foreach ($items as $item) {
+            if (!$item->produit_id) {
+                continue;
+            }
+
+            $produit = $this->produitService->getProduitById($item->produit_id);
+
+            if (!$produit) {
+                continue;
+            }
+
+            $seuil = 5; // Seuil d'alerte stock faible
+
+            if ($produit->quantite_stock <= $seuil) {
+                $this->notificationService->notifyLowStock(
+                    $produit->nom,
+                    (int) $produit->quantite_stock,
+                    $produit->id
+                );
+            }
+        }
     }
 }
