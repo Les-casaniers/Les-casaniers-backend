@@ -27,10 +27,15 @@ return new class extends Migration
                 ->constrained('produits')
                 ->nullOnDelete();
 
+            // $table->foreignId('configuration_id')
+            //     ->nullable()
+            //     ->constrained('configurations_pc')
+            //     ->nullOnDelete();
+
             $table->foreignId('configuration_id')
-                ->nullable()
-                ->constrained('configurations_pc')
-                ->nullOnDelete();
+                    ->nullable()
+                    ->constrained('configurations')
+                    ->nullOnDelete();
 
             // Données item panier
             $table->string('titre');

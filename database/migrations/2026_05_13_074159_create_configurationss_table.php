@@ -53,11 +53,11 @@ return new class extends Migration
             $table->index('utilisateur_id');
 
             // Contraintes logiques (CHECK)
-            $table->check("
-                (nom_configuration = 'autre' AND nom_configuration_autre IS NOT NULL AND nom_configuration_autre <> '')
-                OR
-                (nom_configuration <> 'autre' AND nom_configuration_autre IS NULL)
-            ");
+            // $table->check("
+            //     (nom_configuration = 'autre' AND nom_configuration_autre IS NOT NULL AND nom_configuration_autre <> '')
+            //     OR
+            //     (nom_configuration <> 'autre' AND nom_configuration_autre IS NULL)
+            // ");
         });
     }
 
