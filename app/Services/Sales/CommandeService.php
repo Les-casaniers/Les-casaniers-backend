@@ -90,6 +90,13 @@ class CommandeService
             foreach ($itemsPanier as $item) {
                 if ($item->produit_id) {
                     $produit = $this->produitService->getProduitById($item->produit_id);
+                    if ($produit && (!$produit->actif || !$produit->est_dispo || (int) $produit->quantite_stock <= 0)) {
+                        throw ValidationException::withMessages([
+                            'stock' => [
+                                "Le produit \"{$produit->nom}\" est indisponible."
+                            ],
+                        ]);
+                    }
                     if ($produit && $produit->quantite_stock < ($item->quantite ?? 1)) {
                         throw ValidationException::withMessages([
                             'stock' => [

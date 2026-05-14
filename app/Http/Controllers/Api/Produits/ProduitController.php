@@ -36,7 +36,7 @@ class ProduitController extends Controller
      */
     public function index(Request $request)
     {
-        $filters = $request->only(['categorie_id', 'type_produit', 'actif']);
+        $filters = $request->only(['categorie_id', 'type_produit', 'actif', 'est_dispo']);
         $search = $request->query('search');
 
         $produits = $this->produitService->getProduits($filters, $search);
