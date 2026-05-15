@@ -1077,7 +1077,7 @@
         "/panier": {
             "get": {
                 "tags": [
-                    "Panier"
+                    "Favoris"
                 ],
                 "summary": "Lister le panier actif",
                 "operationId": "362602e942ed32cd1352f03d392ab106",
@@ -1099,7 +1099,7 @@
         "/panier/ajouter": {
             "post": {
                 "tags": [
-                    "Panier"
+                    "Favoris"
                 ],
                 "summary": "Ajouter un article au panier",
                 "operationId": "e1cfaf97b15143dc201045f683ba0be7",
