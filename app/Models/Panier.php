@@ -21,6 +21,11 @@ class Panier extends Model
         'quantite',
     ];
 
+    // Constantes pour les statuts
+    const STATUT_ACTIF = 'actif';      // Panier actif/en cours
+    const STATUT_COMMANDE = 'commande'; // Transformé en commande
+    const STATUT_PAYE = 'paye';        // Payé
+
     const CREATED_AT = 'date_creation';
     const UPDATED_AT = 'date_modification';
 

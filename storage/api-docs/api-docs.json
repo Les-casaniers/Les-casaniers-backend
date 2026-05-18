@@ -7,19 +7,19 @@
     },
     "servers": [
         {
-            "url": "http://localhost:8000/api",
+            "url": "http://127.0.0.1:8000",
             "description": "Serveur Principal"
         }
     ],
     "paths": {
-        "/admin/register": {
+        "/api/admin/register": {
             "post": {
                 "tags": [
                     "Admin Auth"
                 ],
                 "summary": "Creer un compte administrateur",
                 "description": "Permet de creer un nouveau compte administrateur.",
-                "operationId": "4c9ff7f9fab7f89d744513cfe5480a0f",
+                "operationId": "876bcd0cd7c5f5cb4e34601a78d4d431",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -975,6 +975,202 @@
                 ]
             }
         },
+        "/api/devis-express": {
+            "post": {
+                "tags": [
+                    "Devis Express"
+                ],
+                "summary": "Soumettre une demande de devis express",
+                "operationId": "c171e267c450c008536538c0fe9a9192",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nom",
+                                    "email",
+                                    "telephone",
+                                    "besoin"
+                                ],
+                                "properties": {
+                                    "nom": {
+                                        "type": "string",
+                                        "example": "Jean Rakoto"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "jean@email.com"
+                                    },
+                                    "telephone": {
+                                        "type": "string",
+                                        "example": "0341234567"
+                                    },
+                                    "entreprise": {
+                                        "type": "string",
+                                        "example": "Ma Société"
+                                    },
+                                    "besoin": {
+                                        "type": "string",
+                                        "example": "PC Gaming sur-mesure"
+                                    },
+                                    "budget": {
+                                        "type": "string",
+                                        "example": "2 000 000 - 3 500 000 Ar"
+                                    },
+                                    "date_souhaitee": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-31"
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Besoin d'un PC gaming puissant"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Demande soumise avec succès"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/api/admin/devis-express": {
+            "get": {
+                "tags": [
+                    "Devis Express - Admin"
+                ],
+                "summary": "Lister toutes les demandes (Admin)",
+                "operationId": "00db741f855cc06e9bb36e204b0309ab",
+                "responses": {
+                    "200": {
+                        "description": "Liste des demandes"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/devis-express/{id}": {
+            "get": {
+                "tags": [
+                    "Devis Express - Admin"
+                ],
+                "summary": "Voir une demande (Admin)",
+                "operationId": "11c71c2ea1fe66bdc8effc670bb48de5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails de la demande"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Devis Express - Admin"
+                ],
+                "summary": "Supprimer une demande (Admin)",
+                "operationId": "c97d705bc434f9b55f85ced75a1165ca",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Demande supprimée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/devis-express/{id}/statut": {
+            "put": {
+                "tags": [
+                    "Devis Express - Admin"
+                ],
+                "summary": "Changer le statut d'une demande (Admin)",
+                "operationId": "c3a150301bf7b857a8df527a78b2f297",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "statut"
+                                ],
+                                "properties": {
+                                    "statut": {
+                                        "type": "string",
+                                        "enum": [
+                                            "en_attente",
+                                            "traite",
+                                            "repondu",
+                                            "archive"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Statut mis à jour"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/favoris": {
             "get": {
                 "tags": [
@@ -1074,13 +1270,13 @@
                 ]
             }
         },
-        "/panier": {
+        "/api/panier": {
             "get": {
                 "tags": [
-                    "Favoris"
+                    "Panier"
                 ],
                 "summary": "Lister le panier actif",
-                "operationId": "362602e942ed32cd1352f03d392ab106",
+                "operationId": "b03a36cfdb2ffbc8e7c5fae58d9bac6d",
                 "responses": {
                     "200": {
                         "description": "Panier récupéré"
@@ -1096,13 +1292,13 @@
                 ]
             }
         },
-        "/panier/ajouter": {
+        "/api/panier/ajouter": {
             "post": {
                 "tags": [
-                    "Favoris"
+                    "Panier"
                 ],
                 "summary": "Ajouter un article au panier",
-                "operationId": "e1cfaf97b15143dc201045f683ba0be7",
+                "operationId": "7c8d89508ab6169a525458a3c261edd6",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1142,13 +1338,13 @@
                 ]
             }
         },
-        "/panier/modifier/{itemId}": {
+        "/api/panier/modifier/{itemId}": {
             "put": {
                 "tags": [
                     "Panier"
                 ],
                 "summary": "Modifier la quantité d'un article",
-                "operationId": "2ce49b4c52536ac882a07ecf576cd998",
+                "operationId": "d498afe5fdd721609e7a93941ae59f54",
                 "parameters": [
                     {
                         "name": "itemId",
@@ -1194,13 +1390,13 @@
                 ]
             }
         },
-        "/panier/supprimer/{itemId}": {
+        "/api/panier/supprimer/{itemId}": {
             "delete": {
                 "tags": [
                     "Panier"
                 ],
                 "summary": "Supprimer un article du panier",
-                "operationId": "4b1e95228b750f182ce0352aeb5e9f10",
+                "operationId": "67b60bc67cdf2dfcba4811de4d00ffb9",
                 "parameters": [
                     {
                         "name": "itemId",
@@ -1226,13 +1422,13 @@
                 ]
             }
         },
-        "/panier/vider": {
+        "/api/panier/vider": {
             "delete": {
                 "tags": [
                     "Panier"
                 ],
                 "summary": "Vider le panier actif",
-                "operationId": "d2da95c221b3b821bba7b2450747ba37",
+                "operationId": "5052295731faa2b3c91c518582d5f4d7",
                 "responses": {
                     "200": {
                         "description": "Panier vidé"
@@ -2381,6 +2577,10 @@
             "description": "Templates pour configurer des PC sur mesure"
         },
         {
+            "name": "Devis Express",
+            "description": "Demandes de devis rapides"
+        },
+        {
             "name": "Favoris",
             "description": "Gestion des produits favoris des utilisateurs"
         },
@@ -2419,6 +2619,10 @@
         {
             "name": "Profils Configurateur - Admin",
             "description": "Profils Configurateur - Admin"
+        },
+        {
+            "name": "Devis Express - Admin",
+            "description": "Devis Express - Admin"
         },
         {
             "name": "Utilisateur",
