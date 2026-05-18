@@ -5,6 +5,8 @@ use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\AdminNotificationController;
 use App\Http\Controllers\Api\AvisClients\AvisClientController;
 use App\Http\Controllers\Api\Favoris\FavorisController;
+use App\Http\Controllers\Api\Guides\GuideController;
+use App\Http\Controllers\Api\NewsletterController;
 use App\Http\Controllers\Api\Paniers\PanierController;
 use App\Http\Controllers\Api\Produits\AttributProduitController;
 use App\Http\Controllers\Api\Produits\CategoryController;
@@ -57,6 +59,18 @@ Route::get('/produits/{id}', [ProduitController::class, 'show']);
 Route::get('/produits/{produitId}/avis', [AvisClientController::class, 'getAvisByProduit']);
 Route::get('/produits/{produitId}/avis/stats', [AvisClientController::class, 'getStatistiquesProduit']);
 Route::get('/avis/latest', [AvisClientController::class, 'latest']);
+Route::get('/guides/recent', [GuideController::class, 'recent']);
+Route::get('/guides/popular', [GuideController::class, 'popular']);
+Route::get('/guides/featured', [GuideController::class, 'featured']);
+Route::get('/guides/categories', [GuideController::class, 'categories']);
+Route::get('/guides/categorie/{categorie}', [GuideController::class, 'byCategory']);
+Route::get('/guides', [GuideController::class, 'index']);
+Route::get('/guides/{id}', [GuideController::class, 'show'])->whereNumber('id');
+Route::get('/guides/slug/{slug}', [GuideController::class, 'showBySlug']);
+
+// Newsletter
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe']);
+Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe']);
 
 // Protected product/admin routes
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -118,6 +132,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     Route::get('/avis', [AvisClientController::class, 'adminList']);
     Route::put('/avis/{id}/publier', [AvisClientController::class, 'togglePublish']);
+    Route::get('/guides', [GuideController::class, 'adminIndex']);
+    Route::post('/guides', [GuideController::class, 'store']);
+    Route::get('/guides/{id}', [GuideController::class, 'adminShow']);
+    Route::post('/guides/{id}', [GuideController::class, 'update']);
+    Route::put('/guides/{id}', [GuideController::class, 'update']);
+    Route::delete('/guides/{id}', [GuideController::class, 'destroy']);
+
+    // Newsletter admin
+    Route::get('/newsletter', [NewsletterController::class, 'adminIndex']);
+    Route::delete('/newsletter/{id}', [NewsletterController::class, 'adminDestroy']);
     Route::post('/utilisateurs', [UtilisateurController::class, 'adminStore']);
     Route::get('/utilisateurs', [UtilisateurController::class, 'adminIndex']);
     Route::get('/utilisateurs/{id}', [UtilisateurController::class, 'adminShow']);
