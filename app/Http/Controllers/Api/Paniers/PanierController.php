@@ -23,7 +23,7 @@ class PanierController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/panier",
+     *     path="/api/panier",
      *     summary="Lister le panier actif",
      *     tags={"Panier"},
      *     security={{"sanctum": {}}},
@@ -44,7 +44,7 @@ class PanierController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/panier/ajouter",
+     *     path="/api/panier/ajouter",
      *     summary="Ajouter un article au panier",
      *     tags={"Panier"},
      *     security={{"sanctum": {}}},
@@ -91,7 +91,7 @@ class PanierController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/panier/modifier/{itemId}",
+     *     path="/api/panier/modifier/{itemId}",
      *     summary="Modifier la quantité d'un article",
      *     tags={"Panier"},
      *     security={{"sanctum": {}}},
@@ -141,7 +141,7 @@ class PanierController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/panier/supprimer/{itemId}",
+     *     path="/api/panier/supprimer/{itemId}",
      *     summary="Supprimer un article du panier",
      *     tags={"Panier"},
      *     security={{"sanctum": {}}},
@@ -176,7 +176,7 @@ class PanierController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/panier/vider",
+     *     path="/api/panier/vider",
      *     summary="Vider le panier actif",
      *     tags={"Panier"},
      *     security={{"sanctum": {}}},

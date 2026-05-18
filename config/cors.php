@@ -17,6 +17,7 @@ return [
          'http://127.0.0.1:8000',
          'https://les-casaniers-frontend.vercel.app',
          'http://localhost:5173',
+         'http://localhost:8080',
     ],
 
     'allowed_origins_patterns' => [],

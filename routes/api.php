@@ -100,10 +100,18 @@ Route::middleware(['auth:sanctum'])->prefix('devis')->group(function () {
     Route::delete('/{id}', [DevisController::class, 'destroy']);
 });
 
+// Route::middleware(['auth:sanctum'])->prefix('factures')->group(function () {
+//     Route::get('/', [FactureController::class, 'index']);
+//     Route::get('/{id}', [FactureController::class, 'show']);
+//     Route::get('/{id}/download', [FactureController::class, 'download']);
+// });
+
+/// ROute pour la facturation pour le moment
 Route::middleware(['auth:sanctum'])->prefix('factures')->group(function () {
     Route::get('/', [FactureController::class, 'index']);
     Route::get('/{id}', [FactureController::class, 'show']);
-    Route::get('/{id}/download', [FactureController::class, 'download']);
+    Route::post('/generate', [FactureController::class, 'generate']);
+    Route::post('/{id}/pay', [FactureController::class, 'markAsPaid']);
 });
 
 // Avis routes
@@ -150,6 +158,11 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::patch('/notifications/{id}/lire', [AdminNotificationController::class, 'markAsRead']);
     Route::delete('/notifications/all', [AdminNotificationController::class, 'destroyAll']);
     Route::delete('/notifications/{id}', [AdminNotificationController::class, 'destroy']);
+
+    // Routes pour la gestion des administrateurs
+    Route::get('/list', [AdminAuthController::class, 'list']);
+    Route::put('/{id}/statut', [AdminAuthController::class, 'updateStatut']);
+    Route::delete('/{id}', [AdminAuthController::class, 'destroy']);
 });
 
 // Panier routes
@@ -162,13 +175,13 @@ Route::middleware(['auth:sanctum'])->prefix('panier')->group(function () {
 });
 
 // Routes devis (client connecté)
-Route::middleware(['auth:sanctum'])->prefix('devis')->group(function () {
-    Route::get('/', [DevisController::class, 'index']);              // Mes devis
-    Route::post('/creer', [DevisController::class, 'creer']);        // Créer un devis
-    Route::get('/{id}', [DevisController::class, 'show']);           // Voir un devis
-    Route::put('/{id}/envoyer', [DevisController::class, 'envoyer']); // Envoyer un devis
-    Route::delete('/{id}', [DevisController::class, 'destroy']);     // Supprimer un devis
-});
+// Route::middleware(['auth:sanctum'])->prefix('devis')->group(function () {
+//     Route::get('/', [DevisController::class, 'index']);              // Mes devis
+//     Route::post('/creer', [DevisController::class, 'creer']);        // Créer un devis
+//     Route::get('/{id}', [DevisController::class, 'show']);           // Voir un devis
+//     Route::put('/{id}/envoyer', [DevisController::class, 'envoyer']); // Envoyer un devis
+//     Route::delete('/{id}', [DevisController::class, 'destroy']);     // Supprimer un devis
+// });
 
 use App\Http\Controllers\Api\Configurateur\ProfilConfigurateurController;
 
@@ -236,4 +249,67 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::get('/devis-express/{id}', [DevisExpressController::class, 'adminShow']);
     Route::put('/devis-express/{id}/statut', [DevisExpressController::class, 'adminUpdateStatut']);
     Route::delete('/devis-express/{id}', [DevisExpressController::class, 'adminDestroy']);
+});
+
+// Ajoutez cette route dans le groupe des routes authentifiées
+Route::get('/commandes/last', [CommandeController::class, 'getLastNumber']);
+
+// // Routes pour les devis
+// Route::middleware(['auth:sanctum'])->prefix('devis')->group(function () {
+//     Route::get('/', [DevisController::class, 'index']);      // GET /api/devis
+//     Route::post('/', [DevisController::class, 'store']);     // POST /api/devis
+//     Route::get('/{id}', [DevisController::class, 'show']);   // GET /api/devis/{id}
+//     Route::put('/{id}', [DevisController::class, 'update']); // PUT /api/devis/{id}
+//     Route::delete('/{id}', [DevisController::class, 'destroy']); // DELETE /api/devis/{id}
+// });
+
+// Routes factures
+// Routes factures pour les clients
+Route::middleware(['auth:sanctum'])->prefix('factures')->group(function () {
+    Route::get('/', [FactureController::class, 'index']);
+    Route::get('/{id}', [FactureController::class, 'show']);
+    Route::post('/generate', [FactureController::class, 'generate']);
+    Route::post('/{id}/pay', [FactureController::class, 'markAsPaid']);
+    Route::get('/{id}/download', [FactureController::class, 'download']);
+});
+
+// Routes admin pour les factures
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/factures', [FactureController::class, 'adminIndex']);
+    Route::post('/factures', [FactureController::class, 'adminStore']);
+    Route::get('/factures/{id}', [FactureController::class, 'adminShow']);
+    Route::post('/factures/{id}/emettre', [FactureController::class, 'adminEmit']);
+    Route::post('/factures/{id}/payer', [FactureController::class, 'adminMarkPaid']);
+    Route::post('/factures/{id}/annuler', [FactureController::class, 'adminCancel']);
+    Route::get('/factures/{id}/download', [FactureController::class, 'adminDownload']);
+});
+
+// Routes POUR la génération automatique de facture
+Route::middleware(['auth:sanctum'])->prefix('factures')->group(function () {
+    Route::get('/', [FactureController::class, 'index']);
+    Route::get('/{id}', [FactureController::class, 'show']);
+    Route::post('/generate', [FactureController::class, 'generate']);
+    Route::post('/{id}/pay', [FactureController::class, 'markAsPaid']);
+    Route::get('/{id}/download', [FactureController::class, 'download']);
+    Route::delete('/{id}', [FactureController::class, 'destroy']);
+});
+
+// Routes admin pour les commandes
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    // Commandes
+    Route::get('/commandes', [CommandeController::class, 'adminIndex']);
+    Route::patch('/commandes/{uuid}/statut', [CommandeController::class, 'adminUpdateStatus']);
+    Route::post('/commandes/{uuid}/rembourser', [CommandeController::class, 'adminRembourser']);
+    Route::delete('/commandes/{uuid}', [CommandeController::class, 'adminDestroy']);
+});
+
+// Routes admin pour les factures
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/factures', [FactureController::class, 'adminIndex']);
+    Route::get('/factures/{id}', [FactureController::class, 'adminShow']);
+    Route::post('/factures/{id}/emettre', [FactureController::class, 'adminEmit']);
+    Route::post('/factures/{id}/payer', [FactureController::class, 'adminMarkPaid']);
+    Route::post('/factures/{id}/annuler', [FactureController::class, 'adminCancel']);
+    Route::delete('/factures/{id}', [FactureController::class, 'adminDestroy']);
+    Route::get('/factures/{id}/download', [FactureController::class, 'adminDownload']);
 });

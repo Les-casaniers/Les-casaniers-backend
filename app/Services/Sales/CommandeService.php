@@ -11,6 +11,8 @@ use App\Traits\CalculatesLineItems;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Models\Commande;
+use App\Models\Panier;
 use Illuminate\Validation\ValidationException;
 
 class CommandeService
@@ -75,6 +77,91 @@ class CommandeService
      * Crée une commande à partir du panier actif.
      * Atomique : validation stock + création items + marquage panier.
      */
+    // public function createFromPanier(int $userId, array $payload): array
+    // {
+    //     return DB::transaction(function () use ($userId, $payload) {
+    //         $itemsPanier = $this->panierRepository->getActiveItemsWithProduit($userId);
+
+    //         if ($itemsPanier->isEmpty()) {
+    //             throw ValidationException::withMessages([
+    //                 'panier' => ['Le panier actif est vide.'],
+    //             ]);
+    //         }
+
+    //         // Vérifier la disponibilité du stock AVANT de créer la commande
+    //         foreach ($itemsPanier as $item) {
+    //             if ($item->produit_id) {
+    //                 $produit = $this->produitService->getProduitById($item->produit_id);
+    //                 if ($produit && (!$produit->actif || !$produit->est_dispo || (int) $produit->quantite_stock <= 0)) {
+    //                     throw ValidationException::withMessages([
+    //                         'stock' => [
+    //                             "Le produit \"{$produit->nom}\" est indisponible."
+    //                         ],
+    //                     ]);
+    //                 }
+    //                 if ($produit && $produit->quantite_stock < ($item->quantite ?? 1)) {
+    //                     throw ValidationException::withMessages([
+    //                         'stock' => [
+    //                             "Stock insuffisant pour \"{$produit->nom}\" " .
+    //                             "(demandé: {$item->quantite}, disponible: {$produit->quantite_stock})."
+    //                         ],
+    //                     ]);
+    //                 }
+    //             }
+    //         }
+
+    //         $uuid = (string) Str::uuid();
+    //         $livraison = (float) ($payload['livraison'] ?? 0);
+    //         $devise = $payload['devise'] ?? 'MGA';
+    //         $sousTotal = $this->calculerSousTotal($itemsPanier);
+    //         $total = $sousTotal + $livraison;
+
+    //         foreach ($itemsPanier as $item) {
+    //             $this->commandeRepository->create([
+    //                 'commande_uuid' => $uuid,
+    //                 'utilisateur_id' => $userId,
+    //                 'panier_id' => $item->id,
+    //                 'devis_id' => $payload['devis_id'] ?? null,
+    //                 'statut' => CommandeStatut::EnAttente->value,
+    //                 'sous_total' => $sousTotal,
+    //                 'livraison' => $livraison,
+    //                 'total' => $total,
+    //                 'devise' => $devise,
+    //                 'adresse_expedition_id' => $payload['adresse_expedition_id'] ?? null,
+    //                 'adresse_facturation_id' => $payload['adresse_facturation_id'] ?? null,
+    //                 'produit_id' => $item->produit_id,
+    //                 'titre' => $item->titre,
+    //                 'reference' => $item->produit?->reference,
+    //                 'prix_unitaire' => $item->prix_unitaire ?? 0,
+    //                 'quantite' => $item->quantite ?? 1,
+    //                 'meta_json' => $payload['meta_json'] ?? null,
+    //             ]);
+    //         }
+
+    //         $this->panierRepository->markActiveAsCommande($userId);
+
+    //         // Notifier l'admin de la nouvelle commande
+    //         try {
+    //             $items = $this->commandeRepository->findByUuid($uuid);
+    //             $commande = $items->first();
+    //             $clientNom = trim(($commande->utilisateur->prenom ?? '') . ' ' . ($commande->utilisateur->nom ?? ''));
+    //             $this->notificationService->notifyNewCommande(
+    //                 $uuid,
+    //                 $total,
+    //                 $devise,
+    //                 $clientNom ?: 'Client'
+    //             );
+    //         } catch (\Throwable $e) {
+    //             \Illuminate\Support\Facades\Log::warning('Notification new commande failed', ['error' => $e->getMessage()]);
+    //         }
+
+    //         return [
+    //             'commande_uuid' => $uuid,
+    //             'items' => $this->commandeRepository->findByUuid($uuid),
+    //         ];
+    //     });
+    // }
+
     public function createFromPanier(int $userId, array $payload): array
     {
         return DB::transaction(function () use ($userId, $payload) {
@@ -86,29 +173,26 @@ class CommandeService
                 ]);
             }
 
-            // Vérifier la disponibilité du stock AVANT de créer la commande
+            // Vérifier la disponibilité du stock
             foreach ($itemsPanier as $item) {
                 if ($item->produit_id) {
                     $produit = $this->produitService->getProduitById($item->produit_id);
                     if ($produit && (!$produit->actif || !$produit->est_dispo || (int) $produit->quantite_stock <= 0)) {
                         throw ValidationException::withMessages([
-                            'stock' => [
-                                "Le produit \"{$produit->nom}\" est indisponible."
-                            ],
+                            'stock' => ["Le produit \"{$produit->nom}\" est indisponible."],
                         ]);
                     }
                     if ($produit && $produit->quantite_stock < ($item->quantite ?? 1)) {
                         throw ValidationException::withMessages([
-                            'stock' => [
-                                "Stock insuffisant pour \"{$produit->nom}\" " .
-                                "(demandé: {$item->quantite}, disponible: {$produit->quantite_stock})."
-                            ],
+                            'stock' => ["Stock insuffisant pour \"{$produit->nom}\" (demandé: {$item->quantite}, disponible: {$produit->quantite_stock})."],
                         ]);
                     }
                 }
             }
 
-            $uuid = (string) Str::uuid();
+            // Générer le numéro de commande unique
+            $commandeUuid = $this->generateCommandeUuid();
+            
             $livraison = (float) ($payload['livraison'] ?? 0);
             $devise = $payload['devise'] ?? 'MGA';
             $sousTotal = $this->calculerSousTotal($itemsPanier);
@@ -116,7 +200,7 @@ class CommandeService
 
             foreach ($itemsPanier as $item) {
                 $this->commandeRepository->create([
-                    'commande_uuid' => $uuid,
+                    'commande_uuid' => $commandeUuid,  // Utiliser le format CMD-2026-001
                     'utilisateur_id' => $userId,
                     'panier_id' => $item->id,
                     'devis_id' => $payload['devis_id'] ?? null,
@@ -138,13 +222,13 @@ class CommandeService
 
             $this->panierRepository->markActiveAsCommande($userId);
 
-            // Notifier l'admin de la nouvelle commande
+            // Notifier l'admin
             try {
-                $items = $this->commandeRepository->findByUuid($uuid);
+                $items = $this->commandeRepository->findByUuid($commandeUuid);
                 $commande = $items->first();
                 $clientNom = trim(($commande->utilisateur->prenom ?? '') . ' ' . ($commande->utilisateur->nom ?? ''));
                 $this->notificationService->notifyNewCommande(
-                    $uuid,
+                    $commandeUuid,
                     $total,
                     $devise,
                     $clientNom ?: 'Client'
@@ -154,8 +238,8 @@ class CommandeService
             }
 
             return [
-                'commande_uuid' => $uuid,
-                'items' => $this->commandeRepository->findByUuid($uuid),
+                'commande_uuid' => $commandeUuid,
+                'items' => $this->commandeRepository->findByUuid($commandeUuid),
             ];
         });
     }
@@ -357,4 +441,30 @@ class CommandeService
             }
         }
     }
+
+    /**
+ * Génère un numéro de commande unique au format CMD-ANNEE-NUMERO
+ * Exemple: CMD-2026-001, CMD-2026-002, ...
+ */
+    private function generateCommandeUuid(): string
+    {
+        $year = date('Y');
+        
+        // Récupérer le dernier numéro de commande pour l'année en cours
+        $lastCommande = Commande::where('commande_uuid', 'like', "CMD-{$year}-%")
+            ->orderBy('id', 'desc')
+            ->first();
+        
+        if ($lastCommande) {
+            // Extraire le numéro et l'incrémenter
+            $parts = explode('-', $lastCommande->commande_uuid);
+            $lastNumber = (int) end($parts);
+            $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+        } else {
+            $newNumber = '001';
+        }
+        
+        return "CMD-{$year}-{$newNumber}";
+    }
+
 }

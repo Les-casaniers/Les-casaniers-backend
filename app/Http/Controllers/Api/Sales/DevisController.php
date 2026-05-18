@@ -39,6 +39,7 @@ class DevisController extends Controller
                 'panier_id' => ['nullable', 'integer', 'exists:paniers,id'],
                 'note' => ['nullable', 'string'],
                 'devise' => ['nullable', 'string', 'size:3'],
+                'devis_id' => ['nullable', 'integer', 'exists:devis,id'],
             ]);
 
             $data = $this->devisService->create((int) $request->user()->id, $validated);

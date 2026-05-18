@@ -20,7 +20,7 @@ class AdminAuthController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/admin/register",
+     *     path="/api/admin/register",
      *     summary="Creer un compte administrateur",
      *     description="Permet de creer un nouveau compte administrateur.",
      *     tags={"Admin Auth"},
@@ -466,6 +466,118 @@ class AdminAuthController extends Controller
                 'errors' => $e->errors()
             ], 401);
         } catch (Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur serveur'
+            ], 500);
+        }
+    }
+
+    /**
+     * Admin - Liste tous les administrateurs
+     */
+    public function list(Request $request)
+    {
+        try {
+            $admins = \App\Models\Admin::select(
+                'id', 
+                'prenom', 
+                'nom', 
+                'email', 
+                'telephone', 
+                'poste', 
+                'statut', 
+                'date_creation', 
+                'date_modification'
+            )
+            ->orderBy('date_creation', 'desc')
+            ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $admins
+            ], 200);
+        } catch (Throwable $e) {
+            Log::error('Admin list failed', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors du chargement des administrateurs'
+            ], 500);
+        }
+    }
+
+    /**
+     * Admin - Mettre à jour le statut d'un administrateur
+     */
+    public function updateStatut(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'statut' => 'required|in:actif,inactif'
+            ]);
+
+            $admin = \App\Models\Admin::find($id);
+            
+            if (!$admin) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Administrateur non trouvé'
+                ], 404);
+            }
+
+            $admin->statut = $request->statut;
+            $admin->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Statut mis à jour avec succès',
+                'data' => $admin
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (Throwable $e) {
+            Log::error('Admin update statut failed', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur serveur'
+            ], 500);
+        }
+    }
+
+    /**
+     * Admin - Supprimer un administrateur
+     */
+    public function destroy($id)
+    {
+        try {
+            $admin = \App\Models\Admin::find($id);
+            
+            if (!$admin) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Administrateur non trouvé'
+                ], 404);
+            }
+
+            // Empêcher la suppression de son propre compte
+            if (auth()->id() == $id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous ne pouvez pas supprimer votre propre compte'
+                ], 403);
+            }
+
+            $admin->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Administrateur supprimé avec succès'
+            ], 200);
+        } catch (Throwable $e) {
+            Log::error('Admin destroy failed', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur serveur'

@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Services\Sales\CommandeService;
 use App\Services\Sales\FactureService;
 use Illuminate\Http\Request;
+use App\Models\Commande;
 use Illuminate\Validation\ValidationException;
 use Throwable;
+use Illuminate\Support\Facades\DB;
+use App\Models\Produit;
 
 /**
  * @OA\Tag(
@@ -88,6 +91,7 @@ class CommandeController extends Controller
                 'adresse_expedition_id' => ['nullable', 'integer'],
                 'adresse_facturation_id' => ['nullable', 'integer'],
                 'meta_json' => ['nullable', 'array'],
+                'devis_id' => ['nullable', 'integer', 'exists:devis,id'], // ← AJOUTER CECI
             ]);
 
             $data = $this->commandeService->createFromPanier((int) $request->user()->id, $validated);
@@ -219,6 +223,111 @@ class CommandeController extends Controller
             return response()->json(['success' => true, 'data' => $data], 200);
         } catch (ValidationException $e) {
             return response()->json(['success' => false, 'errors' => $e->errors()], 422);
+        }
+    }
+
+    public function getLastNumber()
+    {
+        try {
+            $lastCommande = Commande::orderBy('id', 'desc')->first();
+            
+            $lastNumber = 0;
+            if ($lastCommande && $lastCommande->commande_uuid) {
+                // Extraire le numéro de CMD-XXX
+                $parts = explode('-', $lastCommande->commande_uuid);
+                $lastNumber = (int) end($parts);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'last_number' => $lastNumber
+            ]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'success' => true,
+                'last_number' => 0
+            ]);
+        }
+    }
+
+    /**
+     * Admin - Rembourser une commande
+     */
+    /**
+ * Admin - Rembourser une commande
+ */
+    public function adminRembourser(Request $request, string $uuid)
+    {
+        try {
+            $commande = Commande::where('commande_uuid', $uuid)->first();
+            
+            if (!$commande) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Commande non trouvée'
+                ], 404);
+            }
+            
+            // Vérifier si la commande peut être remboursée
+            if ($commande->statut !== 'payee') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Seules les commandes payées peuvent être remboursées'
+                ], 422);
+            }
+            
+            DB::transaction(function () use ($commande) {
+                $commande->update(['statut' => 'remboursee']);
+                
+                // Restaurer le stock si nécessaire
+                if ($commande->produit_id) {
+                    $produit = Produit::find($commande->produit_id);
+                    if ($produit) {
+                        $produit->increment('quantite_stock', $commande->quantite);
+                    }
+                }
+            });
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Commande remboursée avec succès'
+            ], 200);
+            
+        } catch (Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors du remboursement: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Admin - Supprimer définitivement une commande
+     */
+    public function adminDestroy(Request $request, string $uuid)
+    {
+        try {
+            $commande = Commande::where('commande_uuid', $uuid)->first();
+            
+            if (!$commande) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Commande non trouvée'
+                ], 404);
+            }
+            
+            $commande->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Commande supprimée avec succès'
+            ], 200);
+            
+        } catch (Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la suppression: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
