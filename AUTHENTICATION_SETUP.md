@@ -78,6 +78,9 @@ php artisan serve
 
 # Le serveur sera disponible sur http://localhost:8000
 ```
+### 7. To start the WebSocket
+```bash
+php artisan websocket:serve --port=8090
 
 ---
 
