@@ -21,7 +21,7 @@ class ImageProduitService
         $this->imageRepository = $imageRepository;
 
         $this->backendImagePath = base_path('image');
-        $this->backendImageUrlBase = rtrim((string) env('app.url', 'http://localhost:8000'), '/') . '/image';
+        $this->backendImageUrlBase = rtrim((string) env('https://api.holines.xyz', 'http://localhost:8000'), '/') . '/image';
 
         // Creation automatique du dossier backend s'il n'existe pas.
         if (!File::exists($this->backendImagePath)) {
