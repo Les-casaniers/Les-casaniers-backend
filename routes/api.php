@@ -21,6 +21,8 @@ use App\Http\Controllers\Api\UtilisateurController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use App\Http\Controllers\Api\DevisExpress\DevisExpressController;
+use App\Models\Admin;
+use Illuminate\Http\Request;
 
 Route::middleware(['auth:sanctum'])->get('/user', [UserController::class, 'user']);
 
@@ -336,4 +338,11 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/factures/{id}/annuler', [FactureController::class, 'adminCancel']);
     Route::delete('/factures/{id}', [FactureController::class, 'adminDestroy']);
     Route::get('/factures/{id}/download', [FactureController::class, 'adminDownload']);
+});
+
+// Route pour vérifier si un utilisateur est admin par son email
+Route::middleware(['auth:sanctum'])->post('/admin/check-by-email', function (Request $request) {
+    $email = $request->email;
+    $isAdmin = Admin::where('email', $email)->exists();
+    return response()->json(['isAdmin' => $isAdmin]);
 });
