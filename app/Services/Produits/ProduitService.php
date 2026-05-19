@@ -81,6 +81,14 @@ class ProduitService
     }
 
     /**
+     * CRUD Back-Office: Supprimer un produit
+     */
+    public function deleteProduit(int $id)
+    {
+        return $this->produitRepository->delete($id);
+    }
+
+    /**
      * Gestion du stock : décrémente atomiquement sur commande confirmée.
      * Utilise une requête SQL atomique pour éviter les race conditions.
      *

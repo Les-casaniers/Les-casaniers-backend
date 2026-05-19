@@ -432,3 +432,10 @@ Mise à jour de config/auth.php pour utiliser le modèle Utilisateur à la place
 Création de UtilisateurController.php avec toutes les méthodes nécessaires et la documentation Swagger (OpenApi).
 Ajout des routes API sous le préfixe /utilisateurs dans routes/api.php.
 Toutes les fonctionnalités d'authentification et de gestion de compte pour les utilisateurs sont maintenant opérationnelles et alignées sur la structure de la table SQL.
+
+
+Modifs principales :
+CRUD admin enrichi dans AdminGuides.tsx : slug, catégorie, statut, badge, budgets, composants, difficulté, durée, étapes, vidéo, tags, ordre, mise en avant, image, aperçu avant publication, filtres, recherche, pagination.
+Hook guides mis à jour dans useGuides.ts : support des slugs SEO, newsletter avec honeypot, listing admin newsletter.
+Pages client ajustées dans Guides.tsx et GuideDetail.tsx pour utiliser /guides/{slug} quand disponible.
+Newsletter backend renforcée dans NewsletterController.php avec validation honeypot + rate limiting basique.

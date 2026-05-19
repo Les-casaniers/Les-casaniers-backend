@@ -78,6 +78,11 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
+            \App\Repositories\Guides\GuideRepositoryInterface::class,
+            \App\Repositories\Guides\GuideRepository::class
+        );
+
+        $this->app->bind(
             \App\Repositories\Adresse\AdresseRepositoryInterface::class,
             \App\Repositories\Adresse\AdresseRepository::class
         );
