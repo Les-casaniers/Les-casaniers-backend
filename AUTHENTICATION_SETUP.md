@@ -16,6 +16,8 @@
 # Installer Composer
 composer install
 
+if (Test-Path .\vendor\laravel\framework) { Remove-Item -Recurse -Force .\vendor\laravel\framework }; composer install
+
 # Installer les dépendances npm
 npm install
 ```
