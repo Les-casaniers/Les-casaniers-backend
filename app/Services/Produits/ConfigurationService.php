@@ -21,8 +21,22 @@ class ConfigurationService
     {
         $this->validateNomConfiguration($payload);
 
+        // 🔥 CORRECTION IMPORTANTE: Conserver le champ "nom" des composants
+        $composants = $payload['composants_json'] ?? [];
+        
+        // Vérifier que chaque composant a bien tous ses champs (nom, prix, quantite)
+        $composantsTraites = [];
+        foreach ($composants as $composant) {
+            $composantsTraites[] = [
+                'nom' => $composant['nom'] ?? null,           // ← Conserver le nom !
+                'prix' => (float) ($composant['prix'] ?? 0),
+                'quantite' => (int) ($composant['quantite'] ?? 1),
+            ];
+        }
+        
         $payload['utilisateur_id'] = $utilisateurId;
-        $payload['prix_total'] = $this->calculatePrixTotal($payload['composants_json'] ?? []);
+        $payload['prix_total'] = $this->calculatePrixTotal($composantsTraites);
+        $payload['composants_json'] = $composantsTraites; // ← Remplacer par les composants traités
 
         return $this->configurationRepository->create($payload);
     }
@@ -40,7 +54,18 @@ class ConfigurationService
         $this->validateNomConfiguration($next);
 
         if (array_key_exists('composants_json', $payload)) {
-            $payload['prix_total'] = $this->calculatePrixTotal($payload['composants_json']);
+            // 🔥 CORRECTION: Conserver le champ "nom" lors de la mise à jour aussi
+            $composants = $payload['composants_json'];
+            $composantsTraites = [];
+            foreach ($composants as $composant) {
+                $composantsTraites[] = [
+                    'nom' => $composant['nom'] ?? null,
+                    'prix' => (float) ($composant['prix'] ?? 0),
+                    'quantite' => (int) ($composant['quantite'] ?? 1),
+                ];
+            }
+            $payload['prix_total'] = $this->calculatePrixTotal($composantsTraites);
+            $payload['composants_json'] = $composantsTraites;
         }
 
         return $this->configurationRepository->update($configurationId, $payload);
