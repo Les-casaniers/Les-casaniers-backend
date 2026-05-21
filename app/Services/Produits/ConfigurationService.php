@@ -83,11 +83,19 @@ class ConfigurationService
         return $this->configurationRepository->delete($configurationId) > 0;
     }
 
+    /**
+     * Valide les règles de nommage des configurations
+     * 
+     * Règles :
+     * 1. Si nom_configuration = "autre" → nom_configuration_autre est obligatoire
+     * 2. Si nom_configuration ≠ "autre" → nom_configuration_autre peut être null OU une valeur (plus de restriction)
+     */
     private function validateNomConfiguration(array $payload): void
     {
         $nom = $payload['nom_configuration'] ?? null;
         $autre = $payload['nom_configuration_autre'] ?? null;
 
+        // Règle 1 : Si "autre" est sélectionné, le champ personnalisé est requis
         if ($nom === 'autre' && blank($autre)) {
             throw ValidationException::withMessages([
                 'nom_configuration_autre' => [
@@ -96,13 +104,13 @@ class ConfigurationService
             ]);
         }
 
-        if ($nom !== 'autre' && !blank($autre)) {
-            throw ValidationException::withMessages([
-                'nom_configuration_autre' => [
-                    'Le champ nom_configuration_autre doit être null pour une configuration différente de autre.',
-                ],
-            ]);
-        }
+        // Règle 2 : Supprimée - Plus de restriction pour les autres cas
+        // Maintenant, nom_configuration_autre peut être rempli pour n'importe quelle valeur de nom_configuration
+        // Exemples valides :
+        // - nom_configuration = "ram", nom_configuration_autre = "RAM 16G DDR5" ✅
+        // - nom_configuration = "cpu", nom_configuration_autre = "Ryzen 7 7800X3D" ✅
+        // - nom_configuration = "gpu", nom_configuration_autre = null ✅
+        // - nom_configuration = "gpu", nom_configuration_autre = "" ✅
     }
 
     private function calculatePrixTotal(array $composants): float
