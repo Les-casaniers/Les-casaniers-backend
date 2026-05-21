@@ -72,13 +72,47 @@ class ConfigurationController extends Controller
      *     @OA\Response(response=422, description="Erreur de validation")
      * )
      */
+    // public function store(Request $request)
+    // {
+    //     try {
+    //         $validated = $request->validate([
+    //             'produit_id' => ['required', 'integer', 'exists:produits,id'],
+    //             'nom_configuration' => ['required', 'string', 'in:cpu,carte_mere,gpu,ram,ssd,hdd,stockage,alimentation,boitier,refroidissement,ventilateur,ecran,clavier,souris,os,reseau,autre'],
+    //             'nom_configuration_autre' => ['nullable', 'string', 'max:190'],
+    //             'devise' => ['nullable', 'string', 'size:3'],
+    //             'composants_json' => ['required', 'array', 'min:1'],
+    //             'composants_json.*.prix' => ['nullable', 'numeric', 'min:0'],
+    //             'composants_json.*.quantite' => ['nullable', 'integer', 'min:1'],
+    //         ]);
+
+    //         $configuration = $this->configurationService->store((int) $request->user()->id, $validated);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Configuration créée avec succès.',
+    //             'data' => $configuration,
+    //         ], 201);
+    //     } catch (ValidationException $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Erreur de validation',
+    //             'errors' => $e->errors(),
+    //         ], 422);
+    //     } catch (Throwable $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Erreur serveur',
+    //         ], 500);
+    //     }
+    // }
+
     public function store(Request $request)
     {
         try {
             $validated = $request->validate([
                 'produit_id' => ['required', 'integer', 'exists:produits,id'],
                 'nom_configuration' => ['required', 'string', 'in:cpu,carte_mere,gpu,ram,ssd,hdd,stockage,alimentation,boitier,refroidissement,ventilateur,ecran,clavier,souris,os,reseau,autre'],
-                'nom_configuration_autre' => ['nullable', 'string', 'max:190'],
+                'nom_configuration_autre' => ['nullable', 'string', 'max:190'], // ← Supprimez la condition "requis si autre"
                 'devise' => ['nullable', 'string', 'size:3'],
                 'composants_json' => ['required', 'array', 'min:1'],
                 'composants_json.*.prix' => ['nullable', 'numeric', 'min:0'],
