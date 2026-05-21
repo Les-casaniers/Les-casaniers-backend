@@ -306,7 +306,7 @@ CREATE TABLE paniers (
 -- Colonnes clés: utilisateur_id (client), panier_id, configuration_id, montant_total
 -- Table: commandes
 -- Description: commandes passées
--- Colonnes clés: utilisateur_id, adresse_expedition_id, adresse_facturation_id, statut, total
+-- Colonnes clés: utilisateur_id, adresse_expedition_id, adresse_facturation_id, sFtatut, total
 -- =========================
 CREATE TABLE `devis` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
