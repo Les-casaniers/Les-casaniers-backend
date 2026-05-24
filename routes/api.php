@@ -80,7 +80,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::put('/categories/{id}', [CategoryController::class, 'update']);
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
-    Route::patch('/categories/reorder', [CategoryController::class, 'reorder']);
 
     Route::post('/produits', [ProduitController::class, 'store']);
     Route::put('/produits/{id}', [ProduitController::class, 'update']);

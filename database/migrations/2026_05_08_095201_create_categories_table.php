@@ -15,9 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('parent_id')->nullable()->constrained('categories')->onDelete('set null');
             $table->string('nom', 190);
-            $table->enum('type', ['pro', 'gaming', 'composants', 'peripheriques', 'services', 'guides']);
-            $table->integer('ordre_tri')->default(0);
-            $table->timestamp('date_creation')->useCurrent();
+            $table->text('code')->nullable();
             $table->timestamp('date_modification')->useCurrent()->useCurrentOnUpdate();
         });
     }

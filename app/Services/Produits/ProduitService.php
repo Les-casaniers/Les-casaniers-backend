@@ -22,32 +22,31 @@ class ProduitService
     }
 
     /**
-     * CRUD Back-Office: Créer un produit
+     * CRUD Back-Office: Creer un produit
      */
     public function createProduit(array $data)
     {
+        unset($data['reference']);
+
         $this->validateProduit($data);
         $data['est_dispo'] = ((int) ($data['quantite_stock'] ?? 0)) > 0;
 
-        if (empty($data['reference'])) {
-            $data['reference'] = $this->generateReference();
-        }
-
-        // Vérifier si la catégorie existe
         $category = $this->categoryRepository->findById($data['categorie_id']);
         if (!$category) {
-            throw new Exception("La catégorie spécifiée n'existe pas.");
+            throw new Exception("La categorie specifiee n'existe pas.");
         }
+
+        $data['reference'] = $this->generateReference($category->code);
 
         return $this->produitRepository->create($data);
     }
 
     /**
-     * CRUD Back-Office: Mettre à jour un produit
+     * CRUD Back-Office: Mettre a jour un produit
      */
     public function updateProduit(int $id, array $data)
     {
-        // On ne valide que les champs fournis pour l'édition partielle
+        // On ne valide que les champs fournis pour l'edition partielle
         $validator = Validator::make($data, [
             'prix' => 'sometimes|numeric|min:0',
             'quantite_stock' => 'sometimes|integer|min:0',
@@ -55,7 +54,7 @@ class ProduitService
             'description_courte' => 'sometimes|nullable|string|max:500',
             'nom' => 'sometimes|string|max:255',
             'categorie_id' => 'sometimes|exists:categories,id',
-            'type_produit' => 'sometimes|in:pc,portable,composant,peripherique,service',
+            'type_produit' => 'sometimes|in:pc,portable,pro,gaming,composant,peripherique,service',
             'reference' => 'sometimes|nullable|string|max:80|unique:produits,reference,' . $id,
             'devise' => 'sometimes|nullable|string|max:10',
             'actif' => 'sometimes|boolean',
@@ -73,7 +72,7 @@ class ProduitService
     }
 
     /**
-     * Activation / Désactivation
+     * Activation / Desactivation
      */
     public function toggleStatus(int $id, bool $active)
     {
@@ -89,8 +88,8 @@ class ProduitService
     }
 
     /**
-     * Gestion du stock : décrémente atomiquement sur commande confirmée.
-     * Utilise une requête SQL atomique pour éviter les race conditions.
+     * Gestion du stock : decremente atomiquement sur commande confirmee.
+     * Utilise une requete SQL atomique pour eviter les race conditions.
      *
      * @throws \Exception Si le stock est insuffisant.
      */
@@ -107,13 +106,13 @@ class ProduitService
             $nom = $produit?->nom ?? "ID #{$produitId}";
             $stockActuel = $produit?->quantite_stock ?? 0;
             throw new Exception(
-                "Stock insuffisant pour \"{$nom}\" (demandé: {$quantity}, disponible: {$stockActuel})."
+                "Stock insuffisant pour \"{$nom}\" (demande: {$quantity}, disponible: {$stockActuel})."
             );
         }
     }
 
     /**
-     * Gestion du stock : restaure le stock après annulation ou remboursement.
+     * Gestion du stock : restaure le stock apres annulation ou remboursement.
      */
     public function restoreStock(int $produitId, int $quantity): void
     {
@@ -125,7 +124,7 @@ class ProduitService
     }
 
     /**
-     * Récupérer un produit par ID
+     * Recuperer un produit par ID
      */
     public function getProduitById(int $id)
     {
@@ -133,7 +132,7 @@ class ProduitService
     }
 
     /**
-     * Liste des produits par catégorie
+     * Liste des produits par categorie
      */
     public function getProduitsByCategory(int $categoryId)
     {
@@ -163,14 +162,14 @@ class ProduitService
     }
 
     /**
-     * Validation pour la création
+     * Validation pour la creation
      */
     protected function validateProduit(array $data)
     {
         $validator = Validator::make($data, [
             'nom' => 'required|string|max:255',
             'categorie_id' => 'required|exists:categories,id',
-            'type_produit' => 'required|in:pc,portable,composant,peripherique,service',
+            'type_produit' => 'required|in:pc,portable,pro,gaming,composant,peripherique,service',
             'prix' => 'required|numeric|min:0',
             'quantite_stock' => 'required|integer|min:0',
             'reference' => 'nullable|string|max:80|unique:produits,reference',
@@ -187,19 +186,31 @@ class ProduitService
     }
 
     /**
-     * Génère la prochaine référence séquentielle au format REF-001.
+     * Genere la prochaine reference sequentielle selon le code categorie.
      */
-    protected function generateReference(): string
+    protected function generateReference(?string $categoryCode): string
     {
-        $lastReference = $this->produitRepository->getLastReference();
+        $prefix = $this->normalizeReferencePrefix($categoryCode);
+        $lastReference = $this->produitRepository->getLastReferenceByPrefix($prefix);
 
         if (!$lastReference) {
-            return 'REF-001';
+            return $prefix . '001';
         }
 
-        $numericPart = (int) preg_replace('/^REF-/', '', $lastReference);
+        $numericPart = (int) substr($lastReference, strlen($prefix));
         $nextNumber = $numericPart + 1;
 
-        return sprintf('REF-%03d', $nextNumber);
+        return sprintf('%s%03d', $prefix, $nextNumber);
+    }
+
+    protected function normalizeReferencePrefix(?string $categoryCode): string
+    {
+        $prefix = strtoupper(trim((string) $categoryCode));
+
+        if ($prefix === '') {
+            throw new Exception("La categorie doit avoir un code pour generer la reference du produit.");
+        }
+
+        return str_ends_with($prefix, '-') ? $prefix : $prefix . '-';
     }
 }

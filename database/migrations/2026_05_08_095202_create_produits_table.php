@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('nom', 255);
             $table->string('description_courte', 1000)->nullable();
             $table->longText('description')->nullable();
-            $table->enum('type_produit', ['pc', 'portable', 'composant', 'peripherique', 'service']);
+            $table->enum('type_produit', ['pc', 'portable', 'pro', 'gaming' ,'composant', 'peripherique', 'service']);
             $table->decimal('prix', 12, 2)->nullable();
             $table->char('devise', 3)->default('MGA');
             $table->integer('quantite_stock')->nullable();

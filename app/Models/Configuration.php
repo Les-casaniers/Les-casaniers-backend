@@ -13,16 +13,15 @@ class Configuration extends Model
 
     protected $fillable = [
         'produit_id',
-        'utilisateur_id',
         'nom_configuration',
-        'nom_configuration_autre',
-        'devise',
+        'type',
+        'detail',
+        'capacite',
         'prix_total',
-        'composants_json',
     ];
 
     protected $casts = [
-        'composants_json' => 'array',
+        'prix_total' => 'decimal:2',
     ];
 
     const CREATED_AT = 'date_creation';
@@ -33,8 +32,4 @@ class Configuration extends Model
         return $this->belongsTo(Produit::class);
     }
 
-    public function utilisateur()
-    {
-        return $this->belongsTo(Utilisateur::class);
-    }
 }

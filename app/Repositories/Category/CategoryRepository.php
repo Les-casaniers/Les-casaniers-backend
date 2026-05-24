@@ -20,7 +20,7 @@ class CategoryRepository implements CategoryRepositoryInterface
 
     public function getRoots()
     {
-        return $this->model->whereNull('parent_id')->orderBy('ordre_tri')->get();
+        return $this->model->whereNull('parent_id')->orderBy('nom')->get();
     }
 
     public function findById(int $id)
@@ -56,7 +56,7 @@ class CategoryRepository implements CategoryRepositoryInterface
     {
         return $this->model->whereNull('parent_id')
             ->with('enfants')
-            ->orderBy('ordre_tri')
+            ->orderBy('nom')
             ->get();
     }
 }

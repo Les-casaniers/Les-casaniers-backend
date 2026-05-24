@@ -33,20 +33,14 @@ class CategoryController extends Controller
     /**
      * @OA\Get(
      *     path="/api/categories",
-     *     summary="Liste des catÃ©gories racines",
+     *     summary="Liste des catÃ©gories",
      *     tags={"CatÃ©gories"},
-     *     @OA\Parameter(name="type", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Response(response=200, description="SuccÃ¨s")
      * )
      */
     public function index(Request $request)
     {
-        $type = $request->query('type');
-        if ($type) {
-            $categories = $this->categoryService->getMenuByType($type);
-        } else {
-            $categories = $this->categoryService->getAllCategories();
-        }
+        $categories = $this->categoryService->getAllCategories();
         
         return response()->json([
             'success' => true,
@@ -85,7 +79,7 @@ class CategoryController extends Controller
      *     summary="CrÃ©er une catÃ©gorie (Admin)",
      *     tags={"CatÃ©gories"},
      *     security={{"sanctum": {}}},
-     *     @OA\RequestBody(required=true, @OA\JsonContent(required={"nom", "type"})),
+    *     @OA\RequestBody(required=true, @OA\JsonContent(required={"nom"})),
      *     @OA\Response(response=201, description="CrÃ©Ã©"),
      *     @OA\Response(response=422, description="Erreur de validation")
      * )
@@ -149,23 +143,6 @@ class CategoryController extends Controller
         return response()->json(['success' => $deleted]);
     }
 
-    /**
-     * @OA\Patch(
-     *     path="/api/categories/reorder",
-     *     summary="RÃ©organiser les catÃ©gories (Admin)",
-     *     tags={"CatÃ©gories"},
-     *     security={{"sanctum": {}}},
-     *     @OA\Response(response=200, description="RÃ©organisÃ©")
-     * )
-     */
-    public function reorder(Request $request)
-    {
-        if ($response = $this->ensureAdmin($request)) {
-            return $response;
-        }
-        $this->categoryService->updateOrder($request->input('orders', []));
-        return response()->json(['success' => true]);
-    }
 }
 
 

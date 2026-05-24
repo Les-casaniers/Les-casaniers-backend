@@ -4,13 +4,13 @@ namespace App\Repositories\Configurations;
 
 interface ConfigurationRepositoryInterface
 {
-    public function getAllByUser(?int $userId);
+    public function getAll(array $filters = []);
 
     public function findById(int $id);
 
-    public function findByIdForUser(int $id, ?int $userId);
-
     public function create(array $data);
+
+    public function createMany(array $rows);
 
     public function update(int $id, array $data);
 

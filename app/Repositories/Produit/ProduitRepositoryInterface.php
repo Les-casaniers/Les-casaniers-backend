@@ -13,6 +13,7 @@ interface ProduitRepositoryInterface
     public function search(string $term);
     public function getLatest(int $limit = 10);
     public function getLastReference(): ?string;
+    public function getLastReferenceByPrefix(string $prefix): ?string;
 
     /**
      * Décrémente atomiquement le stock d'un produit.

@@ -22,13 +22,6 @@ class CategoryService
     {
         $this->validateCategory($data);
 
-        if (!empty($data['parent_id'])) {
-            $parent = $this->categoryRepository->findById($data['parent_id']);
-            if ($parent && $parent->type !== $data['type']) {
-                $data['type'] = $parent->type;
-            }
-        }
-
         return $this->categoryRepository->create($data);
     }
 
@@ -38,13 +31,6 @@ class CategoryService
     public function updateCategory(int $id, array $data)
     {
         $this->validateCategory($data, $id);
-
-        if (!empty($data['parent_id'])) {
-            $parent = $this->categoryRepository->findById($data['parent_id']);
-            if ($parent && $parent->type !== $data['type']) {
-                $data['type'] = $parent->type;
-            }
-        }
 
         return $this->categoryRepository->update($id, $data);
     }
@@ -84,33 +70,17 @@ class CategoryService
         return $breadcrumbs;
     }
 
-    public function getMenuByType(string $type)
-    {
-        return $this->categoryRepository->getRoots()
-            ->where('type', $type)
-            ->load('enfants');
-    }
-
     public function getAllCategories()
     {
         return $this->categoryRepository->getAll();
-    }
-
-    public function updateOrder(array $orders)
-    {
-        foreach ($orders as $id => $ordre) {
-            $this->categoryRepository->update($id, ['ordre_tri' => $ordre]);
-        }
-        return true;
     }
 
     protected function validateCategory(array $data, int $id = null)
     {
         $rules = [
             'nom' => 'required|string|max:190',
-            'type' => 'required|in:pro,gaming,composants,peripheriques,services,guides',
             'parent_id' => 'nullable|exists:categories,id',
-            'ordre_tri' => 'integer',
+            'code' => 'nullable|string',
         ];
 
         $validator = Validator::make($data, $rules);

@@ -7,90 +7,118 @@ use Illuminate\Validation\ValidationException;
 
 class ConfigurationService
 {
+    private const NOM_CONFIGURATIONS = [
+        'cpu',
+        'carte_mere',
+        'gpu',
+        'ram',
+        'ssd',
+        'hdd',
+        'stockage',
+        'alimentation',
+        'boitier',
+        'refroidissement',
+        'ventilateur',
+        'ecran',
+        'clavier',
+        'souris',
+        'os',
+        'reseau',
+        'autre',
+    ];
+
     public function __construct(
         private readonly ConfigurationRepositoryInterface $configurationRepository
     ) {
     }
 
-    public function index(int $utilisateurId)
+    public function index(array $filters = [])
     {
-        return $this->configurationRepository->getAllByUser($utilisateurId);
+        return $this->configurationRepository->getAll($filters);
     }
 
-    public function store(int $utilisateurId, array $payload)
+    public function store(array $payload)
     {
-        $this->validateNomConfiguration($payload);
+        $rows = $this->normalizeRows($payload);
 
-        $payload['utilisateur_id'] = $utilisateurId;
-        $payload['prix_total'] = $this->calculatePrixTotal($payload['composants_json'] ?? []);
-
-        return $this->configurationRepository->create($payload);
+        return count($rows) === 1
+            ? $this->configurationRepository->create($rows[0])
+            : $this->configurationRepository->createMany($rows);
     }
 
-    public function update(int $utilisateurId, int $configurationId, array $payload)
+    public function update(int $configurationId, array $payload)
     {
-        $configuration = $this->configurationRepository->findByIdForUser($configurationId, $utilisateurId);
+        $configuration = $this->configurationRepository->findById($configurationId);
         if (!$configuration) {
             throw ValidationException::withMessages([
-                'configuration_id' => ['Configuration introuvable pour cet utilisateur.'],
+                'configuration_id' => ['Configuration introuvable.'],
             ]);
         }
 
-        $next = array_merge($configuration->toArray(), $payload);
-        $this->validateNomConfiguration($next);
+        $row = $this->normalizeRow(array_merge($configuration->toArray(), $payload));
 
-        if (array_key_exists('composants_json', $payload)) {
-            $payload['prix_total'] = $this->calculatePrixTotal($payload['composants_json']);
-        }
+        unset($row['produit_id']);
 
-        return $this->configurationRepository->update($configurationId, $payload);
+        return $this->configurationRepository->update($configurationId, $row);
     }
 
-    public function destroy(int $utilisateurId, int $configurationId): bool
+    public function destroy(int $configurationId): bool
     {
-        $configuration = $this->configurationRepository->findByIdForUser($configurationId, $utilisateurId);
-        if (!$configuration) {
-            throw ValidationException::withMessages([
-                'configuration_id' => ['Configuration introuvable pour cet utilisateur.'],
-            ]);
-        }
-
         return $this->configurationRepository->delete($configurationId) > 0;
     }
 
-    private function validateNomConfiguration(array $payload): void
+    private function normalizeRows(array $payload): array
     {
-        $nom = $payload['nom_configuration'] ?? null;
-        $autre = $payload['nom_configuration_autre'] ?? null;
+        $produitId = $payload['produit_id'] ?? null;
+        $configs = $payload['configurations'] ?? null;
 
-        if ($nom === 'autre' && blank($autre)) {
-            throw ValidationException::withMessages([
-                'nom_configuration_autre' => [
-                    'Le champ nom_configuration_autre est obligatoire si nom_configuration = autre.',
-                ],
-            ]);
+        if (is_array($configs)) {
+            return collect($configs)
+                ->map(fn (array $row) => $this->normalizeRow(array_merge($row, ['produit_id' => $produitId])))
+                ->values()
+                ->all();
         }
 
-        if ($nom !== 'autre' && !blank($autre)) {
-            throw ValidationException::withMessages([
-                'nom_configuration_autre' => [
-                    'Le champ nom_configuration_autre doit être null pour une configuration différente de autre.',
-                ],
-            ]);
-        }
+        return [$this->normalizeRow($payload)];
     }
 
-    private function calculatePrixTotal(array $composants): float
+    private function normalizeRow(array $row): array
     {
-        return (float) collect($composants)->sum(function ($composant) {
-            if (!is_array($composant)) {
-                return 0;
-            }
+        $nomConfiguration = $row['nom_configuration'] ?? null;
 
-            $prix = (float) ($composant['prix'] ?? 0);
-            $quantite = (int) ($composant['quantite'] ?? 1);
+        if (!in_array($nomConfiguration, self::NOM_CONFIGURATIONS, true)) {
+            throw ValidationException::withMessages([
+                'nom_configuration' => ['Le nom de configuration selectionne est invalide.'],
+            ]);
+        }
 
-            return $prix * max($quantite, 1);
-        });
+        return [
+            'produit_id' => (int) $row['produit_id'],
+            'nom_configuration' => $nomConfiguration,
+            'type' => $this->nullableString($row['type'] ?? null),
+            'detail' => $this->nullableString($row['detail'] ?? null),
+            'capacite' => $this->nullableString($row['capacite'] ?? null),
+            'prix_total' => $this->nullableNumber($row['prix_total'] ?? null),
+        ];
+    }
+
+    private function nullableString(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim((string) $value);
+
+        return $value === '' ? null : $value;
+    }
+
+    private function nullableNumber(mixed $value): ?float
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return (float) $value;
     }
 }

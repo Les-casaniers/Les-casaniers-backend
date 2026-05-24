@@ -14,11 +14,10 @@ class Category extends Model
     protected $fillable = [
         'parent_id',
         'nom',
-        'type',
-        'ordre_tri'
+        'code'
     ];
 
-    const CREATED_AT = 'date_creation';
+    const CREATED_AT = null;
     const UPDATED_AT = 'date_modification';
 
     public function parent()

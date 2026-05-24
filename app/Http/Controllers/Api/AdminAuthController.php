@@ -19,8 +19,8 @@ class AdminAuthController extends Controller
     }
 
     /**
-     * @OA\Post(
-     *     path="/api/admin/register",
+    * @OA\Post(
+    *     path="/admin/register",
      *     summary="Creer un compte administrateur",
      *     description="Permet de creer un nouveau compte administrateur.",
      *     tags={"Admin Auth"},
@@ -104,8 +104,8 @@ class AdminAuthController extends Controller
     }
 
     /**
-     * @OA\Post(
-     *     path="/admin/login",
+      * @OA\Post(
+      *     path="/admin/login",
      *     summary="Connexion administrateur",
      *     description="Permet a un administrateur de se connecter via Sanctum stateful.",
      *     tags={"Admin Auth"},
@@ -189,8 +189,8 @@ class AdminAuthController extends Controller
     }
 
     /**
-     * @OA\Post(
-     *     path="/admin/logout",
+    * @OA\Post(
+    *     path="/admin/logout",
      *     summary="Deconnexion administrateur",
      *     description="Deconnecte l'administrateur et revoque le token.",
      *     tags={"Admin Auth"},
@@ -229,8 +229,8 @@ class AdminAuthController extends Controller
     }
 
     /**
-     * @OA\Get(
-     *     path="/admin/profile",
+    * @OA\Get(
+    *     path="/admin/profile",
      *     summary="Profil administrateur connecte",
      *     description="Retourne les informations de l'administrateur actuellement connecte.",
      *     tags={"Admin Auth"},
@@ -258,8 +258,8 @@ class AdminAuthController extends Controller
     }
 
     /**
-     * @OA\Put(
-     *     path="/admin/profile",
+    * @OA\Put(
+    *     path="/admin/profile",
      *     summary="Modifier les informations de l'administrateur",
      *     description="Permet à l'administrateur connecté de modifier ses informations personnelles.",
      *     tags={"Admin Auth"},
@@ -340,8 +340,8 @@ class AdminAuthController extends Controller
     }
 
     /**
-     * @OA\Post(
-     *     path="/admin/change-password",
+    * @OA\Post(
+    *     path="/admin/change-password",
      *     summary="Changer le mot de passe de l'administrateur",
      *     description="Permet à l'administrateur de modifier son mot de passe en vérifiant l'ancien.",
      *     tags={"Admin Auth"},
@@ -416,8 +416,8 @@ class AdminAuthController extends Controller
     }
 
     /**
-     * @OA\Post(
-     *     path="/admin/refresh-token",
+    * @OA\Post(
+    *     path="/admin/refresh-token",
      *     summary="Renouveler l'access token via le refresh token",
      *     tags={"Admin Auth"},
      *     @OA\RequestBody(

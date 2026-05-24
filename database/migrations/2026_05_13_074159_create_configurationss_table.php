@@ -17,12 +17,6 @@ return new class extends Migration
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
 
-            // Utilisateur (nullable = invité)
-            $table->foreignId("utilisateur_id")
-                ->nullable()
-                ->constrained("utilisateurs")
-                ->nullOnDelete()
-                ->cascadeOnUpdate();
 
             // Type de configuration
             $table->enum("nom_configuration", [
@@ -31,16 +25,14 @@ return new class extends Migration
                 "ecran","clavier","souris","os","reseau","autre"
             ]);
 
-            // Champ libre si "autre"
-            $table->string("nom_configuration_autre", 190)->nullable();
+            
+            $table->string("type", 190)->nullable();
+            $table->text("detail")->nullable();
 
-            $table->char("devise", 3)->default("MGA");
+            $table->string("capacite", 190)->nullable();
 
             // Prix total
-            $table->decimal("prix_total", 12, 2)->default(0);
-
-            // Composants JSON
-            $table->json("composants_json");
+            $table->decimal("prix_total", 12, 2)->nullable();
 
             // Dates custom
             $table->timestamp("date_creation")->useCurrent();
@@ -50,14 +42,7 @@ return new class extends Migration
 
             // Index
             $table->index("produit_id");
-            $table->index("utilisateur_id");
 
-            // Contraintes logiques (CHECK) - Laravel does not directly support check constraints in migrations. You can add this manually in the database or use a package.
-            // $table->check(""
-            //     (nom_configuration = \'autre\' AND nom_configuration_autre IS NOT NULL AND nom_configuration_autre <> \'\')
-            //     OR
-            //     (nom_configuration <> \'autre\' AND nom_configuration_autre IS NULL)
-            // ");
         });
 
         // Add FK from paniers.configuration_id once configurations exists.

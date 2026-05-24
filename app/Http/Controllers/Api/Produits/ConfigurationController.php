@@ -33,7 +33,7 @@ class ConfigurationController extends Controller
      */
     public function index(Request $request)
     {
-        $data = $this->configurationService->index((int) $request->user()->id);
+        $data = $this->configurationService->index($request->only(['produit_id']));
 
         return response()->json([
             'success' => true,
@@ -77,15 +77,20 @@ class ConfigurationController extends Controller
         try {
             $validated = $request->validate([
                 'produit_id' => ['required', 'integer', 'exists:produits,id'],
-                'nom_configuration' => ['required', 'string', 'in:cpu,carte_mere,gpu,ram,ssd,hdd,stockage,alimentation,boitier,refroidissement,ventilateur,ecran,clavier,souris,os,reseau,autre'],
-                'nom_configuration_autre' => ['nullable', 'string', 'max:190'],
-                'devise' => ['nullable', 'string', 'size:3'],
-                'composants_json' => ['required', 'array', 'min:1'],
-                'composants_json.*.prix' => ['nullable', 'numeric', 'min:0'],
-                'composants_json.*.quantite' => ['nullable', 'integer', 'min:1'],
+                'configurations' => ['sometimes', 'array', 'min:1'],
+                'configurations.*.nom_configuration' => ['required_with:configurations', 'string', 'in:cpu,carte_mere,gpu,ram,ssd,hdd,stockage,alimentation,boitier,refroidissement,ventilateur,ecran,clavier,souris,os,reseau,autre'],
+                'configurations.*.type' => ['nullable', 'string', 'max:190'],
+                'configurations.*.detail' => ['nullable', 'string'],
+                'configurations.*.capacite' => ['nullable', 'string', 'max:190'],
+                'configurations.*.prix_total' => ['nullable', 'numeric', 'min:0'],
+                'nom_configuration' => ['required_without:configurations', 'string', 'in:cpu,carte_mere,gpu,ram,ssd,hdd,stockage,alimentation,boitier,refroidissement,ventilateur,ecran,clavier,souris,os,reseau,autre'],
+                'type' => ['nullable', 'string', 'max:190'],
+                'detail' => ['nullable', 'string'],
+                'capacite' => ['nullable', 'string', 'max:190'],
+                'prix_total' => ['nullable', 'numeric', 'min:0'],
             ]);
 
-            $configuration = $this->configurationService->store((int) $request->user()->id, $validated);
+            $configuration = $this->configurationService->store($validated);
 
             return response()->json([
                 'success' => true,
@@ -131,18 +136,13 @@ class ConfigurationController extends Controller
         try {
             $validated = $request->validate([
                 'nom_configuration' => ['sometimes', 'required', 'string', 'in:cpu,carte_mere,gpu,ram,ssd,hdd,stockage,alimentation,boitier,refroidissement,ventilateur,ecran,clavier,souris,os,reseau,autre'],
-                'nom_configuration_autre' => ['nullable', 'string', 'max:190'],
-                'devise' => ['nullable', 'string', 'size:3'],
-                'composants_json' => ['sometimes', 'required', 'array', 'min:1'],
-                'composants_json.*.prix' => ['nullable', 'numeric', 'min:0'],
-                'composants_json.*.quantite' => ['nullable', 'integer', 'min:1'],
+                'type' => ['nullable', 'string', 'max:190'],
+                'detail' => ['nullable', 'string'],
+                'capacite' => ['nullable', 'string', 'max:190'],
+                'prix_total' => ['nullable', 'numeric', 'min:0'],
             ]);
 
-            $configuration = $this->configurationService->update(
-                (int) $request->user()->id,
-                $id,
-                $validated
-            );
+            $configuration = $this->configurationService->update($id, $validated);
 
             return response()->json([
                 'success' => true,
@@ -177,7 +177,7 @@ class ConfigurationController extends Controller
     public function destroy(Request $request, int $id)
     {
         try {
-            $this->configurationService->destroy((int) $request->user()->id, $id);
+            $this->configurationService->destroy($id);
 
             return response()->json([
                 'success' => true,

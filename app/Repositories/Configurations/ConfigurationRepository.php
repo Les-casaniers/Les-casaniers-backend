@@ -6,29 +6,30 @@ use App\Models\Configuration;
 
 class ConfigurationRepository implements ConfigurationRepositoryInterface
 {
-    public function getAllByUser(?int $userId)
+    public function getAll(array $filters = [])
     {
-        return Configuration::with(['produit'])
-            ->where('utilisateur_id', $userId)
-            ->latest()
-            ->get();
+        $query = Configuration::with(['produit'])->latest('date_creation');
+
+        if (!empty($filters['produit_id'])) {
+            $query->where('produit_id', $filters['produit_id']);
+        }
+
+        return $query->get();
     }
 
     public function findById(int $id)
     {
-        return Configuration::findOrFail($id);
-    }
-
-    public function findByIdForUser(int $id, ?int $userId)
-    {
-        return Configuration::where('id', $id)
-            ->where('utilisateur_id', $userId)
-            ->first();
+        return Configuration::find($id);
     }
 
     public function create(array $data)
     {
         return Configuration::create($data);
+    }
+
+    public function createMany(array $rows)
+    {
+        return collect($rows)->map(fn (array $row) => Configuration::create($row))->values();
     }
 
     public function update(int $id, array $data)

@@ -102,6 +102,14 @@ class ProduitRepository implements ProduitRepositoryInterface
             ->value('reference');
     }
 
+    public function getLastReferenceByPrefix(string $prefix): ?string
+    {
+        return $this->model
+            ->where('reference', 'like', $prefix . '%')
+            ->orderByRaw('CAST(SUBSTRING(reference, ?) AS UNSIGNED) DESC', [strlen($prefix) + 1])
+            ->value('reference');
+    }
+
     /**
      * Décrémentation atomique : UPDATE WHERE quantite_stock >= quantity
      * Empêche les stocks négatifs même en cas de requêtes concurrentes.
