@@ -21,7 +21,7 @@ npm install
 ```
 
 # Upload et stockage des images
-
+```bash
 composer require spatie/laravel-image-optimizer
 
 ### 2. Configuration de l'environnement
