@@ -14,7 +14,7 @@ class PanierService
      */
     public function index(int $utilisateurId)
     {
-        return Panier::with('produit')
+        return Panier::with(['produit', 'configuration'])
             ->where('utilisateur_id', $utilisateurId)
             ->where('statut', Panier::STATUT_ACTIF)  // Changé: 'actif' au lieu de 'panier'
             ->get()
@@ -22,6 +22,7 @@ class PanierService
                 return [
                     'id' => $item->id,
                     'produit_id' => $item->produit_id,
+                    'configuration_id' => $item->configuration_id,
                     'titre' => $item->titre,
                     'quantite' => $item->quantite,
                     'prix_unitaire' => $item->prix_unitaire,
@@ -31,6 +32,12 @@ class PanierService
                         'nom' => $item->produit->nom,
                         'type_produit' => $item->produit->type_produit,
                         'prix' => $item->produit->prix,
+                    ] : null,
+                    'configuration' => $item->configuration ? [
+                        'id' => $item->configuration->id,
+                        'nom_configuration' => $item->configuration->nom_configuration,
+                        'nom_configuration_autre' => $item->configuration->nom_configuration_autre,
+                        'prix_total' => $item->configuration->prix_total,
                     ] : null,
                 ];
             });
@@ -43,11 +50,13 @@ class PanierService
     {
         $produit = Produit::findOrFail($data['produit_id']);
         $quantite = $data['quantite'] ?? 1;
+        $configId = $data['configuration_id'] ?? null;
 
-        // Vérifier si le produit existe déjà dans le panier actif
+        // Vérifier si le produit avec la même configuration existe déjà dans le panier actif
         $existingItem = Panier::where('utilisateur_id', $utilisateurId)
             ->where('produit_id', $produit->id)
-            ->where('statut', Panier::STATUT_ACTIF)  // Changé: 'actif'
+            ->where('configuration_id', $configId)
+            ->where('statut', Panier::STATUT_ACTIF)
             ->first();
 
         if ($existingItem) {
@@ -61,10 +70,11 @@ class PanierService
         // Créer un nouvel article
         Panier::create([
             'utilisateur_id' => $utilisateurId,
-            'statut' => Panier::STATUT_ACTIF,  // Changé: 'actif'
+            'statut' => Panier::STATUT_ACTIF,
             'produit_id' => $produit->id,
-            'titre' => $produit->nom,
-            'prix_unitaire' => $produit->prix,
+            'configuration_id' => $configId,
+            'titre' => $data['titre'] ?? $produit->nom,
+            'prix_unitaire' => $data['prix_unitaire'] ?? $produit->prix,
             'quantite' => $quantite,
         ]);
 

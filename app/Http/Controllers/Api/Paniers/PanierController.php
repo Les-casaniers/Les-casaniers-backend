@@ -66,6 +66,9 @@ class PanierController extends Controller
             $validated = $request->validate([
                 'produit_id' => ['required', 'integer', 'exists:produits,id'],
                 'quantite' => ['nullable', 'integer', 'min:1'],
+                'configuration_id' => ['nullable', 'integer', 'exists:configurations,id'],
+                'titre' => ['nullable', 'string', 'max:255'],
+                'prix_unitaire' => ['nullable', 'numeric'],
             ]);
 
             $result = $this->panierService->addItem((int) $request->user()->id, $validated);
