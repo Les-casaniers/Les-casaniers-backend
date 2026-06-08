@@ -17,6 +17,7 @@ class Produit extends Model
         'nom',
         'description_courte',
         'description',
+        'atout',
         'type_produit',
         'prix',
         'devise',
@@ -54,7 +55,7 @@ class Produit extends Model
         return $this->hasMany(Configuration::class, 'produit_id');
     }
 
-        // Mutateur pour éviter les stocks négatifs
+    // Mutateur pour éviter les stocks négatifs
     public function setQuantiteStockAttribute($value)
     {
         $this->attributes['quantite_stock'] = max(0, $value);
