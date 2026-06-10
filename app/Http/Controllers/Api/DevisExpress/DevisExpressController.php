@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\DevisExpress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use App\Mail\DevisExpressConfirmation;
+use App\Mail\DevisExpressAdminNotification;
+use Illuminate\Support\Facades\Mail;
+
 
 /**
  * @OA\Tag(
@@ -74,21 +77,27 @@ class DevisExpressController extends Controller
                 'statut' => 'en_attente'
             ]);
 
-            // Optionnel: Envoyer un email de confirmation
-            // Mail::to($request->email)->send(new DevisExpressConfirmation($devis));
+            // ENVOI EMAIL AU CLIENT
+            Mail::to($request->email)->send(new DevisExpressConfirmation($devis));
 
-            // Optionnel: Envoyer une notification à l'admin
-            // Mail::to('admin@lescasaniers.mg')->send(new NewDevisExpressNotification($devis));
+            //ENVOI EMAIL À L'ADMIN (remplacez par l'email de l'admin)
+            $adminEmail = 'onjaniainamapionona@gmail.com';
+            Mail::to($adminEmail)->send(new DevisExpressAdminNotification($devis));
+
+            // Optionnel: envoyer aussi aux admins multiples
+            // $adminEmails = ['admin1@lescasaniers.mg', 'admin2@lescasaniers.mg'];
+            // foreach ($adminEmails as $adminEmail) {
+            //     Mail::to($adminEmail)->send(new DevisExpressAdminNotification($devis));
+            // }
 
             return response()->json([
                 'success' => true,
                 'data' => $devis,
-                'message' => 'Votre demande de devis a été envoyée avec succès. Nous vous répondrons sous 24h.'
+                'message' => 'Votre demande de devis a été envoyée avec succès. Vous allez recevoir un email de confirmation.'
             ], 201);
-
         } catch (\Exception $e) {
             Log::error('Erreur DevisExpress: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Une erreur est survenue. Veuillez réessayer.'
@@ -109,7 +118,7 @@ class DevisExpressController extends Controller
     {
         try {
             $devis = DevisExpress::orderBy('created_at', 'desc')->paginate(20);
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $devis
@@ -141,7 +150,7 @@ class DevisExpressController extends Controller
     {
         try {
             $devis = DevisExpress::findOrFail($id);
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $devis
