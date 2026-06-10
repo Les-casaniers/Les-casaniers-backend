@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Services\UtilisateurService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Models\NewsletterAbonnement;
+use App\Mail\BienvenueMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -48,6 +51,61 @@ class UtilisateurController extends Controller
      *     @OA\Response(response=422, description="Erreur de validation")
      * )
      */
+    // public function register(Request $request)
+    // {
+    //     try {
+    //         $payload = $request->only([
+    //             'prenom',
+    //             'nom',
+    //             'email',
+    //             'telephone',
+    //             'mot_de_passe',
+    //             'mot_de_passe_confirmation',
+    //         ]);
+
+    //         $utilisateur = $this->utilisateurService->register($payload);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Compte utilisateur créé avec succès',
+    //             'data' => $utilisateur,
+    //         ], 201);
+    //     } catch (ValidationException $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Erreur de validation',
+    //             'errors' => $e->errors(),
+    //         ], 422);
+    //     } catch (Throwable $e) {
+    //         Log::error('Utilisateur registration failed', ['error' => $e->getMessage()]);
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Erreur serveur',
+    //         ], 500);
+    //     }
+
+    //     //  AJOUTER L'EMAIL DE BIENVENUE ICI
+    //     try {
+    //         // Ajouter à newsletter
+    //         NewsletterAbonnement::updateOrCreate(
+    //             ['email' => $user->email],
+    //             [
+    //                 'prenom' => $request->prenom,
+    //                 'nom' => $request->nom,
+    //                 'actif' => true
+    //             ]
+    //         );
+
+    //         // Envoyer l'email
+    //         Mail::to($user->email)->send(new BienvenueMail($user));
+    //         Log::info('Email de bienvenue envoyé à: ' . $user->email);
+            
+    //     } catch (\Exception $e) {
+    //         Log::error('Erreur envoi email: ' . $e->getMessage());
+    //     }
+    // }
+
+    /************************************************************************** */
     public function register(Request $request)
     {
         try {
@@ -62,11 +120,32 @@ class UtilisateurController extends Controller
 
             $utilisateur = $this->utilisateurService->register($payload);
 
+            // ✅ AJOUTER L'EMAIL DE BIENVENUE ICI (avant le return)
+            try {
+                // Ajouter à newsletter
+                NewsletterAbonnement::updateOrCreate(
+                    ['email' => $utilisateur->email],
+                    [
+                        'prenom' => $request->prenom,
+                        'nom' => $request->nom,
+                        'actif' => true
+                    ]
+                );
+
+                // Envoyer l'email de bienvenue
+                Mail::to($utilisateur->email)->send(new BienvenueMail($utilisateur));
+                Log::info('Email de bienvenue envoyé à: ' . $utilisateur->email);
+                
+            } catch (\Exception $e) {
+                Log::error('Erreur envoi email de bienvenue: ' . $e->getMessage());
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Compte utilisateur créé avec succès',
                 'data' => $utilisateur,
             ], 201);
+            
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
@@ -81,6 +160,8 @@ class UtilisateurController extends Controller
             ], 500);
         }
     }
+
+    /*************************************************************************** */
 
     /**
      * @OA\Post(

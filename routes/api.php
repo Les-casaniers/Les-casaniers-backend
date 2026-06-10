@@ -281,13 +281,13 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 Route::get('/commandes/last', [CommandeController::class, 'getLastNumber']);
 
 // // Routes pour les devis
-// Route::middleware(['auth:sanctum'])->prefix('devis')->group(function () {
-//     Route::get('/', [DevisController::class, 'index']);      // GET /api/devis
-//     Route::post('/', [DevisController::class, 'store']);     // POST /api/devis
-//     Route::get('/{id}', [DevisController::class, 'show']);   // GET /api/devis/{id}
-//     Route::put('/{id}', [DevisController::class, 'update']); // PUT /api/devis/{id}
-//     Route::delete('/{id}', [DevisController::class, 'destroy']); // DELETE /api/devis/{id}
-// });
+Route::middleware(['auth:sanctum'])->prefix('devis')->group(function () {
+    Route::get('/', [DevisController::class, 'index']);      // GET /api/devis
+    Route::post('/', [DevisController::class, 'store']);     // POST /api/devis
+    Route::get('/{id}', [DevisController::class, 'show']);   // GET /api/devis/{id}
+    Route::put('/{id}', [DevisController::class, 'update']); // PUT /api/devis/{id}
+    Route::delete('/{id}', [DevisController::class, 'destroy']); // DELETE /api/devis/{id}
+});
 
 // Routes factures
 // Routes factures pour les clients
