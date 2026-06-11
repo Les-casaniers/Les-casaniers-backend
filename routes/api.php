@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\Produits\ProduitController;
 use App\Http\Controllers\Api\Sales\CommandeController;
 use App\Http\Controllers\Api\Sales\DevisController;
 use App\Http\Controllers\Api\Sales\FactureController;
+use App\Http\Controllers\Api\Admin\AdminFavorisController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UtilisateurController;
 use Illuminate\Support\Facades\Route;
@@ -252,7 +253,6 @@ Route::middleware(['auth:sanctum'])->prefix('configurations')->group(function ()
     Route::post('/', [ConfigurationController::class, 'store']);
     Route::put('/{id}', [ConfigurationController::class, 'update']);
     Route::delete('/{id}', [ConfigurationController::class, 'destroy']);
-
 });
 
 // Adresses routes
@@ -343,6 +343,15 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/factures/{id}/annuler', [FactureController::class, 'adminCancel']);
     Route::delete('/factures/{id}', [FactureController::class, 'adminDestroy']);
     Route::get('/factures/{id}/download', [FactureController::class, 'adminDownload']);
+});
+
+ // Admin - Gestion des favoris
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/utilisateurs-avec-favoris', [AdminFavorisController::class, 'getUtilisateursAvecFavoris']);
+    Route::get('/favoris/all', [AdminFavorisController::class, 'getAllFavoris']);
+    Route::get('/favoris/stats', [AdminFavorisController::class, 'getStats']);
+    Route::get('/utilisateurs/{userId}/favoris', [AdminFavorisController::class, 'getFavorisByUser']);
+    Route::post('/favoris/envoyer-email', [AdminFavorisController::class, 'sendEmailFavoris']);
 });
 
 // Route pour vérifier si un utilisateur est admin par son email
