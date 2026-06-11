@@ -16,7 +16,8 @@ use App\Http\Controllers\Api\Produits\ProduitController;
 use App\Http\Controllers\Api\Sales\CommandeController;
 use App\Http\Controllers\Api\Sales\DevisController;
 use App\Http\Controllers\Api\Sales\FactureController;
-use App\Http\Controllers\Api\Admin\AdminFavorisController;
+use App\Http\Controllers\Api\Admin\AdminFavorisController;//favoris Admin
+use App\Http\Controllers\Api\Admin\AdminPanierController;//panier Admin
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UtilisateurController;
 use Illuminate\Support\Facades\Route;
@@ -352,6 +353,14 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::get('/favoris/stats', [AdminFavorisController::class, 'getStats']);
     Route::get('/utilisateurs/{userId}/favoris', [AdminFavorisController::class, 'getFavorisByUser']);
     Route::post('/favoris/envoyer-email', [AdminFavorisController::class, 'sendEmailFavoris']);
+});
+
+ // Admin - Gestion des paniers
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/utilisateurs-avec-paniers', [AdminPanierController::class, 'getUtilisateursAvecPaniers']);
+    Route::get('/paniers/stats', [AdminPanierController::class, 'getStats']);
+    Route::post('/paniers/envoyer-email', [AdminPanierController::class, 'sendEmailRappel']);
+    Route::delete('/paniers/{id}', [AdminPanierController::class, 'deletePanier']);
 });
 
 // Route pour vérifier si un utilisateur est admin par son email
