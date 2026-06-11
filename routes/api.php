@@ -23,6 +23,7 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use App\Http\Controllers\Api\DevisExpress\DevisExpressController;
 use App\Models\Admin;
 use Illuminate\Http\Request;
+use App\Http\Controllers\ConsentementCookieController;
 
 Route::middleware(['auth:sanctum'])->get('/user', [UserController::class, 'user']);
 
@@ -70,6 +71,10 @@ Route::get('/guides/categorie/{categorie}', [GuideController::class, 'byCategory
 Route::get('/guides', [GuideController::class, 'index']);
 Route::get('/guides/{id}', [GuideController::class, 'show'])->whereNumber('id');
 Route::get('/guides/slug/{slug}', [GuideController::class, 'showBySlug']);
+
+//cookies
+Route::post('/cookies/consent', [ConsentementCookieController::class, 'store']);
+Route::get('/cookies/consent/check', [ConsentementCookieController::class, 'check']);
 
 // Newsletter
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe']);
