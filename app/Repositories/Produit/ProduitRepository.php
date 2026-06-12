@@ -15,18 +15,18 @@ class ProduitRepository implements ProduitRepositoryInterface
 
     public function getAll(array $filters = [])
     {
-        $query = $this->model->with(['categorie', 'images']);
+        $query = $this->model->with(['categorie', 'sousCategorie', 'images']);
 
         if (isset($filters['categorie_id'])) {
             $query->where('categorie_id', $filters['categorie_id']);
         }
 
-        if (isset($filters['actif'])) {
-            $query->where('actif', $filters['actif']);
+        if (isset($filters['id_sous_categorie'])) {
+            $query->where('id_sous_categorie', $filters['id_sous_categorie']);
         }
 
-        if (isset($filters['type_produit'])) {
-            $query->where('type_produit', $filters['type_produit']);
+        if (isset($filters['actif'])) {
+            $query->where('actif', $filters['actif']);
         }
 
         if (isset($filters['est_dispo'])) {
@@ -38,7 +38,7 @@ class ProduitRepository implements ProduitRepositoryInterface
 
     public function findById(int $id)
     {
-        return $this->model->with(['categorie', 'images', 'attributs', 'configurations'])->find($id);
+        return $this->model->with(['categorie', 'sousCategorie', 'images', 'attributs', 'configurations'])->find($id);
     }
 
     public function findByCategory(int $categoryId)
@@ -82,7 +82,7 @@ class ProduitRepository implements ProduitRepositoryInterface
     {
         return $this->model->where('nom', 'LIKE', "%{$term}%")
             ->orWhere('reference', 'LIKE', "%{$term}%")
-            ->with(['categorie', 'images'])
+            ->with(['categorie', 'sousCategorie', 'images'])
             ->get();
     }
 
@@ -90,7 +90,7 @@ class ProduitRepository implements ProduitRepositoryInterface
     {
         return $this->model->orderBy('date_creation', 'DESC')
             ->limit($limit)
-            ->with(['categorie', 'images'])
+            ->with(['categorie', 'sousCategorie', 'images'])
             ->get();
     }
 

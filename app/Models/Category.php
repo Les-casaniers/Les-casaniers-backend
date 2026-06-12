@@ -35,4 +35,9 @@ class Category extends Model
     {
         return $this->hasMany(Produit::class, 'categorie_id');
     }
+
+    public function sousCategories()
+    {
+        return $this->hasMany(SousCategorie::class, 'id_categorie');
+    }
 }

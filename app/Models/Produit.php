@@ -13,12 +13,11 @@ class Produit extends Model
 
     protected $fillable = [
         'categorie_id',
+        'id_sous_categorie',
         'reference',
         'nom',
         'description_courte',
         'description',
-        'atout',
-        'type_produit',
         'prix',
         'devise',
         'quantite_stock',
@@ -38,6 +37,11 @@ class Produit extends Model
     public function categorie()
     {
         return $this->belongsTo(Category::class, 'categorie_id');
+    }
+
+    public function sousCategorie()
+    {
+        return $this->belongsTo(SousCategorie::class, 'id_sous_categorie');
     }
 
     public function images()

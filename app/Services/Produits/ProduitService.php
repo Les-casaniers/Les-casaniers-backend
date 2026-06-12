@@ -56,7 +56,7 @@ class ProduitService
             'atout' => 'sometimes|nullable|string|max:255',
             'nom' => 'sometimes|string|max:255',
             'categorie_id' => 'sometimes|exists:categories,id',
-            'type_produit' => 'sometimes|in:pc,portable,composant,peripherique,service',
+            'id_sous_categorie' => 'sometimes|nullable|exists:sous_categories,id',
             'reference' => 'sometimes|nullable|string|max:80|unique:produits,reference,' . $id,
             'devise' => 'sometimes|nullable|string|max:10',
             'actif' => 'sometimes|boolean',
@@ -171,7 +171,7 @@ class ProduitService
         $validator = Validator::make($data, [
             'nom' => 'required|string|max:255',
             'categorie_id' => 'required|exists:categories,id',
-            'type_produit' => 'required|in:pc,portable,composant,peripherique,service',
+            'id_sous_categorie' => 'nullable|exists:sous_categories,id',
             'prix' => 'required|numeric|min:0',
             'quantite_stock' => 'required|integer|min:0',
             'reference' => 'nullable|string|max:80|unique:produits,reference',

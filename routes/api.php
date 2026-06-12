@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\NewsletterController;
 use App\Http\Controllers\Api\Paniers\PanierController;
 use App\Http\Controllers\Api\Produits\AttributProduitController;
 use App\Http\Controllers\Api\Produits\CategoryController;
+use App\Http\Controllers\Api\Produits\SousCategorieController;
 use App\Http\Controllers\Api\Produits\ConfigurationController;
 use App\Http\Controllers\Api\Produits\ImageProduitController;
 use App\Http\Controllers\Api\Produits\ProduitController;
@@ -60,6 +61,8 @@ Route::prefix('utilisateurs')->group(function () {
 // Public routes
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
+Route::get('/sous-categories', [SousCategorieController::class, 'index']);
+Route::get('/sous-categories/{id}', [SousCategorieController::class, 'show']);
 Route::get('/produits', [ProduitController::class, 'index']);
 Route::get('/produits/{id}', [ProduitController::class, 'show']);
 Route::get('/produits/{produitId}/avis', [AvisClientController::class, 'getAvisByProduit']);
@@ -88,6 +91,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/categories/{id}', [CategoryController::class, 'update']);
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
     Route::patch('/categories/reorder', [CategoryController::class, 'reorder']);
+
+    Route::post('/sous-categories', [SousCategorieController::class, 'store']);
+    Route::put('/sous-categories/{id}', [SousCategorieController::class, 'update']);
+    Route::delete('/sous-categories/{id}', [SousCategorieController::class, 'destroy']);
 
     Route::post('/produits', [ProduitController::class, 'store']);
     Route::put('/produits/{id}', [ProduitController::class, 'update']);

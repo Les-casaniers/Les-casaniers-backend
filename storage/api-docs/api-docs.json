@@ -12,14 +12,14 @@
         }
     ],
     "paths": {
-        "/api/admin/register": {
+        "/admin/register": {
             "post": {
                 "tags": [
                     "Admin Auth"
                 ],
                 "summary": "Creer un compte administrateur",
                 "description": "Permet de creer un nouveau compte administrateur.",
-                "operationId": "876bcd0cd7c5f5cb4e34601a78d4d431",
+                "operationId": "4c9ff7f9fab7f89d744513cfe5480a0f",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1997,10 +1997,10 @@
                         }
                     },
                     {
-                        "name": "type_produit",
+                        "name": "id_sous_categorie",
                         "in": "query",
                         "schema": {
-                            "type": "string"
+                            "type": "integer"
                         }
                     },
                     {

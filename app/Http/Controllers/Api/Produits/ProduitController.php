@@ -29,14 +29,14 @@ class ProduitController extends Controller
      *     summary="Liste des produits avec filtres",
      *     tags={"Produits"},
      *     @OA\Parameter(name="categorie_id", in="query", @OA\Schema(type="integer")),
-     *     @OA\Parameter(name="type_produit", in="query", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="id_sous_categorie", in="query", @OA\Schema(type="integer")),
      *     @OA\Parameter(name="search", in="query", @OA\Schema(type="string")),
      *     @OA\Response(response=200, description="SuccÃ¨s")
      * )
      */
     public function index(Request $request)
     {
-        $filters = $request->only(['categorie_id', 'type_produit', 'actif', 'est_dispo']);
+        $filters = $request->only(['categorie_id', 'id_sous_categorie', 'actif', 'est_dispo']);
         $search = $request->query('search');
 
         $produits = $this->produitService->getProduits($filters, $search);
