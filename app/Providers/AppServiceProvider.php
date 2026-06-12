@@ -91,6 +91,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Repositories\AdminNotification\AdminNotificationRepositoryInterface::class,
             \App\Repositories\AdminNotification\AdminNotificationRepository::class
         );
+
+        $this->app->bind(
+            \App\Repositories\SousCategorie\SousCategorieRepositoryInterface::class,
+            \App\Repositories\SousCategorie\SousCategorieRepository::class
+        );
     }
 
     /**

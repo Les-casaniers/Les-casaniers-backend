@@ -20,7 +20,7 @@ class AdminAuthController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/admin/register",
+     *     path="/admin/register",
      *     summary="Creer un compte administrateur",
      *     description="Permet de creer un nouveau compte administrateur.",
      *     tags={"Admin Auth"},
