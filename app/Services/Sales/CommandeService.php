@@ -3,6 +3,8 @@
 namespace App\Services\Sales;
 
 use App\Enums\Sales\CommandeStatut;
+use App\Mail\CommandeConfirmationClient;  // ← AJOUTER CETTE LIGNE
+use App\Mail\CommandeNotificationAdmin;    // ← AJOUTER CETTE LIGNE
 use App\Repositories\Paniers\PanierRepositoryInterface;
 use App\Repositories\Sales\CommandeRepositoryInterface;
 use App\Services\AdminNotificationService;
@@ -10,6 +12,7 @@ use App\Services\Produits\ProduitService;
 use App\Traits\CalculatesLineItems;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use App\Models\Commande;
 use App\Models\Panier;
@@ -36,8 +39,7 @@ class CommandeService
         private readonly PanierRepositoryInterface $panierRepository,
         private readonly ProduitService $produitService,
         private readonly AdminNotificationService $notificationService,
-    ) {
-    }
+    ) {}
 
     public function index(int $userId, ?string $statut = null): Collection
     {
@@ -192,7 +194,7 @@ class CommandeService
 
             // Générer le numéro de commande unique
             $commandeUuid = $this->generateCommandeUuid();
-            
+
             $livraison = (float) ($payload['livraison'] ?? 0);
             $devise = $payload['devise'] ?? 'MGA';
             $sousTotal = $this->calculerSousTotal($itemsPanier);
@@ -221,6 +223,34 @@ class CommandeService
             }
 
             $this->panierRepository->markActiveAsCommande($userId);
+
+            // Récupérer la commande créée
+            $commandeItems = $this->commandeRepository->findByUuid($commandeUuid);
+            $commande = $commandeItems->first();
+
+            // Récupérer l'utilisateur
+            $utilisateur = $commande->utilisateur;
+
+            // Récupérer l'adresse de livraison
+            $adresseLivraison = $commande->adresse_livraison;
+
+            // ✅ ENVOI DES EMAILS
+            try {
+                // Email au client
+                Mail::to($utilisateur->email)->send(new CommandeConfirmationClient($commande, $utilisateur));
+
+                // Email à l'admin (vous pouvez configurer l'email admin dans .env)
+                $adminEmail = config('mail.admin_email', 'onjaniainamapionona@gmail.com');
+                Mail::to($adminEmail)->send(new CommandeNotificationAdmin($commande, $utilisateur));
+
+                \Illuminate\Support\Facades\Log::info('Emails commande envoyés', [
+                    'commande_uuid' => $commandeUuid,
+                    'client_email' => $utilisateur->email,
+                    'admin_email' => $adminEmail
+                ]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Erreur envoi emails commande: ' . $e->getMessage());
+            }
 
             // Notifier l'admin
             try {
@@ -443,18 +473,18 @@ class CommandeService
     }
 
     /**
- * Génère un numéro de commande unique au format CMD-ANNEE-NUMERO
- * Exemple: CMD-2026-001, CMD-2026-002, ...
- */
+     * Génère un numéro de commande unique au format CMD-ANNEE-NUMERO
+     * Exemple: CMD-2026-001, CMD-2026-002, ...
+     */
     private function generateCommandeUuid(): string
     {
         $year = date('Y');
-        
+
         // Récupérer le dernier numéro de commande pour l'année en cours
         $lastCommande = Commande::where('commande_uuid', 'like', "CMD-{$year}-%")
             ->orderBy('id', 'desc')
             ->first();
-        
+
         if ($lastCommande) {
             // Extraire le numéro et l'incrémenter
             $parts = explode('-', $lastCommande->commande_uuid);
@@ -463,8 +493,7 @@ class CommandeService
         } else {
             $newNumber = '001';
         }
-        
+
         return "CMD-{$year}-{$newNumber}";
     }
-
 }
