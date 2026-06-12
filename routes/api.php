@@ -17,6 +17,8 @@ use App\Http\Controllers\Api\Produits\ProduitController;
 use App\Http\Controllers\Api\Sales\CommandeController;
 use App\Http\Controllers\Api\Sales\DevisController;
 use App\Http\Controllers\Api\Sales\FactureController;
+use App\Http\Controllers\Api\Admin\AdminFavorisController;//favoris Admin
+use App\Http\Controllers\Api\Admin\AdminPanierController;//panier Admin
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UtilisateurController;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +26,7 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use App\Http\Controllers\Api\DevisExpress\DevisExpressController;
 use App\Models\Admin;
 use Illuminate\Http\Request;
+use App\Http\Controllers\ConsentementCookieController;
 
 Route::middleware(['auth:sanctum'])->get('/user', [UserController::class, 'user']);
 
@@ -73,6 +76,10 @@ Route::get('/guides/categorie/{categorie}', [GuideController::class, 'byCategory
 Route::get('/guides', [GuideController::class, 'index']);
 Route::get('/guides/{id}', [GuideController::class, 'show'])->whereNumber('id');
 Route::get('/guides/slug/{slug}', [GuideController::class, 'showBySlug']);
+
+//cookies
+Route::post('/cookies/consent', [ConsentementCookieController::class, 'store']);
+Route::get('/cookies/consent/check', [ConsentementCookieController::class, 'check']);
 
 // Newsletter
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe']);
@@ -254,7 +261,6 @@ Route::middleware(['auth:sanctum'])->prefix('configurations')->group(function ()
     Route::post('/', [ConfigurationController::class, 'store']);
     Route::put('/{id}', [ConfigurationController::class, 'update']);
     Route::delete('/{id}', [ConfigurationController::class, 'destroy']);
-
 });
 
 // Adresses routes
@@ -288,13 +294,13 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 Route::get('/commandes/last', [CommandeController::class, 'getLastNumber']);
 
 // // Routes pour les devis
-// Route::middleware(['auth:sanctum'])->prefix('devis')->group(function () {
-//     Route::get('/', [DevisController::class, 'index']);      // GET /api/devis
-//     Route::post('/', [DevisController::class, 'store']);     // POST /api/devis
-//     Route::get('/{id}', [DevisController::class, 'show']);   // GET /api/devis/{id}
-//     Route::put('/{id}', [DevisController::class, 'update']); // PUT /api/devis/{id}
-//     Route::delete('/{id}', [DevisController::class, 'destroy']); // DELETE /api/devis/{id}
-// });
+Route::middleware(['auth:sanctum'])->prefix('devis')->group(function () {
+    Route::get('/', [DevisController::class, 'index']);      // GET /api/devis
+    Route::post('/', [DevisController::class, 'store']);     // POST /api/devis
+    Route::get('/{id}', [DevisController::class, 'show']);   // GET /api/devis/{id}
+    Route::put('/{id}', [DevisController::class, 'update']); // PUT /api/devis/{id}
+    Route::delete('/{id}', [DevisController::class, 'destroy']); // DELETE /api/devis/{id}
+});
 
 // Routes factures
 // Routes factures pour les clients
@@ -345,6 +351,23 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/factures/{id}/annuler', [FactureController::class, 'adminCancel']);
     Route::delete('/factures/{id}', [FactureController::class, 'adminDestroy']);
     Route::get('/factures/{id}/download', [FactureController::class, 'adminDownload']);
+});
+
+ // Admin - Gestion des favoris
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/utilisateurs-avec-favoris', [AdminFavorisController::class, 'getUtilisateursAvecFavoris']);
+    Route::get('/favoris/all', [AdminFavorisController::class, 'getAllFavoris']);
+    Route::get('/favoris/stats', [AdminFavorisController::class, 'getStats']);
+    Route::get('/utilisateurs/{userId}/favoris', [AdminFavorisController::class, 'getFavorisByUser']);
+    Route::post('/favoris/envoyer-email', [AdminFavorisController::class, 'sendEmailFavoris']);
+});
+
+ // Admin - Gestion des paniers
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/utilisateurs-avec-paniers', [AdminPanierController::class, 'getUtilisateursAvecPaniers']);
+    Route::get('/paniers/stats', [AdminPanierController::class, 'getStats']);
+    Route::post('/paniers/envoyer-email', [AdminPanierController::class, 'sendEmailRappel']);
+    Route::delete('/paniers/{id}', [AdminPanierController::class, 'deletePanier']);
 });
 
 // Route pour vérifier si un utilisateur est admin par son email
