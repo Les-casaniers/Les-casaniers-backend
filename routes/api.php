@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\Sales\DevisController;
 use App\Http\Controllers\Api\Sales\FactureController;
 use App\Http\Controllers\Api\Admin\AdminFavorisController;//favoris Admin
 use App\Http\Controllers\Api\Admin\AdminPanierController;//panier Admin
+use App\Http\Controllers\Api\BoutiqueMisa\BoutiqueMisaController;//boutique misa
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UtilisateurController;
 use Illuminate\Support\Facades\Route;
@@ -368,6 +369,16 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::get('/paniers/stats', [AdminPanierController::class, 'getStats']);
     Route::post('/paniers/envoyer-email', [AdminPanierController::class, 'sendEmailRappel']);
     Route::delete('/paniers/{id}', [AdminPanierController::class, 'deletePanier']);
+});
+
+// Admin - Gestion des boutiques Misa
+Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
+    Route::get('boutique-misa', [BoutiqueMisaController::class, 'index']);
+    Route::post('boutique-misa', [BoutiqueMisaController::class, 'store']);
+    Route::get('boutique-misa/{id}', [BoutiqueMisaController::class, 'show']);
+    Route::put('boutique-misa/{id}', [BoutiqueMisaController::class, 'update']);
+    Route::delete('boutique-misa/{id}', [BoutiqueMisaController::class, 'destroy']);
+    Route::patch('boutique-misa/{id}/stock', [BoutiqueMisaController::class, 'updateStock']);
 });
 
 // Route pour vérifier si un utilisateur est admin par son email
