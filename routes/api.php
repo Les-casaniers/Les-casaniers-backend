@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\Sales\FactureController;
 use App\Http\Controllers\Api\Admin\AdminFavorisController;//favoris Admin
 use App\Http\Controllers\Api\Admin\AdminPanierController;//panier Admin
 use App\Http\Controllers\Api\BoutiqueMisa\BoutiqueMisaController;//boutique misa
+use App\Http\Controllers\Api\Livreur\LivreurController;//Livreur
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UtilisateurController;
 use Illuminate\Support\Facades\Route;
@@ -380,6 +381,21 @@ Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
     Route::delete('boutique-misa/{id}', [BoutiqueMisaController::class, 'destroy']);
     Route::patch('boutique-misa/{id}/stock', [BoutiqueMisaController::class, 'updateStock']);
 });
+
+// Routes pour les livreurs - TEMPORAIREMENT SANS AUTHENTIFICATION POUR TEST
+Route::prefix('livreur-test')->group(function () {
+    // Supprimer le middleware d'authentification pour le test
+    Route::get('/commandes', [LivreurController::class, 'getCommandes']);
+    Route::patch('/commandes/{uuid}/statut', [LivreurController::class, 'updateStatut']);
+    Route::get('/commandes/{uuid}', [LivreurController::class, 'showCommande']);
+});
+
+// OU ALTERNATIVE : Garder l'auth mais permettre l'accès sans token
+// Route::prefix('livreur')->middleware(['auth:sanctum'])->group(function () {
+//     Route::get('/commandes', [LivreurController::class, 'getCommandes']);
+//     Route::patch('/commandes/{uuid}/statut', [LivreurController::class, 'updateStatut']);
+//     Route::get('/commandes/{uuid}', [LivreurController::class, 'showCommande']);
+// });
 
 // Route pour vérifier si un utilisateur est admin par son email
 Route::middleware(['auth:sanctum'])->post('/admin/check-by-email', function (Request $request) {
