@@ -63,7 +63,6 @@ class UtilisateurService
         return DB::transaction(function () use ($payload) {
             $utilisateur = $this->utilisateurRepository->create($payload);
 
-            // Notifier l'admin d'une nouvelle inscription
             try {
                 $this->notificationService->notifyNewUser(
                     $payload['prenom'],
@@ -71,7 +70,6 @@ class UtilisateurService
                     $payload['email']
                 );
             } catch (\Throwable $e) {
-                // Ne pas bloquer l'inscription si la notification échoue
                 \Illuminate\Support\Facades\Log::warning('Notification new user failed', ['error' => $e->getMessage()]);
             }
 
@@ -125,7 +123,6 @@ class UtilisateurService
         }
 
         Auth::guard('web')->login($utilisateur, $remember);
-
 
         RateLimiter::clear($throttleKey);
         
@@ -266,11 +263,37 @@ class UtilisateurService
         return Str::transliterate($email.'|'.$ip);
     }
 
-    public function getAllClients()
+    // ============================================
+    // METHODES POUR LE FRONTEND
+    // ============================================
+
+    /**
+     * Récupérer tous les clients avec pagination
+     */
+    public function getAllClients($perPage = 10, $search = '', $statut = '')
+    {
+        return $this->utilisateurRepository->getAllPaginated($perPage, $search, $statut);
+    }
+
+    /**
+     * Récupérer tous les clients (sans pagination) pour export
+     */
+    public function getAllClientsWithoutPagination()
     {
         return $this->utilisateurRepository->getAll();
     }
 
+    /**
+     * Rechercher des clients
+     */
+    public function searchClients($query = '', $statut = '')
+    {
+        return $this->utilisateurRepository->search($query, $statut);
+    }
+
+    /**
+     * Récupérer un client par ID
+     */
     public function getClientById(int $id)
     {
         $client = $this->utilisateurRepository->findById($id);
@@ -283,6 +306,9 @@ class UtilisateurService
         return $client;
     }
 
+    /**
+     * Mettre à jour un client (admin)
+     */
     public function adminUpdateClient(int $id, array $data)
     {
         $client = $this->utilisateurRepository->findById($id);
@@ -297,6 +323,9 @@ class UtilisateurService
         });
     }
 
+    /**
+     * Supprimer un client
+     */
     public function deleteClient(int $id): void
     {
         $client = $this->utilisateurRepository->findById($id);
@@ -309,5 +338,21 @@ class UtilisateurService
         DB::transaction(function () use ($id) {
             $this->utilisateurRepository->delete($id);
         });
+    }
+
+    /**
+     * Activation en masse
+     */
+    public function bulkActivate(array $ids)
+    {
+        return $this->utilisateurRepository->bulkUpdate($ids, ['statut' => 'actif']);
+    }
+
+    /**
+     * Suppression en masse
+     */
+    public function bulkDelete(array $ids)
+    {
+        return $this->utilisateurRepository->bulkDelete($ids);
     }
 }

@@ -22,90 +22,8 @@ class UtilisateurController extends Controller
     }
 
     /**
-     * @OA\Post(
-     *     path="/utilisateurs/register",
-     *     summary="Créer un compte utilisateur",
-     *     description="Permet de créer un nouveau compte utilisateur.",
-     *     tags={"Utilisateurs"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"prenom", "nom", "email", "mot_de_passe", "mot_de_passe_confirmation"},
-     *             @OA\Property(property="prenom", type="string", example="Jean"),
-     *             @OA\Property(property="nom", type="string", example="Dupont"),
-     *             @OA\Property(property="email", type="string", format="email", example="jean.dupont@email.com"),
-     *             @OA\Property(property="telephone", type="string", example="0123456789"),
-     *             @OA\Property(property="mot_de_passe", type="string", format="password", example="Secret123!"),
-     *             @OA\Property(property="mot_de_passe_confirmation", type="string", format="password", example="Secret123!")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Compte créé avec succès",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Compte utilisateur créé avec succès"),
-     *             @OA\Property(property="data", type="object")
-     *         )
-     *     ),
-     *     @OA\Response(response=422, description="Erreur de validation")
-     * )
+     * Register a new user
      */
-    // public function register(Request $request)
-    // {
-    //     try {
-    //         $payload = $request->only([
-    //             'prenom',
-    //             'nom',
-    //             'email',
-    //             'telephone',
-    //             'mot_de_passe',
-    //             'mot_de_passe_confirmation',
-    //         ]);
-
-    //         $utilisateur = $this->utilisateurService->register($payload);
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Compte utilisateur créé avec succès',
-    //             'data' => $utilisateur,
-    //         ], 201);
-    //     } catch (ValidationException $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Erreur de validation',
-    //             'errors' => $e->errors(),
-    //         ], 422);
-    //     } catch (Throwable $e) {
-    //         Log::error('Utilisateur registration failed', ['error' => $e->getMessage()]);
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Erreur serveur',
-    //         ], 500);
-    //     }
-
-    //     //  AJOUTER L'EMAIL DE BIENVENUE ICI
-    //     try {
-    //         // Ajouter à newsletter
-    //         NewsletterAbonnement::updateOrCreate(
-    //             ['email' => $user->email],
-    //             [
-    //                 'prenom' => $request->prenom,
-    //                 'nom' => $request->nom,
-    //                 'actif' => true
-    //             ]
-    //         );
-
-    //         // Envoyer l'email
-    //         Mail::to($user->email)->send(new BienvenueMail($user));
-    //         Log::info('Email de bienvenue envoyé à: ' . $user->email);
-            
-    //     } catch (\Exception $e) {
-    //         Log::error('Erreur envoi email: ' . $e->getMessage());
-    //     }
-    // }
-
-    /************************************************************************** */
     public function register(Request $request)
     {
         try {
@@ -120,9 +38,8 @@ class UtilisateurController extends Controller
 
             $utilisateur = $this->utilisateurService->register($payload);
 
-            // ✅ AJOUTER L'EMAIL DE BIENVENUE ICI (avant le return)
+            // Ajouter à newsletter et envoyer email de bienvenue
             try {
-                // Ajouter à newsletter
                 NewsletterAbonnement::updateOrCreate(
                     ['email' => $utilisateur->email],
                     [
@@ -132,7 +49,6 @@ class UtilisateurController extends Controller
                     ]
                 );
 
-                // Envoyer l'email de bienvenue
                 Mail::to($utilisateur->email)->send(new BienvenueMail($utilisateur));
                 Log::info('Email de bienvenue envoyé à: ' . $utilisateur->email);
                 
@@ -161,24 +77,8 @@ class UtilisateurController extends Controller
         }
     }
 
-    /*************************************************************************** */
-
     /**
-     * @OA\Post(
-     *     path="/utilisateurs/login",
-     *     summary="Connexion utilisateur",
-     *     tags={"Utilisateurs"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"email", "mot_de_passe"},
-     *             @OA\Property(property="email", type="string", example="jean.dupont@email.com"),
-     *             @OA\Property(property="mot_de_passe", type="string", example="Secret123!"),
-     *             @OA\Property(property="remember", type="boolean", example=false)
-     *         )
-     *     ),
-     *     @OA\Response(response=200, description="Connexion réussie")
-     * )
+     * Login user
      */
     public function login(Request $request)
     {
@@ -217,13 +117,7 @@ class UtilisateurController extends Controller
     }
 
     /**
-     * @OA\Post(
-     *     path="/utilisateurs/logout",
-     *     summary="Déconnexion utilisateur",
-     *     tags={"Utilisateurs"},
-     *     security={{"sanctum": {}}},
-     *     @OA\Response(response=200, description="Déconnexion réussie")
-     * )
+     * Logout user
      */
     public function logout(Request $request)
     {
@@ -247,13 +141,7 @@ class UtilisateurController extends Controller
     }
 
     /**
-     * @OA\Get(
-     *     path="/utilisateurs/profile",
-     *     summary="Profil utilisateur connecté",
-     *     tags={"Utilisateurs"},
-     *     security={{"sanctum": {}}},
-     *     @OA\Response(response=200, description="Succès")
-     * )
+     * Get user profile
      */
     public function profile(Request $request)
     {
@@ -264,13 +152,7 @@ class UtilisateurController extends Controller
     }
 
     /**
-     * @OA\Put(
-     *     path="/utilisateurs/profile",
-     *     summary="Modifier le profil",
-     *     tags={"Utilisateurs"},
-     *     security={{"sanctum": {}}},
-     *     @OA\Response(response=200, description="Profil mis à jour")
-     * )
+     * Update user profile
      */
     public function updateProfile(Request $request)
     {
@@ -299,13 +181,7 @@ class UtilisateurController extends Controller
     }
 
     /**
-     * @OA\Post(
-     *     path="/utilisateurs/change-password",
-     *     summary="Changer le mot de passe",
-     *     tags={"Utilisateurs"},
-     *     security={{"sanctum": {}}},
-     *     @OA\Response(response=200, description="Mot de passe modifié")
-     * )
+     * Change password
      */
     public function changePassword(Request $request)
     {
@@ -333,12 +209,7 @@ class UtilisateurController extends Controller
     }
 
     /**
-     * @OA\Post(
-     *     path="/utilisateurs/refresh-token",
-     *     summary="Rafraîchir le token",
-     *     tags={"Utilisateurs"},
-     *     @OA\Response(response=200, description="Token rafraîchi")
-     * )
+     * Refresh token
      */
     public function refreshToken(Request $request)
     {
@@ -367,15 +238,57 @@ class UtilisateurController extends Controller
         }
     }
 
-    public function adminIndex(Request $request)
+    // ============================================
+    // API METHODS FOR FRONTEND
+    // ============================================
+
+    /**
+     * API: Liste des utilisateurs avec pagination
+     */
+    public function apiIndex(Request $request)
     {
         try {
-            $clients = $this->utilisateurService->getAllClients();
+            $perPage = $request->get('per_page', 10);
+            $search = $request->get('search', '');
+            $statut = $request->get('statut', '');
+            
+            $clients = $this->utilisateurService->getAllClients($perPage, $search, $statut);
+            
             return response()->json([
                 'success' => true,
-                'data' => $clients,
-            ], 200);
+                'data' => $clients->items(),
+                'current_page' => $clients->currentPage(),
+                'last_page' => $clients->lastPage(),
+                'per_page' => $clients->perPage(),
+                'total' => $clients->total(),
+            ]);
         } catch (Throwable $e) {
+            Log::error('API Index error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur serveur: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Recherche avancée
+     */
+    public function apiSearch(Request $request)
+    {
+        try {
+            $query = $request->get('q', '');
+            $statut = $request->get('statut', '');
+            
+            $results = $this->utilisateurService->searchClients($query, $statut);
+            
+            return response()->json([
+                'success' => true,
+                'data' => $results,
+                'count' => $results->count()
+            ]);
+        } catch (Throwable $e) {
+            Log::error('API Search error', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur serveur',
@@ -383,7 +296,36 @@ class UtilisateurController extends Controller
         }
     }
 
-    public function adminStore(Request $request)
+    /**
+     * API: Récupérer un utilisateur spécifique
+     */
+    public function apiShow($id)
+    {
+        try {
+            $client = $this->utilisateurService->getClientById($id);
+            return response()->json([
+                'success' => true,
+                'data' => $client,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Utilisateur non trouvé',
+                'errors' => $e->errors(),
+            ], 404);
+        } catch (Throwable $e) {
+            Log::error('API Show error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur serveur',
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Créer un utilisateur
+     */
+    public function apiStore(Request $request)
     {
         try {
             $payload = $request->only([
@@ -393,13 +335,18 @@ class UtilisateurController extends Controller
                 'telephone',
                 'mot_de_passe',
                 'mot_de_passe_confirmation',
+                'statut'
             ]);
+
+            if (!isset($payload['statut'])) {
+                $payload['statut'] = true;
+            }
 
             $client = $this->utilisateurService->register($payload);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Client cree avec succes',
+                'message' => 'Utilisateur créé avec succès',
                 'data' => $client,
             ], 201);
         } catch (ValidationException $e) {
@@ -408,35 +355,18 @@ class UtilisateurController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         } catch (Throwable $e) {
+            Log::error('API Store error', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur serveur',
+                'message' => 'Erreur serveur: ' . $e->getMessage(),
             ], 500);
         }
     }
 
-    public function adminShow(int $id)
-    {
-        try {
-            $client = $this->utilisateurService->getClientById($id);
-            return response()->json([
-                'success' => true,
-                'data' => $client,
-            ], 200);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'errors' => $e->errors(),
-            ], 404);
-        } catch (Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur serveur',
-            ], 500);
-        }
-    }
-
-    public function adminUpdate(Request $request, int $id)
+    /**
+     * API: Mettre à jour un utilisateur
+     */
+    public function apiUpdate(Request $request, $id)
     {
         try {
             $validated = $request->validate([
@@ -444,13 +374,14 @@ class UtilisateurController extends Controller
                 'nom' => 'sometimes|required|string|max:100',
                 'email' => 'sometimes|required|email:rfc,dns|max:190|unique:utilisateurs,email,' . $id,
                 'telephone' => 'nullable|string|max:30',
-                'statut' => 'sometimes|required|in:actif,desactive',
+                'statut' => 'sometimes|boolean',
             ]);
 
             $client = $this->utilisateurService->adminUpdateClient($id, $validated);
+            
             return response()->json([
                 'success' => true,
-                'message' => 'Client mis à jour avec succès',
+                'message' => 'Utilisateur mis à jour avec succès',
                 'data' => $client,
             ], 200);
         } catch (ValidationException $e) {
@@ -459,6 +390,7 @@ class UtilisateurController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         } catch (Throwable $e) {
+            Log::error('API Update error', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur serveur',
@@ -466,13 +398,16 @@ class UtilisateurController extends Controller
         }
     }
 
-    public function adminDestroy(int $id)
+    /**
+     * API: Supprimer un utilisateur
+     */
+    public function apiDestroy($id)
     {
         try {
             $this->utilisateurService->deleteClient($id);
             return response()->json([
                 'success' => true,
-                'message' => 'Client supprimé avec succès',
+                'message' => 'Utilisateur supprimé avec succès',
             ], 200);
         } catch (ValidationException $e) {
             return response()->json([
@@ -480,10 +415,167 @@ class UtilisateurController extends Controller
                 'errors' => $e->errors(),
             ], 404);
         } catch (Throwable $e) {
+            Log::error('API Destroy error', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur serveur',
             ], 500);
         }
+    }
+
+    /**
+     * API: Exporter les utilisateurs en CSV
+     */
+    public function apiExportCsv()
+    {
+        try {
+            $clients = $this->utilisateurService->getAllClientsWithoutPagination();
+            
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="utilisateurs_' . date('Y-m-d') . '.csv"',
+            ];
+
+            $callback = function() use ($clients) {
+                $file = fopen('php://output', 'w');
+                
+                fputcsv($file, ['ID', 'Prénom', 'Nom', 'Email', 'Téléphone', 'Statut', 'Date création']);
+                
+                foreach ($clients as $client) {
+                    fputcsv($file, [
+                        $client->id,
+                        $client->prenom,
+                        $client->nom,
+                        $client->email,
+                        $client->telephone ?? '',
+                        $client->statut ? 'Actif' : 'Inactif',
+                        $client->date_creation?->format('d/m/Y H:i') ?? ''
+                    ]);
+                }
+                
+                fclose($file);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        } catch (Throwable $e) {
+            Log::error('API Export error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'export: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Activation en masse
+     */
+    public function apiBulkActivate(Request $request)
+    {
+        try {
+            $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'exists:utilisateurs,id'
+            ]);
+
+            $count = $this->utilisateurService->bulkActivate($request->ids);
+
+            return response()->json([
+                'success' => true,
+                'message' => "{$count} utilisateur(s) activé(s) avec succès",
+                'count' => $count
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (Throwable $e) {
+            Log::error('API Bulk Activate error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur serveur',
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Suppression en masse
+     */
+    public function apiBulkDelete(Request $request)
+    {
+        try {
+            $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'exists:utilisateurs,id'
+            ]);
+
+            $count = $this->utilisateurService->bulkDelete($request->ids);
+
+            return response()->json([
+                'success' => true,
+                'message' => "{$count} utilisateur(s) supprimé(s) avec succès",
+                'count' => $count
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (Throwable $e) {
+            Log::error('API Bulk Delete error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur serveur',
+            ], 500);
+        }
+    }
+
+    // ============================================
+    // ADMIN METHODS
+    // ============================================
+
+    public function adminIndex(Request $request)
+    {
+        return $this->apiIndex($request);
+    }
+
+    public function adminStore(Request $request)
+    {
+        return $this->apiStore($request);
+    }
+
+    public function adminShow($id)
+    {
+        return $this->apiShow($id);
+    }
+
+    public function adminUpdate(Request $request, $id)
+    {
+        return $this->apiUpdate($request, $id);
+    }
+
+    public function adminDestroy($id)
+    {
+        return $this->apiDestroy($id);
+    }
+
+    public function adminSearch(Request $request)
+    {
+        return $this->apiSearch($request);
+    }
+
+    public function adminExportCsv()
+    {
+        return $this->apiExportCsv();
+    }
+
+    public function adminBulkActivate(Request $request)
+    {
+        return $this->apiBulkActivate($request);
+    }
+
+    public function adminBulkDelete(Request $request)
+    {
+        return $this->apiBulkDelete($request);
     }
 }
