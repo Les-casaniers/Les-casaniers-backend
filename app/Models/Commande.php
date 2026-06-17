@@ -68,4 +68,41 @@ class Commande extends Model
     {
         return $this->hasOne(Facture::class, 'commande_id');
     }
+
+    // ✅ RELATION AVEC L'ADRESSE DE LIVRAISON (EXPÉDITION)
+    public function adresseExpédition()
+    {
+        return $this->belongsTo(AdresseUtilisateur::class, 'adresse_expedition_id');
+    }
+
+    // ✅ RELATION AVEC L'ADRESSE DE FACTURATION
+    public function adresseFacturation()
+    {
+        return $this->belongsTo(AdresseUtilisateur::class, 'adresse_facturation_id');
+    }
+
+    // ✅ MÉTHODE POUR OBTENIR L'ADRESSE FORMATÉE
+    public function getAdresseLivraisonFormatted(): string
+    {
+        // Essayer d'abord avec la relation adresseExpédition
+        if ($this->adresseExpédition) {
+            return $this->adresseExpédition->getFullAddress();
+        }
+
+        // Sinon, essayer de récupérer depuis meta_json
+        if ($this->meta_json) {
+            $meta = $this->meta_json;
+            if (isset($meta['adresse_livraison'])) {
+                return $meta['adresse_livraison'];
+            }
+            if (isset($meta['adresse'])) {
+                return $meta['adresse'];
+            }
+            if (isset($meta['adresse_expedition'])) {
+                return $meta['adresse_expedition'];
+            }
+        }
+
+        return 'Adresse non disponible';
+    }
 }

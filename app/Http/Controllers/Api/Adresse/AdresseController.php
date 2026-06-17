@@ -19,8 +19,7 @@ class AdresseController extends Controller
 {
     public function __construct(
         private readonly AdresseService $adresseService
-    ) {
-    }
+    ) {}
 
     /**
      * @OA\Get(
@@ -66,6 +65,10 @@ class AdresseController extends Controller
                 'pays' => 'required|string|max:80',
                 'par_defaut_expedition' => 'boolean',
                 'par_defaut_facturation' => 'boolean',
+                // ✅ NOUVEAUX CHAMPS
+                'image_adress' => 'nullable|string|max:255',
+                'latitude' => 'nullable|numeric|between:-90,90',
+                'longitude' => 'nullable|numeric|between:-180,180',
             ]);
 
             $adresse = $this->adresseService->create((int) $request->user()->id, $validated);
@@ -83,7 +86,7 @@ class AdresseController extends Controller
         } catch (Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur serveur',
+                'message' => 'Erreur serveur: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -145,6 +148,10 @@ class AdresseController extends Controller
                 'pays' => 'sometimes|required|string|max:80',
                 'par_defaut_expedition' => 'boolean',
                 'par_defaut_facturation' => 'boolean',
+                // ✅ NOUVEAUX CHAMPS
+                'image_adress' => 'nullable|string|max:255',
+                'latitude' => 'nullable|numeric|between:-90,90',
+                'longitude' => 'nullable|numeric|between:-180,180',
             ]);
 
             $adresse = $this->adresseService->update($id, (int) $request->user()->id, $validated);
@@ -162,7 +169,7 @@ class AdresseController extends Controller
         } catch (Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur serveur',
+                'message' => 'Erreur serveur: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -217,7 +224,7 @@ class AdresseController extends Controller
         } catch (Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur serveur',
+                'message' => 'Erreur serveur: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -280,6 +287,10 @@ class AdresseController extends Controller
                 'pays' => 'required|string|max:80',
                 'par_defaut_expedition' => 'boolean',
                 'par_defaut_facturation' => 'boolean',
+                // ✅ NOUVEAUX CHAMPS
+                'image_adress' => 'nullable|string|max:255',
+                'latitude' => 'nullable|numeric|between:-90,90',
+                'longitude' => 'nullable|numeric|between:-180,180',
             ]);
 
             $adresse = $this->adresseService->create($utilisateurId, $validated);
@@ -324,6 +335,10 @@ class AdresseController extends Controller
                 'pays' => 'sometimes|required|string|max:80',
                 'par_defaut_expedition' => 'boolean',
                 'par_defaut_facturation' => 'boolean',
+                // ✅ NOUVEAUX CHAMPS
+                'image_adress' => 'nullable|string|max:255',
+                'latitude' => 'nullable|numeric|between:-90,90',
+                'longitude' => 'nullable|numeric|between:-180,180',
             ]);
 
             $adresse = $this->adresseService->update($id, $utilisateurId, $validated);
@@ -371,6 +386,32 @@ class AdresseController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur serveur',
+            ], 500);
+        }
+    }
+
+    /**
+     * Upload d'image pour l'adresse
+     */
+    public function uploadImage(Request $request)
+    {
+        try {
+            $request->validate([
+                'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+            ]);
+
+            // Récupérer l'URL complète depuis le service
+            $imageUrl = $this->adresseService->uploadImage($request->file('image'));
+
+            return response()->json([
+                'success' => true,
+                'image_url' => $imageUrl,
+                'message' => 'Image téléchargée avec succès'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'upload: ' . $e->getMessage()
             ], 500);
         }
     }

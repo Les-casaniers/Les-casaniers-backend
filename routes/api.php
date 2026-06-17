@@ -340,6 +340,55 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::put('/profils-configurateur/{id}', [ProfilConfigurateurController::class, 'update']);
     Route::delete('/profils-configurateur/{id}', [ProfilConfigurateurController::class, 'destroy']);
 
+// Routes adresses (client connecté)
+Route::middleware(['auth:sanctum'])->prefix('adresses')->group(function () {
+    Route::get('/', [AdresseController::class, 'index']);
+    Route::post('/', [AdresseController::class, 'store']);
+    Route::get('/{id}', [AdresseController::class, 'show']);
+    Route::put('/{id}', [AdresseController::class, 'update']);
+    Route::delete('/{id}', [AdresseController::class, 'destroy']);
+    Route::put('/{id}/defaut-expedition', [AdresseController::class, 'setDefaultExpedition']);
+    Route::get('/defaut/expedition', [AdresseController::class, 'getDefaultExpedition']);
+});
+// Favoris routes
+Route::middleware(['auth:sanctum'])->prefix('favoris')->group(function () {
+    Route::get('/', [FavorisController::class, 'index']);
+    Route::post('/', [FavorisController::class, 'store']);
+    Route::delete('/{produitId}', [FavorisController::class, 'destroy']);
+});
+
+// Configurations routes
+Route::middleware(['auth:sanctum'])->prefix('configurations')->group(function () {
+    Route::get('/', [ConfigurationController::class, 'index']);
+    Route::post('/', [ConfigurationController::class, 'store']);
+    Route::put('/{id}', [ConfigurationController::class, 'update']);
+    Route::delete('/{id}', [ConfigurationController::class, 'destroy']);
+});
+
+// Adresses routes
+Route::middleware(['auth:sanctum'])->prefix('adresses')->group(function () {
+    Route::get('/', [AdresseController::class, 'index']);
+    Route::post('/', [AdresseController::class, 'store']);
+    Route::get('/defaut/expedition', [AdresseController::class, 'getDefaultExpedition']);
+    Route::get('/{id}', [AdresseController::class, 'show']);
+    Route::put('/{id}', [AdresseController::class, 'update']);
+    Route::delete('/{id}', [AdresseController::class, 'destroy']);
+    Route::put('/{id}/defaut-expedition', [AdresseController::class, 'setDefaultExpedition']);
+    // ✅ Route pour uploader l'image
+    Route::post('/upload-image', [AdresseController::class, 'uploadImage']);
+});
+
+// Route::middleware(['auth:sanctum', 'admin'])->prefix('adresses')->group(function () {
+//     Route::delete('/{id}', [AdresseController::class, 'destroy']);
+// });
+
+
+
+// Route publique pour soumettre un devis express
+Route::post('/devis-express', [DevisExpressController::class, 'store']);
+
+// Routes admin (protégées)
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     // Devis Express
     Route::get('/devis-express', [DevisExpressController::class, 'adminList']);
     Route::get('/devis-express/{id}', [DevisExpressController::class, 'adminShow']);
