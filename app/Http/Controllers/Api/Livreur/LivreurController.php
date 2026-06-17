@@ -11,14 +11,17 @@ use Illuminate\Http\JsonResponse;
 class LivreurController extends Controller
 {
     /**
-     * Récupérer les commandes pour le livreur (Version publique pour test)
+     * Récupérer les commandes pour le livreur
      */
     public function getCommandes(Request $request): JsonResponse
     {
         try {
-            // Récupérer toutes les commandes avec les infos utilisateur
-            $query = Commande::with(['utilisateur'])
-                ->orderBy('date_creation', 'desc');
+            // ✅ Récupérer les commandes avec les relations utilisateur et adresses
+            $query = Commande::with([
+                'utilisateur',
+                'adresseExpédition', // Relation avec l'adresse de livraison
+                'adresseFacturation' // Relation avec l'adresse de facturation
+            ])->orderBy('date_creation', 'desc');
 
             // Filtrer par statut si demandé
             if ($request->has('statut') && $request->statut !== 'all') {
@@ -83,12 +86,21 @@ class LivreurController extends Controller
                     }
                 }
 
-                // Récupérer l'adresse de livraison
+                // ✅ RÉCUPÉRER L'ADRESSE DE LIVRAISON DEPUIS LA RELATION
                 $adresseLivraison = 'Adresse non disponible';
-                if (isset($metaData['adresse_livraison'])) {
+                
+                // Essayer d'abord avec la relation adresseExpédition
+                if ($commande->adresseExpédition) {
+                    $adresse = $commande->adresseExpédition;
+                    $adresseLivraison = $adresse->getFullAddress();
+                } 
+                // Sinon, essayer de récupérer depuis meta_json
+                elseif (isset($metaData['adresse_livraison'])) {
                     $adresseLivraison = $metaData['adresse_livraison'];
                 } elseif (isset($metaData['adresse'])) {
                     $adresseLivraison = $metaData['adresse'];
+                } elseif (isset($metaData['adresse_expedition'])) {
+                    $adresseLivraison = $metaData['adresse_expedition'];
                 }
 
                 return [
@@ -110,6 +122,7 @@ class LivreurController extends Controller
                     'produits' => $produits,
                     'photos' => $photos,
                     'adresse_livraison' => $adresseLivraison,
+                    'adresse_expedition_id' => $commande->adresse_expedition_id,
                     'meta' => $metaData,
                 ];
             });
@@ -139,9 +152,12 @@ class LivreurController extends Controller
     public function showCommande(string $uuid): JsonResponse
     {
         try {
-            $commande = Commande::with(['utilisateur'])
-                ->where('commande_uuid', $uuid)
-                ->first();
+            // ✅ Récupérer la commande avec les relations
+            $commande = Commande::with([
+                'utilisateur',
+                'adresseExpédition',
+                'adresseFacturation'
+            ])->where('commande_uuid', $uuid)->first();
 
             if (!$commande) {
                 return response()->json([
@@ -178,8 +194,12 @@ class LivreurController extends Controller
                 }
             }
 
+            // ✅ RÉCUPÉRER L'ADRESSE DE LIVRAISON
             $adresseLivraison = 'Adresse non disponible';
-            if (isset($metaData['adresse_livraison'])) {
+            
+            if ($commande->adresseExpédition) {
+                $adresseLivraison = $commande->adresseExpédition->getFullAddress();
+            } elseif (isset($metaData['adresse_livraison'])) {
                 $adresseLivraison = $metaData['adresse_livraison'];
             } elseif (isset($metaData['adresse'])) {
                 $adresseLivraison = $metaData['adresse'];
@@ -206,6 +226,7 @@ class LivreurController extends Controller
                     'produits' => $produits,
                     'photos' => $photos,
                     'adresse_livraison' => $adresseLivraison,
+                    'adresse_expedition_id' => $commande->adresse_expedition_id,
                 ]
             ]);
 

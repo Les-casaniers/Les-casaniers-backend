@@ -272,12 +272,15 @@ Route::middleware(['auth:sanctum'])->prefix('adresses')->group(function () {
     Route::get('/defaut/expedition', [AdresseController::class, 'getDefaultExpedition']);
     Route::get('/{id}', [AdresseController::class, 'show']);
     Route::put('/{id}', [AdresseController::class, 'update']);
+    Route::delete('/{id}', [AdresseController::class, 'destroy']);
     Route::put('/{id}/defaut-expedition', [AdresseController::class, 'setDefaultExpedition']);
+    // ✅ Route pour uploader l'image
+    Route::post('/upload-image', [AdresseController::class, 'uploadImage']);
 });
 
-Route::middleware(['auth:sanctum', 'admin'])->prefix('adresses')->group(function () {
-    Route::delete('/{id}', [AdresseController::class, 'destroy']);
-});
+// Route::middleware(['auth:sanctum', 'admin'])->prefix('adresses')->group(function () {
+//     Route::delete('/{id}', [AdresseController::class, 'destroy']);
+// });
 
 
 
