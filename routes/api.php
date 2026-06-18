@@ -383,8 +383,6 @@ Route::middleware(['auth:sanctum'])->prefix('adresses')->group(function () {
 //     Route::delete('/{id}', [AdresseController::class, 'destroy']);
 // });
 
-
-
 // Route publique pour soumettre un devis express
 Route::post('/devis-express', [DevisExpressController::class, 'store']);
 
@@ -430,13 +428,9 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 // ============================================
 // ROUTES LIVREUR (PROTEGEES PAR AUTH)
 // ============================================
-
-// ✅ Routes pour les livreurs (authentifiées)
-Route::middleware(['auth:sanctum'])->prefix('livreur')->group(function () {
-    // Vérifier que l'utilisateur est bien un livreur ou admin
-    Route::middleware(['role:livreur,admin'])->group(function () {
-        Route::get('/commandes', [LivreurController::class, 'getCommandes']);
-        Route::patch('/commandes/{uuid}/statut', [LivreurController::class, 'updateStatut']);
-        Route::get('/commandes/{uuid}', [LivreurController::class, 'showCommande']);
-    });
+// ✅ Routes pour livreur - Sans middleware role
+Route::middleware(['auth:sanctum', 'role:livreur,admin'])->prefix('livreur')->group(function () {
+    Route::get('/commandes', [LivreurController::class, 'getCommandes']);
+    Route::patch('/commandes/{uuid}/statut', [LivreurController::class, 'updateStatut']);
+    Route::get('/commandes/{uuid}', [LivreurController::class, 'showCommande']);
 });
