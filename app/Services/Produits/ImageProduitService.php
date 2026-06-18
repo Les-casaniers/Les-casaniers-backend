@@ -20,10 +20,11 @@ class ImageProduitService
     {
         $this->imageRepository = $imageRepository;
 
-        $this->backendImagePath = base_path('image');
+        // Chemin vers le dossier public/image (accessible via le navigateur)
+        $this->backendImagePath = public_path('image');
         $this->backendImageUrlBase = rtrim(config('app.url'), '/') . '/image';
 
-        // Creation automatique du dossier backend s'il n'existe pas.
+        // Création automatique du dossier s'il n'existe pas
         if (!File::exists($this->backendImagePath)) {
             File::makeDirectory($this->backendImagePath, 0755, true);
         }
@@ -34,30 +35,34 @@ class ImageProduitService
      */
     public function uploadImage(int $produitId, UploadedFile $file, string $alt = null, int $ordre = null)
     {
-        $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
         $extension = strtolower($file->getClientOriginalExtension());
 
         if (!in_array($extension, $allowedExtensions, true)) {
-            throw new Exception("Format de fichier non autorise. Utilisez jpg, jpeg, png ou webp.");
+            throw new Exception("Format de fichier non autorisé. Utilisez jpg, jpeg, png, webp ou gif.");
         }
 
+        // Générer un nom unique
         $filename = Str::uuid() . '.' . $extension;
-        $backendTargetPath = $this->backendImagePath . DIRECTORY_SEPARATOR . $filename;
+        $targetPath = $this->backendImagePath . DIRECTORY_SEPARATOR . $filename;
 
         // Compression automatique pour les fichiers > 1 Mo.
         if ($file->getSize() > self::MAX_SIZE_WITHOUT_COMPRESSION) {
-            $this->compressAndSaveImage($file, $backendTargetPath, $extension);
+            $this->compressAndSaveImage($file, $targetPath, $extension);
         } else {
             $file->move($this->backendImagePath, $filename);
         }
 
+        // Construire l'URL
         $url = $this->backendImageUrlBase . '/' . $filename;
 
+        // Déterminer l'ordre
         if ($ordre === null) {
             $existingImages = $this->imageRepository->findByProduit($produitId);
             $ordre = ($existingImages->count() === 0) ? 0 : ((int) $existingImages->max('ordre') + 1);
         }
 
+        // Créer l'entrée en base de données
         return $this->imageRepository->create([
             'produit_id' => $produitId,
             'url' => $url,
@@ -67,7 +72,31 @@ class ImageProduitService
     }
 
     /**
-     * Definir une image comme principale (ordre = 0)
+     * Upload d'images multiples
+     */
+    public function uploadMultipleImages(int $produitId, array $files, array $alts = [])
+    {
+        $uploaded = [];
+        $ordre = $this->imageRepository->findByProduit($produitId)->count();
+
+        foreach ($files as $index => $file) {
+            if ($file instanceof UploadedFile) {
+                try {
+                    $alt = isset($alts[$index]) ? $alts[$index] : null;
+                    $image = $this->uploadImage($produitId, $file, $alt, $ordre + $index);
+                    $uploaded[] = $image;
+                } catch (Exception $e) {
+                    Log::error("Erreur upload image: " . $e->getMessage());
+                    continue;
+                }
+            }
+        }
+
+        return $uploaded;
+    }
+
+    /**
+     * Définir une image comme principale (ordre = 0)
      */
     public function setMainImage(int $produitId, int $imageId)
     {
@@ -85,7 +114,7 @@ class ImageProduitService
     }
 
     /**
-     * Suppression d'une image (base de donnees + fichier)
+     * Suppression d'une image (base de données + fichier)
      */
     public function deleteImage(int $imageId)
     {
@@ -119,51 +148,90 @@ class ImageProduitService
     protected function deleteImageFile(string $url)
     {
         $filename = basename((string) parse_url($url, PHP_URL_PATH));
-        $backendPath = $this->backendImagePath . DIRECTORY_SEPARATOR . $filename;
+        $filePath = $this->backendImagePath . DIRECTORY_SEPARATOR . $filename;
 
-        if (File::exists($backendPath)) {
-            File::delete($backendPath);
+        if (File::exists($filePath)) {
+            File::delete($filePath);
+            return true;
         }
+        return false;
     }
 
     /**
-     * Mise a jour du texte ALT
+     * Mise à jour du texte ALT
      */
     public function updateAlt(int $imageId, string $alt)
     {
         return $this->imageRepository->update($imageId, ['alt' => $alt]);
     }
 
+    /**
+     * Récupérer l'image principale d'un produit
+     */
+    public function getMainImage(int $produitId)
+    {
+        return $this->imageRepository->findMainImage($produitId);
+    }
+
+    /**
+     * Récupérer toutes les images d'un produit
+     */
+    public function getProductImages(int $produitId)
+    {
+        return $this->imageRepository->findByProduit($produitId);
+    }
+
+    /**
+     * Compression et sauvegarde d'une image
+     */
     protected function compressAndSaveImage(UploadedFile $file, string $targetPath, string $extension): void
     {
         $sourcePath = $file->getRealPath();
 
         try {
-            if (in_array($extension, ['jpg', 'jpeg'], true) && function_exists('imagecreatefromjpeg')) {
-                $image = imagecreatefromjpeg($sourcePath);
-                imagejpeg($image, $targetPath, 75);
-                imagedestroy($image);
-                return;
-            }
+            switch ($extension) {
+                case 'jpg':
+                case 'jpeg':
+                    if (function_exists('imagecreatefromjpeg')) {
+                        $image = imagecreatefromjpeg($sourcePath);
+                        imagejpeg($image, $targetPath, 75);
+                        imagedestroy($image);
+                        return;
+                    }
+                    break;
 
-            if ($extension === 'png' && function_exists('imagecreatefrompng')) {
-                $image = imagecreatefrompng($sourcePath);
-                imagepng($image, $targetPath, 7);
-                imagedestroy($image);
-                return;
-            }
+                case 'png':
+                    if (function_exists('imagecreatefrompng')) {
+                        $image = imagecreatefrompng($sourcePath);
+                        imagepng($image, $targetPath, 7);
+                        imagedestroy($image);
+                        return;
+                    }
+                    break;
 
-            if ($extension === 'webp' && function_exists('imagecreatefromwebp')) {
-                $image = imagecreatefromwebp($sourcePath);
-                imagewebp($image, $targetPath, 75);
-                imagedestroy($image);
-                return;
+                case 'webp':
+                    if (function_exists('imagecreatefromwebp')) {
+                        $image = imagecreatefromwebp($sourcePath);
+                        imagewebp($image, $targetPath, 75);
+                        imagedestroy($image);
+                        return;
+                    }
+                    break;
+
+                case 'gif':
+                    if (function_exists('imagecreatefromgif')) {
+                        $image = imagecreatefromgif($sourcePath);
+                        imagegif($image, $targetPath);
+                        imagedestroy($image);
+                        return;
+                    }
+                    break;
             }
         } catch (\Throwable $e) {
             Log::warning('Image compression failed, fallback to original upload: ' . $e->getMessage());
         }
 
+        // Fallback: copie directe
         $file->move($this->backendImagePath, basename($targetPath));
     }
-
 }

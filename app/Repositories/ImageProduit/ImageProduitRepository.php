@@ -3,64 +3,31 @@
 namespace App\Repositories\ImageProduit;
 
 use App\Models\ImageProduit;
-use Illuminate\Support\Facades\DB;
+use App\Repositories\BaseRepository;
 
-class ImageProduitRepository implements ImageProduitRepositoryInterface
+class ImageProduitRepository extends BaseRepository implements ImageProduitRepositoryInterface
 {
-    protected $model;
-
-    public function __construct(ImageProduit $imageProduit)
+    public function __construct(ImageProduit $model)
     {
-        $this->model = $imageProduit;
-    }
-
-    public function findById(int $id)
-    {
-        return $this->model->find($id);
+        parent::__construct($model);
     }
 
     public function findByProduit(int $produitId)
     {
-        return $this->model->where('produit_id', $produitId)->orderBy('ordre')->get();
+        return $this->model->where('produit_id', $produitId)
+            ->orderBy('ordre', 'asc')
+            ->get();
     }
 
-    public function create(array $data)
+    public function findMainImage(int $produitId)
     {
-        // If order is not provided, put it at the end
-        if (!isset($data['ordre'])) {
-            $maxOrder = $this->model->where('produit_id', $data['produit_id'])->max('ordre');
-            $data['ordre'] = ($maxOrder !== null) ? $maxOrder + 1 : 0;
-        }
-
-        return $this->model->create($data);
+        return $this->model->where('produit_id', $produitId)
+            ->where('ordre', 0)
+            ->first();
     }
 
-    public function update(int $id, array $data)
+    public function deleteByProduit(int $produitId)
     {
-        $image = $this->findById($id);
-        if ($image) {
-            $image->update($data);
-            return $image;
-        }
-        return null;
-    }
-
-    public function delete(int $id)
-    {
-        $image = $this->findById($id);
-        if ($image) {
-            return $image->delete();
-        }
-        return false;
-    }
-
-    public function updateOrder(int $produitId, array $imageOrders)
-    {
-        return DB::transaction(function () use ($imageOrders) {
-            foreach ($imageOrders as $id => $order) {
-                $this->model->where('id', $id)->update(['ordre' => $order]);
-            }
-            return true;
-        });
+        return $this->model->where('produit_id', $produitId)->delete();
     }
 }

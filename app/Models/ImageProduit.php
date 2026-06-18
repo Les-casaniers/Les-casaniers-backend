@@ -3,12 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ImageProduit extends Model
 {
-    use HasFactory;
-
     protected $table = 'images_produits';
 
     protected $fillable = [
@@ -18,11 +16,17 @@ class ImageProduit extends Model
         'ordre'
     ];
 
-    const CREATED_AT = 'date_creation';
-    public $timestamps = false;
+    protected $casts = [
+        'ordre' => 'integer',
+    ];
 
-    public function produit()
+    public function produit(): BelongsTo
     {
         return $this->belongsTo(Produit::class, 'produit_id');
+    }
+
+    public function getFilenameAttribute(): string
+    {
+        return basename($this->url);
     }
 }

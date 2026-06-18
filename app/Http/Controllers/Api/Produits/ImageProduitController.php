@@ -30,33 +30,16 @@ class ImageProduitController extends Controller
     }
 
     /**
-     * @OA\Post(
-     *     path="/api/produits/{produitId}/images",
-     *     summary="Uploader une image pour un produit (Admin)",
-     *     tags={"Images Produits"},
-     *     security={{"sanctum": {}}},
-     *     @OA\Parameter(name="produitId", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\MediaType(
-     *             mediaType="multipart/form-data",
-     *             @OA\Schema(
-     *                 @OA\Property(property="image", type="string", format="binary"),
-     *                 @OA\Property(property="alt", type="string"),
-     *                 @OA\Property(property="ordre", type="integer")
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(response=201, description="Upload réussi")
-     * )
+     * Uploader une image pour un produit (Admin)
      */
     public function store(Request $request, int $produitId)
     {
         if ($response = $this->ensureAdmin($request)) {
             return $response;
         }
+
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp,gif|max:10240',
             'alt' => 'nullable|string|max:255',
             'ordre' => 'nullable|integer'
         ]);
@@ -75,43 +58,88 @@ class ImageProduitController extends Controller
     }
 
     /**
-     * @OA\Delete(
-     *     path="/api/images/{id}",
-     *     summary="Supprimer une image (Admin)",
-     *     tags={"Images Produits"},
-     *     security={{"sanctum": {}}},
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Supprimé")
-     * )
+     * Uploader plusieurs images pour un produit (Admin)
+     */
+    public function storeMultiple(Request $request, int $produitId)
+    {
+        if ($response = $this->ensureAdmin($request)) {
+            return $response;
+        }
+
+        $request->validate([
+            'images' => 'required|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp,gif|max:10240',
+            'alts' => 'nullable|array',
+            'alts.*' => 'nullable|string|max:255'
+        ]);
+
+        try {
+            $images = $this->imageService->uploadMultipleImages(
+                $produitId,
+                $request->file('images'),
+                $request->input('alts', [])
+            );
+            return response()->json(['success' => true, 'data' => $images], 201);
+        } catch (Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Supprimer une image (Admin)
      */
     public function destroy(Request $request, int $id)
     {
         if ($response = $this->ensureAdmin($request)) {
             return $response;
         }
-        $deleted = $this->imageService->deleteImage($id);
-        return response()->json(['success' => $deleted]);
+
+        try {
+            $deleted = $this->imageService->deleteImage($id);
+            return response()->json(['success' => $deleted]);
+        } catch (Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**
-     * @OA\Patch(
-     *     path="/api/produits/{produitId}/images/{imageId}/set-main",
-     *     summary="Définir une image comme principale (Admin)",
-     *     tags={"Images Produits"},
-     *     security={{"sanctum": {}}},
-     *     @OA\Parameter(name="produitId", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Parameter(name="imageId", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Succès")
-     * )
+     * Définir une image comme principale (Admin)
      */
     public function setMain(Request $request, int $produitId, int $imageId)
     {
         if ($response = $this->ensureAdmin($request)) {
             return $response;
         }
+
         try {
             $this->imageService->setMainImage($produitId, $imageId);
             return response()->json(['success' => true]);
+        } catch (Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Récupérer l'image principale d'un produit (Public)
+     */
+    public function getMain(int $produitId)
+    {
+        try {
+            $image = $this->imageService->getMainImage($produitId);
+            return response()->json(['success' => true, 'data' => $image]);
+        } catch (Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Récupérer toutes les images d'un produit (Public)
+     */
+    public function getProductImages(int $produitId)
+    {
+        try {
+            $images = $this->imageService->getProductImages($produitId);
+            return response()->json(['success' => true, 'data' => $images]);
         } catch (Throwable $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }

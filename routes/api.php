@@ -31,6 +31,36 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\ConsentementCookieController;
 use App\Http\Controllers\Api\Configurateur\ProfilConfigurateurController;
 
+// ============================================
+// ROUTE POUR SERVIR LES IMAGES (PUBLIQUE - FALLBACK)
+// ============================================
+Route::get('/image/{filename}', function ($filename) {
+    $filename = basename($filename);
+    
+    // Vérifier dans public/image/
+    $path = public_path('image/' . $filename);
+    
+    if (!file_exists($path)) {
+        // Fallback: vérifier dans base_path('image')
+        $path = base_path('image/' . $filename);
+    }
+    
+    if (!file_exists($path)) {
+        // Fallback: vérifier dans storage/app/public/image
+        $path = storage_path('app/public/image/' . $filename);
+    }
+    
+    if (!file_exists($path)) {
+        return response()->json(['error' => 'Image not found'], 404);
+    }
+    
+    $mime = mime_content_type($path);
+    return response()->file($path, [
+        'Content-Type' => $mime,
+        'Cache-Control' => 'public, max-age=31536000',
+    ]);
+})->name('api.image.show');
+
 Route::middleware(['auth:sanctum'])->get('/user', [UserController::class, 'user']);
 
 // ============================================
@@ -182,9 +212,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/produits/{id}', [ProduitController::class, 'destroy']);
     Route::patch('/produits/{id}/toggle-status', [ProduitController::class, 'toggleStatus']);
 
+    // Images produits
     Route::post('/produits/{produitId}/images', [ImageProduitController::class, 'store']);
+    Route::post('/produits/{produitId}/images/multiple', [ImageProduitController::class, 'storeMultiple']);
     Route::delete('/images/{id}', [ImageProduitController::class, 'destroy']);
     Route::patch('/produits/{produitId}/images/{imageId}/set-main', [ImageProduitController::class, 'setMain']);
+    Route::get('/produits/{produitId}/images/main', [ImageProduitController::class, 'getMain']);
+    Route::get('/produits/{produitId}/images', [ImageProduitController::class, 'getProductImages']);
 
     Route::post('/produits/{produitId}/attributes/sync', [AttributProduitController::class, 'sync']);
     Route::get('/attributes/standard-keys', [AttributProduitController::class, 'getStandardKeys']);
@@ -339,6 +373,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/profils-configurateur', [ProfilConfigurateurController::class, 'store']);
     Route::put('/profils-configurateur/{id}', [ProfilConfigurateurController::class, 'update']);
     Route::delete('/profils-configurateur/{id}', [ProfilConfigurateurController::class, 'destroy']);
+});
 
 // Routes adresses (client connecté)
 Route::middleware(['auth:sanctum'])->prefix('adresses')->group(function () {
@@ -350,6 +385,7 @@ Route::middleware(['auth:sanctum'])->prefix('adresses')->group(function () {
     Route::put('/{id}/defaut-expedition', [AdresseController::class, 'setDefaultExpedition']);
     Route::get('/defaut/expedition', [AdresseController::class, 'getDefaultExpedition']);
 });
+
 // Favoris routes
 Route::middleware(['auth:sanctum'])->prefix('favoris')->group(function () {
     Route::get('/', [FavorisController::class, 'index']);
@@ -374,15 +410,8 @@ Route::middleware(['auth:sanctum'])->prefix('adresses')->group(function () {
     Route::put('/{id}', [AdresseController::class, 'update']);
     Route::delete('/{id}', [AdresseController::class, 'destroy']);
     Route::put('/{id}/defaut-expedition', [AdresseController::class, 'setDefaultExpedition']);
-    // ✅ Route pour uploader l'image
     Route::post('/upload-image', [AdresseController::class, 'uploadImage']);
 });
-
-// Route::middleware(['auth:sanctum', 'admin'])->prefix('adresses')->group(function () {
-//     Route::delete('/{id}', [AdresseController::class, 'destroy']);
-// });
-
-
 
 // Route publique pour soumettre un devis express
 Route::post('/devis-express', [DevisExpressController::class, 'store']);
