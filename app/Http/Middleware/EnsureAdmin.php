@@ -13,7 +13,7 @@ class EnsureAdmin
         if (!$request->user() instanceof Admin) {
             return response()->json([
                 'success' => false,
-                'message' => 'Acces administrateur requis',
+                'message' => 'Acces livreur requis',
             ], 403);
         }
 

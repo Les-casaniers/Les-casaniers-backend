@@ -369,10 +369,17 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::put('/{id}/statut', [AdminAuthController::class, 'updateStatut']);
     Route::delete('/{id}', [AdminAuthController::class, 'destroy']);
 
+<<<<<<< HEAD
     // Profils Configurateur
     Route::post('/profils-configurateur', [ProfilConfigurateurController::class, 'store']);
     Route::put('/profils-configurateur/{id}', [ProfilConfigurateurController::class, 'update']);
     Route::delete('/profils-configurateur/{id}', [ProfilConfigurateurController::class, 'destroy']);
+=======
+// Profils Configurateur
+Route::post('/profils-configurateur', [ProfilConfigurateurController::class, 'store']);
+Route::put('/profils-configurateur/{id}', [ProfilConfigurateurController::class, 'update']);
+Route::delete('/profils-configurateur/{id}', [ProfilConfigurateurController::class, 'destroy']);
+>>>>>>> 1fb0e6fa1f613aa3a45a9919d7637139e7493098
 });
 
 // Routes adresses (client connecté)
@@ -413,6 +420,13 @@ Route::middleware(['auth:sanctum'])->prefix('adresses')->group(function () {
     Route::post('/upload-image', [AdresseController::class, 'uploadImage']);
 });
 
+<<<<<<< HEAD
+=======
+// Route::middleware(['auth:sanctum', 'admin'])->prefix('adresses')->group(function () {
+//     Route::delete('/{id}', [AdresseController::class, 'destroy']);
+// });
+
+>>>>>>> 1fb0e6fa1f613aa3a45a9919d7637139e7493098
 // Route publique pour soumettre un devis express
 Route::post('/devis-express', [DevisExpressController::class, 'store']);
 
@@ -449,7 +463,17 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 // ============================================
 // ROUTES LIVREUR (TEST SANS AUTH)
 // ============================================
-Route::prefix('livreur-test')->group(function () {
+// Route::prefix('livreur-test')->group(function () {
+//     Route::get('/commandes', [LivreurController::class, 'getCommandes']);
+//     Route::patch('/commandes/{uuid}/statut', [LivreurController::class, 'updateStatut']);
+//     Route::get('/commandes/{uuid}', [LivreurController::class, 'showCommande']);
+// });
+
+// ============================================
+// ROUTES LIVREUR (PROTEGEES PAR AUTH)
+// ============================================
+// ✅ Routes pour livreur - Sans middleware role
+Route::middleware(['auth:sanctum', 'role:livreur,admin'])->prefix('livreur')->group(function () {
     Route::get('/commandes', [LivreurController::class, 'getCommandes']);
     Route::patch('/commandes/{uuid}/statut', [LivreurController::class, 'updateStatut']);
     Route::get('/commandes/{uuid}', [LivreurController::class, 'showCommande']);

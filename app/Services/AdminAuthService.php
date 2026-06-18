@@ -1,4 +1,5 @@
 <?php
+// app/Services/AdminAuthService.php
 
 namespace App\Services;
 
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\PersonalAccessToken;
 use Carbon\Carbon;
 
@@ -29,7 +31,7 @@ class AdminAuthService
         $validator = Validator::make($data, [
             'prenom' => 'required|string|max:100',
             'nom' => 'required|string|max:100',
-            'email' => 'required|email:rfc,dns|max:190|unique:admin,email',
+            'email' => 'required|email|max:190|unique:admin,email',
             'telephone' => 'nullable|string|max:30',
             'mot_de_passe' => [
                 'required',
@@ -37,15 +39,15 @@ class AdminAuthService
                 'confirmed',
                 Password::min(8)->letters()->mixedCase()->numbers()->symbols(),
             ],
-            'poste' => 'nullable|in:admin,support,logistique',
+            'poste' => 'nullable|in:admin,support,logistique,livreur',
         ]);
 
         if ($validator->fails()) {
-            \Log::error('Admin registration validation failed', ['errors' => $validator->errors()->toArray(), 'data' => $data]);
+            Log::error('Admin registration validation failed', ['errors' => $validator->errors()->toArray(), 'data' => $data]);
             throw new ValidationException($validator);
         }
 
-        \Log::info('Attempting to create admin', ['email' => $data['email'] ?? null]);
+        Log::info('Attempting to create admin', ['email' => $data['email'] ?? null]);
 
         $payload = [
             'prenom' => trim($data['prenom']),
@@ -65,7 +67,7 @@ class AdminAuthService
     public function login(array $data, string $ip, bool $remember = false)
     {
         $validator = Validator::make($data, [
-            'email' => 'required|email:rfc,dns|max:190',
+            'email' => 'required|email|max:190',
             'mot_de_passe' => 'required|string',
         ]);
 
@@ -105,30 +107,23 @@ class AdminAuthService
             ]);
         }
 
-        Auth::guard('admin')->login($admin, $remember);
-
-
-        RateLimiter::clear($throttleKey);
-        
-        $admin = Auth::guard('admin')->user();
-
-        if ($admin && $admin->statut !== 'actif') {
-            Auth::guard('admin')->logout();
+        if ($admin->statut !== 'actif') {
             throw ValidationException::withMessages([
                 'email' => 'Votre compte est désactivé. Veuillez contacter l\'administration.',
             ]);
         }
 
-        // Generate tokens
+        RateLimiter::clear($throttleKey);
+
         $accessToken = $admin->createToken(
-            'access_token', 
-            ['access'], 
+            'access_token',
+            ['access'],
             Carbon::now()->addMinutes(config('sanctum.access_token_expires_in', 30))
         )->plainTextToken;
 
         $refreshToken = $admin->createToken(
-            'refresh_token', 
-            ['refresh'], 
+            'refresh_token',
+            ['refresh'],
             Carbon::now()->addMinutes(config('sanctum.refresh_token_expires_in', 10080))
         )->plainTextToken;
 
@@ -152,10 +147,9 @@ class AdminAuthService
 
         $admin = $token->tokenable;
 
-        // Generate new access token
         $newAccessToken = $admin->createToken(
-            'access_token', 
-            ['access'], 
+            'access_token',
+            ['access'],
             Carbon::now()->addMinutes(config('sanctum.access_token_expires_in', 30))
         )->plainTextToken;
 
@@ -168,10 +162,16 @@ class AdminAuthService
     public function logout(string $guard = 'admin'): void
     {
         $admin = Auth::guard($guard)->user();
-        
+
         if ($admin) {
-            // Revoke current token
-            $admin->currentAccessToken()?->delete();
+            if (method_exists($admin, 'currentAccessToken')) {
+                $admin->currentAccessToken()?->delete();
+            } else {
+                // Fallback: revoke all personal access tokens for this admin if currentAccessToken() isn't available
+                PersonalAccessToken::where('tokenable_id', $admin->getAuthIdentifier())
+                    ->where('tokenable_type', get_class($admin))
+                    ->delete();
+            }
         }
 
         Auth::guard($guard)->logout();
@@ -182,7 +182,7 @@ class AdminAuthService
         $validator = Validator::make($data, [
             'prenom' => 'required|string|max:100',
             'nom' => 'required|string|max:100',
-            'email' => 'required|email:rfc,dns|max:190|unique:admin,email,'.$adminId,
+            'email' => 'required|email|max:190|unique:admin,email,' . $adminId,
             'telephone' => 'nullable|string|max:30',
             'poste' => 'nullable|in:admin,support,logistique',
         ]);
@@ -240,6 +240,6 @@ class AdminAuthService
 
     private function throttleKey(string $email, string $ip): string
     {
-        return Str::transliterate($email.'|'.$ip);
+        return Str::transliterate($email . '|' . $ip);
     }
 }
