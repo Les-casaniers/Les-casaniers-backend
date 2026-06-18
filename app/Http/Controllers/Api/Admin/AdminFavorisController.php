@@ -21,8 +21,9 @@ class AdminFavorisController extends Controller
         
         $result = [];
         foreach ($utilisateurs as $utilisateur) {
+            // Charger les favoris avec les produits et leurs images
             $favoris = Favori::where('utilisateur_id', $utilisateur->id)
-                ->with('produit')
+                ->with(['produit.images']) // ← IMPORTANT: charger les images
                 ->get();
             
             $result[] = [
@@ -34,16 +35,28 @@ class AdminFavorisController extends Controller
                 'statut' => $utilisateur->statut,
                 'date_creation' => $utilisateur->date_creation,
                 'favoris' => $favoris->map(function ($favori) {
+                    $produit = $favori->produit;
                     return [
                         'id' => $favori->id,
                         'produit_id' => $favori->produit_id,
                         'date_creation' => $favori->date_creation,
-                        'produit' => $favori->produit ? [
-                            'id' => $favori->produit->id,
-                            'nom' => $favori->produit->nom,
-                            'prix' => $favori->produit->prix,
-                            'image_url' => $favori->produit->image_url,
-                            'slug' => $favori->produit->slug,
+                        'produit' => $produit ? [
+                            'id' => $produit->id,
+                            'nom' => $produit->nom,
+                            'prix' => $produit->prix,
+                            'image_url' => $produit->image_url,
+                            'slug' => $produit->slug,
+                            // AJOUT : Inclure les images
+                            'images' => $produit->images->map(function ($image) {
+                                return [
+                                    'id' => $image->id,
+                                    'url' => $image->url,
+                                    'alt' => $image->alt,
+                                    'ordre' => $image->ordre,
+                                ];
+                            }),
+                            // AJOUT : Inclure l'image principale
+                            'image' => $produit->images->where('ordre', 0)->first()?->url ?? $produit->image_url,
                         ] : null,
                     ];
                 }),
@@ -62,7 +75,7 @@ class AdminFavorisController extends Controller
      */
     public function getAllFavoris()
     {
-        $favoris = Favori::with(['utilisateur', 'produit'])->get();
+        $favoris = Favori::with(['utilisateur', 'produit.images'])->get();
         
         return response()->json([
             'success' => true,
@@ -78,7 +91,7 @@ class AdminFavorisController extends Controller
         $utilisateur = Utilisateur::findOrFail($userId);
         
         $favoris = Favori::where('utilisateur_id', $userId)
-            ->with('produit')
+            ->with(['produit.images'])
             ->get();
         
         return response()->json([
@@ -151,7 +164,7 @@ class AdminFavorisController extends Controller
         
         // Top 5 des produits les plus favorisés
         $topProduits = Favori::select('produit_id')
-            ->with('produit')
+            ->with('produit.images')
             ->groupBy('produit_id')
             ->orderByRaw('COUNT(*) DESC')
             ->limit(5)
@@ -163,6 +176,7 @@ class AdminFavorisController extends Controller
                     'produit' => $item->produit ? [
                         'nom' => $item->produit->nom,
                         'prix' => $item->produit->prix,
+                        'images' => $item->produit->images,
                     ] : null,
                 ];
             });
