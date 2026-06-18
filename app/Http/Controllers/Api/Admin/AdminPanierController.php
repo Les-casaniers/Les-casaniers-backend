@@ -43,7 +43,8 @@ class AdminPanierController extends Controller
                         'paniers' => $paniers->map(function ($panier) {
                             $produit = null;
                             if ($panier->produit_id) {
-                                $produit = Produit::find($panier->produit_id);
+                                // Charger le produit avec ses images
+                                $produit = Produit::with('images')->find($panier->produit_id);
                             }
 
                             return [
@@ -60,6 +61,17 @@ class AdminPanierController extends Controller
                                     'prix' => (float) $produit->prix,
                                     'image_url' => $produit->image_url,
                                     'slug' => $produit->slug,
+                                    // AJOUT : Inclure les images
+                                    'images' => $produit->images->map(function ($image) {
+                                        return [
+                                            'id' => $image->id,
+                                            'url' => $image->url,
+                                            'alt' => $image->alt,
+                                            'ordre' => $image->ordre,
+                                        ];
+                                    }),
+                                    // AJOUT : Inclure l'image principale si disponible
+                                    'image' => $produit->images->where('ordre', 0)->first()?->url ?? $produit->image_url,
                                 ] : null,
                             ];
                         }),
