@@ -1,4 +1,5 @@
 <?php
+// app/Services/AdminAuthService.php
 
 namespace App\Services;
 
@@ -25,44 +26,6 @@ class AdminAuthService
         $this->adminRepository = $adminRepository;
     }
 
-    // public function register(array $data)
-    // {
-    //     $validator = Validator::make($data, [
-    //         'prenom' => 'required|string|max:100',
-    //         'nom' => 'required|string|max:100',
-    //         'email' => 'required|email|max:190|unique:admin,email',
-    //         'telephone' => 'nullable|string|max:30',
-    //         'mot_de_passe' => [
-    //             'required',
-    //             'string',
-    //             'confirmed',
-    //             Password::min(8)->letters()->mixedCase()->numbers()->symbols(),
-    //         ],
-    //         'poste' => 'nullable|in:admin,support,logistique,livreur',
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         Log::error('Admin registration validation failed', ['errors' => $validator->errors()->toArray(), 'data' => $data]);
-    //         throw new ValidationException($validator);
-    //     }
-
-    //     Log::info('Attempting to create admin', ['email' => $data['email'] ?? null]);
-
-    //     $payload = [
-    //         'prenom' => trim($data['prenom']),
-    //         'nom' => trim($data['nom']),
-    //         'email' => Str::lower(trim($data['email'])),
-    //         'telephone' => isset($data['telephone']) ? trim($data['telephone']) : null,
-    //         'mot_de_passe' => $data['mot_de_passe'],
-    //         'poste' => $data['poste'] ?? 'admin',
-    //         'statut' => 'actif',
-    //     ];
-
-    //     return DB::transaction(function () use ($payload) {
-    //         return $this->adminRepository->create($payload);
-    //     });
-    // }
-
     public function register(array $data)
     {
         $validator = Validator::make($data, [
@@ -76,7 +39,7 @@ class AdminAuthService
                 'confirmed',
                 Password::min(8)->letters()->mixedCase()->numbers()->symbols(),
             ],
-            'poste' => 'nullable|in:admin,support,logistique,livreur', // AJOUT DE LIVREUR
+            'poste' => 'nullable|in:admin,support,logistique,livreur',
         ]);
 
         if ($validator->fails()) {
@@ -144,21 +107,14 @@ class AdminAuthService
             ]);
         }
 
-        Auth::guard('admin')->login($admin, $remember);
-
-
-        RateLimiter::clear($throttleKey);
-
-        $admin = Auth::guard('admin')->user();
-
-        if ($admin && $admin->statut !== 'actif') {
-            Auth::guard('admin')->logout();
+        if ($admin->statut !== 'actif') {
             throw ValidationException::withMessages([
                 'email' => 'Votre compte est désactivé. Veuillez contacter l\'administration.',
             ]);
         }
 
-        // Generate tokens
+        RateLimiter::clear($throttleKey);
+
         $accessToken = $admin->createToken(
             'access_token',
             ['access'],
@@ -191,7 +147,6 @@ class AdminAuthService
 
         $admin = $token->tokenable;
 
-        // Generate new access token
         $newAccessToken = $admin->createToken(
             'access_token',
             ['access'],
@@ -209,8 +164,14 @@ class AdminAuthService
         $admin = Auth::guard($guard)->user();
 
         if ($admin) {
-            // Revoke current token
-            $admin->currentAccessToken()?->delete();
+            if (method_exists($admin, 'currentAccessToken')) {
+                $admin->currentAccessToken()?->delete();
+            } else {
+                // Fallback: revoke all personal access tokens for this admin if currentAccessToken() isn't available
+                PersonalAccessToken::where('tokenable_id', $admin->getAuthIdentifier())
+                    ->where('tokenable_type', get_class($admin))
+                    ->delete();
+            }
         }
 
         Auth::guard($guard)->logout();
@@ -221,7 +182,7 @@ class AdminAuthService
         $validator = Validator::make($data, [
             'prenom' => 'required|string|max:100',
             'nom' => 'required|string|max:100',
-            'email' => 'required|email:rfc,dns|max:190|unique:admin,email,' . $adminId,
+            'email' => 'required|email|max:190|unique:admin,email,' . $adminId,
             'telephone' => 'nullable|string|max:30',
             'poste' => 'nullable|in:admin,support,logistique',
         ]);
