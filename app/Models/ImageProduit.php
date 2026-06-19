@@ -9,6 +9,9 @@ class ImageProduit extends Model
 {
     protected $table = 'images_produits';
 
+    // Désactiver les timestamps automatiques (created_at, updated_at)
+    public $timestamps = false;
+
     protected $fillable = [
         'produit_id',
         'url',
@@ -19,6 +22,11 @@ class ImageProduit extends Model
     protected $casts = [
         'ordre' => 'integer',
     ];
+
+    // Utiliser 'date_creation' comme date de création
+    const CREATED_AT = 'date_creation';
+    // Pas de updated_at
+    const UPDATED_AT = null;
 
     public function produit(): BelongsTo
     {
