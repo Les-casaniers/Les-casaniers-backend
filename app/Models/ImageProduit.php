@@ -9,11 +9,13 @@ class ImageProduit extends Model
 {
     protected $table = 'images_produits';
 
+    public $timestamps = false;
+    
+=========
     // Désactiver les timestamps automatiques (created_at, updated_at)
     public $timestamps = false;
 
-    public $timestamps = false;
-    
+>>>>>>>>> Temporary merge branch 2
     protected $fillable = [
         'produit_id',
         'url',
