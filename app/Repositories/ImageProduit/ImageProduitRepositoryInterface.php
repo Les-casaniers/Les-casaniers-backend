@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Repositories\ImageProduit;
-
+ 
 interface ImageProduitRepositoryInterface
 {
     public function findById(int $id);
