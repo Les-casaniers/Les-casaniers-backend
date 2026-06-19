@@ -172,9 +172,12 @@ class AdresseService
         }
         
         $file->move($destinationPath, $filename);
-        
+            
         // ✅ Retourner l'URL complète comme dans BoutiqueMisa
+
         $baseUrl = rtrim(config('app.url'), '/');
+
         return $baseUrl . '/image-lieu/' . $filename;
+    
     }
 }

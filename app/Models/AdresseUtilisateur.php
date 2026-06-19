@@ -1,4 +1,5 @@
 <?php
+// app/Models/AdresseUtilisateur.php
 
 namespace App\Models;
 
@@ -8,18 +9,40 @@ class AdresseUtilisateur extends Model
 {
     protected $table = 'adresses_utilisateurs';
     
+    // ✅ Activer les timestamps automatiques de Laravel
+    public $timestamps = true;
+    
+    // ✅ Définir les noms des colonnes de timestamps
+    const CREATED_AT = 'date_creation';
+    const UPDATED_AT = 'date_modification';
+    
     protected $fillable = [
-        'utilisateur_id', 'etiquette', 'nom_complet', 'telephone',
-        'adresse_ligne1', 'adresse_ligne2', 'ville', 'region',
-        'code_postal', 'pays', 'par_defaut_expedition',
-        'par_defaut_facturation', 'date_creation', 'date_modification', 'image_adress', 'latitude','longitude'
+        'utilisateur_id',
+        'etiquette',
+        'nom_complet',
+        'telephone',
+        'adresse_ligne1',
+        'adresse_ligne2',
+        'ville',
+        'region',
+        'code_postal',
+        'pays',
+        'par_defaut_expedition',
+        'par_defaut_facturation',
+        'image_adress',
+        'latitude',
+        'longitude',
+        'date_creation',
+        'date_modification'
     ];
     
     protected $casts = [
         'par_defaut_expedition' => 'boolean',
         'par_defaut_facturation' => 'boolean',
+        'latitude' => 'float',
+        'longitude' => 'float',
         'date_creation' => 'datetime',
-        'date_modification' => 'datetime'
+        'date_modification' => 'datetime',
     ];
     
     // Relation avec l'utilisateur
@@ -46,7 +69,6 @@ class AdresseUtilisateur extends Model
         return $adresse;
     }
 
-    // ✅ MÉTHODE POUR OBTENIR L'ADRESSE COMPLÈTE FORMATÉE
     public function getFullAddress(): string
     {
         $parts = [];
@@ -54,11 +76,9 @@ class AdresseUtilisateur extends Model
         if ($this->nom_complet) {
             $parts[] = $this->nom_complet;
         }
-
         if ($this->adresse_ligne1) {
             $parts[] = $this->adresse_ligne1;
         }
-
         if ($this->adresse_ligne2) {
             $parts[] = $this->adresse_ligne2;
         }
@@ -77,7 +97,6 @@ class AdresseUtilisateur extends Model
         if ($this->region) {
             $parts[] = $this->region;
         }
-
         if ($this->pays) {
             $parts[] = $this->pays;
         }
@@ -85,7 +104,6 @@ class AdresseUtilisateur extends Model
         return !empty($parts) ? implode(', ', $parts) : 'Adresse non disponible';
     }
 
-    // ✅ MÉTHODE POUR OBTENIR L'ADRESSE EN UNE LIGNE
     public function getAddressLine(): string
     {
         $parts = [];
