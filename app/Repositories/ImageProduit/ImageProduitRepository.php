@@ -43,16 +43,6 @@ class ImageProduitRepository implements ImageProduitRepositoryInterface
         return $record->delete();
     }
 
-    public function updateOrder(int $produitId, array $orderedIds)
-    {
-        foreach ($orderedIds as $index => $id) {
-            $this->model->where('produit_id', $produitId)
-                ->where('id', $id)
-                ->update(['ordre' => $index]);
-        }
-        return $this->findByProduit($produitId);
-    }
-
     public function findByProduit(int $produitId)
     {
         return $this->model->where('produit_id', $produitId)
