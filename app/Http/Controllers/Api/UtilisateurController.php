@@ -83,7 +83,7 @@ class UtilisateurController extends Controller
     public function login(Request $request)
     {
         try {
-            $payload = $request->only(['email', 'mot_de_passe', 'remember']);
+            $payload = $request->only(['email', 'mot_de_passe', 'password', 'remember']);
             $result = $this->utilisateurService->login($payload, $request->ip(), $request->boolean('remember'));
 
             if ($request->hasSession()) {
