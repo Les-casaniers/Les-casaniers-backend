@@ -3,8 +3,9 @@
 namespace App\Repositories\ImageProduit;
 
 use App\Models\ImageProduit;
-
-class ImageProduitRepository implements ImageProduitRepositoryInterface
+use App\Repositories\BaseRepository;
+ 
+class ImageProduitRepository extends BaseRepository implements ImageProduitRepositoryInterface
 {
     protected $model;
 
@@ -70,5 +71,15 @@ class ImageProduitRepository implements ImageProduitRepositoryInterface
     public function deleteByProduit(int $produitId)
     {
         return $this->model->where('produit_id', $produitId)->delete();
+    }
+
+    public function updateOrder(int $produitId, array $imageOrders)
+    {
+        foreach ($imageOrders as $imageId => $ordre) {
+            $this->model->where('id', $imageId)
+                ->where('produit_id', $produitId)
+                ->update(['ordre' => $ordre]);
+        }
+        return true;
     }
 }

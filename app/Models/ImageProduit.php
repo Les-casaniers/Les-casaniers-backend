@@ -12,6 +12,8 @@ class ImageProduit extends Model
     // Désactiver les timestamps automatiques (created_at, updated_at)
     public $timestamps = false;
 
+    public $timestamps = false;
+    
     protected $fillable = [
         'produit_id',
         'url',
