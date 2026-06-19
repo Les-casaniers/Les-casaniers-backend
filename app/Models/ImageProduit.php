@@ -9,6 +9,8 @@ class ImageProduit extends Model
 {
     protected $table = 'images_produits';
 
+    public $timestamps = false;
+    
     protected $fillable = [
         'produit_id',
         'url',

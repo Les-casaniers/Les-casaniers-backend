@@ -4,7 +4,7 @@ namespace App\Repositories\ImageProduit;
 
 use App\Models\ImageProduit;
 use App\Repositories\BaseRepository;
-
+ 
 class ImageProduitRepository extends BaseRepository implements ImageProduitRepositoryInterface
 {
     public function __construct(ImageProduit $model)
@@ -29,5 +29,15 @@ class ImageProduitRepository extends BaseRepository implements ImageProduitRepos
     public function deleteByProduit(int $produitId)
     {
         return $this->model->where('produit_id', $produitId)->delete();
+    }
+
+    public function updateOrder(int $produitId, array $imageOrders)
+    {
+        foreach ($imageOrders as $imageId => $ordre) {
+            $this->model->where('id', $imageId)
+                ->where('produit_id', $produitId)
+                ->update(['ordre' => $ordre]);
+        }
+        return true;
     }
 }
