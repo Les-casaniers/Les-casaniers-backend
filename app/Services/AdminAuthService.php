@@ -66,6 +66,10 @@ class AdminAuthService
 
     public function login(array $data, string $ip, bool $remember = false)
     {
+        if (!isset($data['mot_de_passe']) && isset($data['password'])) {
+            $data['mot_de_passe'] = $data['password'];
+        }
+
         $validator = Validator::make($data, [
             'email' => 'required|email|max:190',
             'mot_de_passe' => 'required|string',

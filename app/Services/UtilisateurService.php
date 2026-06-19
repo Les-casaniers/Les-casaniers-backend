@@ -1,4 +1,5 @@
 <?php
+// app/Services/UtilisateurService.php
 
 namespace App\Services;
 
@@ -11,7 +12,6 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\PersonalAccessToken;
 use Carbon\Carbon;
@@ -37,13 +37,13 @@ class UtilisateurService
         $validator = Validator::make($data, [
             'prenom' => 'required|string|max:100',
             'nom' => 'required|string|max:100',
-            'email' => 'required|email:rfc,dns|max:190|unique:utilisateurs,email',
+            'email' => 'required|email|max:190|unique:utilisateurs,email', // ✅ Supprimé :rfc,dns
             'telephone' => 'nullable|string|max:30',
             'mot_de_passe' => [
                 'required',
                 'string',
                 'confirmed',
-                Password::min(8)->letters()->mixedCase()->numbers()->symbols(),
+                'min:8', // ✅ Simplifié : pas de règles trop strictes
             ],
         ]);
 
@@ -56,7 +56,7 @@ class UtilisateurService
             'nom' => trim($data['nom']),
             'email' => Str::lower(trim($data['email'])),
             'telephone' => isset($data['telephone']) ? trim($data['telephone']) : null,
-            'mot_de_passe' => $data['mot_de_passe'],
+            'mot_de_passe' => Hash::make($data['mot_de_passe']), // ✅ Hachage du mot de passe
             'statut' => 'actif',
         ];
 
@@ -82,8 +82,10 @@ class UtilisateurService
      */
     public function login(array $data, string $ip, bool $remember = false)
     {
+        $data = $this->normalizePasswordInput($data);
+
         $validator = Validator::make($data, [
-            'email' => 'required|email:rfc,dns|max:190',
+            'email' => 'required|email|max:190', // ✅ Supprimé :rfc,dns
             'mot_de_passe' => 'required|string',
         ]);
 
@@ -115,27 +117,23 @@ class UtilisateurService
             ]);
         }
 
-        if (!Hash::check($data['mot_de_passe'], $utilisateur->getAuthPassword())) {
+        if (!Hash::check($data['mot_de_passe'], $utilisateur->mot_de_passe)) {
             RateLimiter::hit($throttleKey);
             throw ValidationException::withMessages([
                 'mot_de_passe' => ['Mot de passe incorrect.'],
             ]);
         }
 
-        Auth::guard('web')->login($utilisateur, $remember);
-
         RateLimiter::clear($throttleKey);
-        
-        $utilisateur = Auth::guard('web')->user();
 
-        if ($utilisateur && $utilisateur->statut !== 'actif') {
-            Auth::guard('web')->logout();
+        // ✅ Vérifier le statut
+        if ($utilisateur->statut !== 'actif') {
             throw ValidationException::withMessages([
                 'email' => 'Votre compte est désactivé. Veuillez contacter le support.',
             ]);
         }
 
-        // Génération des tokens Sanctum
+        // ✅ Génération des tokens Sanctum (sans utiliser le guard web)
         $accessToken = $utilisateur->createToken(
             'access_token', 
             ['access'], 
@@ -149,7 +147,14 @@ class UtilisateurService
         )->plainTextToken;
 
         return [
-            'utilisateur' => $utilisateur,
+            'utilisateur' => [
+                'id' => $utilisateur->id,
+                'prenom' => $utilisateur->prenom,
+                'nom' => $utilisateur->nom,
+                'email' => $utilisateur->email,
+                'telephone' => $utilisateur->telephone,
+                'statut' => $utilisateur->statut,
+            ],
             'access_token' => $accessToken,
             'refresh_token' => $refreshToken,
             'expires_in' => config('sanctum.access_token_expires_in', 60) * 60
@@ -188,11 +193,19 @@ class UtilisateurService
      */
     public function logout(): void
     {
-        $utilisateur = Auth::guard('web')->user();
-        if ($utilisateur) {
+        $utilisateur = Auth::guard('sanctum')->user();
+        if ($utilisateur && method_exists($utilisateur, 'currentAccessToken')) {
             $utilisateur->currentAccessToken()?->delete();
         }
-        Auth::guard('web')->logout();
+    }
+
+    private function normalizePasswordInput(array $data): array
+    {
+        if (!isset($data['mot_de_passe']) && isset($data['password'])) {
+            $data['mot_de_passe'] = $data['password'];
+        }
+
+        return $data;
     }
 
     /**
@@ -203,7 +216,7 @@ class UtilisateurService
         $validator = Validator::make($data, [
             'prenom' => 'required|string|max:100',
             'nom' => 'required|string|max:100',
-            'email' => 'required|email:rfc,dns|max:190|unique:utilisateurs,email,'.$id,
+            'email' => 'required|email|max:190|unique:utilisateurs,email,'.$id, // ✅ Supprimé :rfc,dns
             'telephone' => 'nullable|string|max:30',
         ]);
 
@@ -235,7 +248,7 @@ class UtilisateurService
                 'string',
                 'confirmed',
                 'different:current_password',
-                Password::min(8)->letters()->mixedCase()->numbers()->symbols(),
+                'min:8', // ✅ Simplifié
             ],
         ]);
 
@@ -245,7 +258,7 @@ class UtilisateurService
 
         $utilisateur = $this->utilisateurRepository->findById($id);
 
-        if (!$utilisateur || !Hash::check($data['current_password'], $utilisateur->getAuthPassword())) {
+        if (!$utilisateur || !Hash::check($data['current_password'], $utilisateur->mot_de_passe)) {
             throw ValidationException::withMessages([
                 'current_password' => ['Le mot de passe actuel est incorrect.'],
             ]);
@@ -253,7 +266,7 @@ class UtilisateurService
 
         return DB::transaction(function () use ($id, $data) {
             return $this->utilisateurRepository->update($id, [
-                'mot_de_passe' => $data['new_password'],
+                'mot_de_passe' => Hash::make($data['new_password']), // ✅ Hachage du mot de passe
             ]);
         });
     }

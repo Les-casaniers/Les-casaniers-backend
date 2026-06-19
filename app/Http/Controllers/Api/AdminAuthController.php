@@ -145,6 +145,7 @@ class AdminAuthController extends Controller
             $payload = $request->only([
                 'email',
                 'mot_de_passe',
+                'password',
                 'remember',
             ]);
 

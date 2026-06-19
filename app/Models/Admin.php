@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 
 class Admin extends Authenticatable
@@ -31,7 +32,11 @@ class Admin extends Authenticatable
 
     public function setMotDePasseAttribute($value)
     {
-        $this->attributes['mot_de_passe'] = bcrypt($value);
+        if (!empty($value)) {
+            $this->attributes['mot_de_passe'] = Hash::needsRehash($value)
+                ? Hash::make($value)
+                : $value;
+        }
     }
 
     public function getAuthPassword(): string
