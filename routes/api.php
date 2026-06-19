@@ -189,6 +189,12 @@ Route::get('/profils-configurateur', [ProfilConfigurateurController::class, 'ind
 Route::get('/profils-configurateur/{slug}', [ProfilConfigurateurController::class, 'show']);
 
 // ============================================
+// ROUTES BOUTIQUE MISA - PUBLIQUES
+// ============================================
+Route::get('/boutique-misa', [BoutiqueMisaController::class, 'index']);
+Route::get('/boutique-misa/{id}', [BoutiqueMisaController::class, 'show']);
+
+// ============================================
 // ROUTES DEVIS EXPRESS (PUBLIQUE)
 // ============================================
 Route::post('/devis-express', [DevisExpressController::class, 'store']);
@@ -369,59 +375,17 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::put('/{id}/statut', [AdminAuthController::class, 'updateStatut']);
     Route::delete('/{id}', [AdminAuthController::class, 'destroy']);
 
-// Profils Configurateur
-Route::post('/profils-configurateur', [ProfilConfigurateurController::class, 'store']);
-Route::put('/profils-configurateur/{id}', [ProfilConfigurateurController::class, 'update']);
-Route::delete('/profils-configurateur/{id}', [ProfilConfigurateurController::class, 'destroy']);
-});
+    // Profils Configurateur
+    Route::post('/profils-configurateur', [ProfilConfigurateurController::class, 'store']);
+    Route::put('/profils-configurateur/{id}', [ProfilConfigurateurController::class, 'update']);
+    Route::delete('/profils-configurateur/{id}', [ProfilConfigurateurController::class, 'destroy']);
 
-// Routes adresses (client connecté)
-Route::middleware(['auth:sanctum'])->prefix('adresses')->group(function () {
-    Route::get('/', [AdresseController::class, 'index']);
-    Route::post('/', [AdresseController::class, 'store']);
-    Route::get('/{id}', [AdresseController::class, 'show']);
-    Route::put('/{id}', [AdresseController::class, 'update']);
-    Route::delete('/{id}', [AdresseController::class, 'destroy']);
-    Route::put('/{id}/defaut-expedition', [AdresseController::class, 'setDefaultExpedition']);
-    Route::get('/defaut/expedition', [AdresseController::class, 'getDefaultExpedition']);
-});
+    // Boutique Misa - Gestion admin (POST, PUT, DELETE, PATCH)
+    Route::post('/boutique-misa', [BoutiqueMisaController::class, 'store']);
+    Route::put('/boutique-misa/{id}', [BoutiqueMisaController::class, 'update']);
+    Route::delete('/boutique-misa/{id}', [BoutiqueMisaController::class, 'destroy']);
+    Route::patch('/boutique-misa/{id}/stock', [BoutiqueMisaController::class, 'updateStock']);
 
-// Favoris routes
-Route::middleware(['auth:sanctum'])->prefix('favoris')->group(function () {
-    Route::get('/', [FavorisController::class, 'index']);
-    Route::post('/', [FavorisController::class, 'store']);
-    Route::delete('/{produitId}', [FavorisController::class, 'destroy']);
-});
-
-// Configurations routes
-Route::middleware(['auth:sanctum'])->prefix('configurations')->group(function () {
-    Route::get('/', [ConfigurationController::class, 'index']);
-    Route::post('/', [ConfigurationController::class, 'store']);
-    Route::put('/{id}', [ConfigurationController::class, 'update']);
-    Route::delete('/{id}', [ConfigurationController::class, 'destroy']);
-});
-
-// Adresses routes
-Route::middleware(['auth:sanctum'])->prefix('adresses')->group(function () {
-    Route::get('/', [AdresseController::class, 'index']);
-    Route::post('/', [AdresseController::class, 'store']);
-    Route::get('/defaut/expedition', [AdresseController::class, 'getDefaultExpedition']);
-    Route::get('/{id}', [AdresseController::class, 'show']);
-    Route::put('/{id}', [AdresseController::class, 'update']);
-    Route::delete('/{id}', [AdresseController::class, 'destroy']);
-    Route::put('/{id}/defaut-expedition', [AdresseController::class, 'setDefaultExpedition']);
-    Route::post('/upload-image', [AdresseController::class, 'uploadImage']);
-});
-
-// Route::middleware(['auth:sanctum', 'admin'])->prefix('adresses')->group(function () {
-//     Route::delete('/{id}', [AdresseController::class, 'destroy']);
-// });
-
-// Route publique pour soumettre un devis express
-Route::post('/devis-express', [DevisExpressController::class, 'store']);
-
-// Routes admin (protégées)
-Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     // Devis Express
     Route::get('/devis-express', [DevisExpressController::class, 'adminList']);
     Route::get('/devis-express/{id}', [DevisExpressController::class, 'adminShow']);
@@ -440,29 +404,22 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::get('/paniers/stats', [AdminPanierController::class, 'getStats']);
     Route::post('/paniers/envoyer-email', [AdminPanierController::class, 'sendEmailRappel']);
     Route::delete('/paniers/{id}', [AdminPanierController::class, 'deletePanier']);
-
-    // Boutique Misa
-    Route::get('boutique-misa', [BoutiqueMisaController::class, 'index']);
-    Route::post('boutique-misa', [BoutiqueMisaController::class, 'store']);
-    Route::get('boutique-misa/{id}', [BoutiqueMisaController::class, 'show']);
-    Route::put('boutique-misa/{id}', [BoutiqueMisaController::class, 'update']);
-    Route::delete('boutique-misa/{id}', [BoutiqueMisaController::class, 'destroy']);
-    Route::patch('boutique-misa/{id}/stock', [BoutiqueMisaController::class, 'updateStock']);
 });
 
 // ============================================
-// ROUTES LIVREUR (TEST SANS AUTH)
+// ROUTES ADRESSES (Client connecté - déjà dans le groupe auth:sanctum)
 // ============================================
-// Route::prefix('livreur-test')->group(function () {
-//     Route::get('/commandes', [LivreurController::class, 'getCommandes']);
-//     Route::patch('/commandes/{uuid}/statut', [LivreurController::class, 'updateStatut']);
-//     Route::get('/commandes/{uuid}', [LivreurController::class, 'showCommande']);
-// });
+// Note: Les routes adresses sont déjà définies dans le groupe auth:sanctum ci-dessus
+// Elles ne doivent pas être redéfinies ici pour éviter les conflits
+
+// ============================================
+// ROUTES DEVIS EXPRESS (PUBLIQUE) - Déjà définie plus haut
+// ============================================
+// Route::post('/devis-express', [DevisExpressController::class, 'store']); // Déjà définie
 
 // ============================================
 // ROUTES LIVREUR (PROTEGEES PAR AUTH)
 // ============================================
-// ✅ Routes pour livreur - Sans middleware role
 Route::middleware(['auth:sanctum', 'role:livreur,admin'])->prefix('livreur')->group(function () {
     Route::get('/commandes', [LivreurController::class, 'getCommandes']);
     Route::patch('/commandes/{uuid}/statut', [LivreurController::class, 'updateStatut']);
