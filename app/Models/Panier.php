@@ -15,6 +15,7 @@ class Panier extends Model
         'utilisateur_id',
         'statut',
         'produit_id',
+        'boutique_id',
         'configuration_id',
         'titre',
         'prix_unitaire',
@@ -37,6 +38,11 @@ class Panier extends Model
     public function produit()
     {
         return $this->belongsTo(Produit::class, 'produit_id');
+    }
+
+    public function boutique()
+    {
+        return $this->belongsTo(BoutiqueMisa::class, 'boutique_id');
     }
 
     public function configuration()

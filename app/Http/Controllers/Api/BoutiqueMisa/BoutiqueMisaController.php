@@ -178,6 +178,43 @@ class BoutiqueMisaController extends Controller
         return response()->json(['message' => 'Article supprimé avec succès']);
     }
 
+    /**
+     *  Mise à jour du stock (accessible aux clients connectés)
+     */
+    public function updateStockPublic(Request $request, int $id): JsonResponse
+    {
+        try {
+            // Vérifier que l'utilisateur est connecté
+            $user = $request->user();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Veuillez vous connecter'
+                ], 401);
+            }
+
+            $validated = $request->validate([
+                'stock' => 'required|integer|min:0',
+            ]);
+
+            $item = $this->boutiqueMisaService->updateStock($id, $validated['stock']);
+            if (!$item) {
+                return response()->json(['message' => 'Article non trouvé'], 404);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Stock mis à jour',
+                'data' => $item
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function updateStock(Request $request, int $id): JsonResponse
     {
         $validated = $request->validate([

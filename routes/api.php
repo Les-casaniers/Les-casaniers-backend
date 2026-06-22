@@ -194,6 +194,9 @@ Route::get('/profils-configurateur/{slug}', [ProfilConfigurateurController::clas
 Route::get('/boutique-misa', [BoutiqueMisaController::class, 'index']);
 Route::get('/boutique-misa/{id}', [BoutiqueMisaController::class, 'show']);
 
+// ✅ Route pour mettre à jour le stock (accessible aux clients connectés)
+Route::middleware(['auth:sanctum'])->patch('/boutique-misa/{id}/stock', [BoutiqueMisaController::class, 'updateStockPublic']);
+
 // ============================================
 // ROUTES DEVIS EXPRESS (PUBLIQUE)
 // ============================================

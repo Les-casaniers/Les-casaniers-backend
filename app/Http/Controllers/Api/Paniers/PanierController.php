@@ -18,8 +18,7 @@ class PanierController extends Controller
 {
     public function __construct(
         private readonly PanierService $panierService
-    ) {
-    }
+    ) {}
 
     /**
      * @OA\Get(
@@ -60,16 +59,60 @@ class PanierController extends Controller
      *     @OA\Response(response=422, description="Erreur de validation")
      * )
      */
+    // public function ajouter(Request $request)
+    // {
+    //     try {
+    //         $validated = $request->validate([
+    //             'produit_id' => ['required', 'integer', 'exists:produits,id'],
+    //             'quantite' => ['nullable', 'integer', 'min:1'],
+    //             'configuration_id' => ['nullable', 'integer', 'exists:configurations,id'],
+    //             'titre' => ['nullable', 'string', 'max:255'],
+    //             'prix_unitaire' => ['nullable', 'numeric'],
+    //         ]);
+
+    //         $result = $this->panierService->addItem((int) $request->user()->id, $validated);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Article ajouté au panier avec succès.',
+    //             'data' => $result,
+    //         ], 200);
+    //     } catch (ValidationException $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Erreur de validation',
+    //             'errors' => $e->errors(),
+    //         ], 422);
+    //     } catch (Throwable $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Erreur serveur',
+    //         ], 500);
+    //     }
+    // }
+
     public function ajouter(Request $request)
     {
         try {
             $validated = $request->validate([
-                'produit_id' => ['required', 'integer', 'exists:produits,id'],
+                'produit_id' => ['nullable', 'integer', 'exists:produits,id'],
+                'boutique_id' => ['nullable', 'integer', 'exists:boutique_misa,id'],
                 'quantite' => ['nullable', 'integer', 'min:1'],
                 'configuration_id' => ['nullable', 'integer', 'exists:configurations,id'],
                 'titre' => ['nullable', 'string', 'max:255'],
                 'prix_unitaire' => ['nullable', 'numeric'],
             ]);
+
+            // ✅ Vérifier qu'au moins un des deux est présent
+            if (empty($validated['produit_id']) && empty($validated['boutique_id'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Veuillez spécifier un produit ou un article de la boutique Misa.',
+                    'errors' => [
+                        'produit_id' => ['Au moins un produit ou article Misa est requis']
+                    ]
+                ], 422);
+            }
 
             $result = $this->panierService->addItem((int) $request->user()->id, $validated);
 
@@ -85,9 +128,14 @@ class PanierController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         } catch (Throwable $e) {
+            Log::error('Erreur ajout panier', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur serveur',
+                'message' => 'Erreur serveur: ' . $e->getMessage(),
             ], 500);
         }
     }
