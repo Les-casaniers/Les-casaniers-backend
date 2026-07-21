@@ -30,6 +30,8 @@ use App\Models\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\ConsentementCookieController;
 use App\Http\Controllers\Api\Configurateur\ProfilConfigurateurController;
+use App\Http\Controllers\Api\Produits\TemplateCaracteristiqueController;/*Autre caracteristique d'un produit */
+use App\Http\Controllers\Api\Produits\ValeurCaracteristiqueController;
 
 // ============================================
 // ROUTE POUR SERVIR LES IMAGES (PUBLIQUE - FALLBACK)
@@ -221,6 +223,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/produits/{id}', [ProduitController::class, 'destroy']);
     Route::patch('/produits/{id}/toggle-status', [ProduitController::class, 'toggleStatus']);
 
+        // Routes pour les templates
+    Route::get('/sous-categories/{sousCategorieId}/templates', [TemplateCaracteristiqueController::class, 'getBySousCategorie']);
+    Route::post('/templates-caracteristiques', [TemplateCaracteristiqueController::class, 'store']);
+    Route::put('/templates-caracteristiques/{id}', [TemplateCaracteristiqueController::class, 'update']);
+    Route::delete('/templates-caracteristiques/{id}', [TemplateCaracteristiqueController::class, 'destroy']);
+
+    // Routes pour les valeurs
+    Route::get('/produits/{produitId}/caracteristiques', [ValeurCaracteristiqueController::class, 'getByProduit']);
+    Route::get('/produits/{produitId}/caracteristiques/{nomChamp}', [ValeurCaracteristiqueController::class, 'getByProduitAndChamp']);
+    Route::post('/valeurs-caracteristiques', [ValeurCaracteristiqueController::class, 'storeOrUpdate']);
+    Route::delete('/valeurs-caracteristiques/{id}', [ValeurCaracteristiqueController::class, 'destroy']);
+    Route::post('/produits/{produitId}/caracteristiques/sync', [ValeurCaracteristiqueController::class, 'sync']);
+
     // Images produits
     Route::post('/produits/{produitId}/images', [ImageProduitController::class, 'store']);
     Route::post('/produits/{produitId}/images/multiple', [ImageProduitController::class, 'storeMultiple']);
@@ -231,7 +246,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('/produits/{produitId}/attributes/sync', [AttributProduitController::class, 'sync']);
     Route::get('/attributes/standard-keys', [AttributProduitController::class, 'getStandardKeys']);
-
+    
     // Commandes
     Route::prefix('commandes')->group(function () {
         Route::get('/', [CommandeController::class, 'index']);

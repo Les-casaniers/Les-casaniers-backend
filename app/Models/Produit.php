@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Produit extends Model
 {
@@ -42,6 +44,48 @@ class Produit extends Model
     public function sousCategorie()
     {
         return $this->belongsTo(SousCategorie::class, 'id_sous_categorie');
+    }
+
+     /**
+     * Relation avec les valeurs des caractéristiques
+     */
+    public function valeursCaracteristiques(): HasMany
+    {
+        return $this->hasMany(ValeurCaracteristique::class, 'produit_id');
+    }
+    
+    /**
+     * Relation avec les templates via les valeurs
+     */
+    public function templatesCaracteristiques(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            TemplateCaracteristique::class,
+            'valeurs_caracteristiques',
+            'produit_id',
+            'template_id'
+        )->withPivot('valeur')->withTimestamps();
+    }
+    
+    /**
+     * Récupérer les caractéristiques formatées
+     */
+    public function getCaracteristiquesAttribute()
+    {
+        return $this->valeursCaracteristiques()
+                    ->with('template')
+                    ->get()
+                    ->mapWithKeys(function ($item) {
+                        return [$item->template->nom_champ => $item->valeur];
+                    });
+    }
+    
+    /**
+     * Vérifier si le produit a des caractéristiques
+     */
+    public function hasCaracteristiques(): bool
+    {
+        return $this->valeursCaracteristiques()->exists();
     }
 
     public function images()
