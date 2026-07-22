@@ -235,6 +235,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/valeurs-caracteristiques', [ValeurCaracteristiqueController::class, 'storeOrUpdate']);
     Route::delete('/valeurs-caracteristiques/{id}', [ValeurCaracteristiqueController::class, 'destroy']);
     Route::post('/produits/{produitId}/caracteristiques/sync', [ValeurCaracteristiqueController::class, 'sync']);
+    Route::get('/templates/{templateId}/valeurs-uniques', [ValeurCaracteristiqueController::class, 'getValeursUniques']);
 
     // Images produits
     Route::post('/produits/{produitId}/images', [ImageProduitController::class, 'store']);
