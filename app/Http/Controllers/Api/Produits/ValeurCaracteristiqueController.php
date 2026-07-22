@@ -241,4 +241,19 @@ class ValeurCaracteristiqueController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
+    public function getValeursUniques(int $templateId)
+    {
+        $valeurs = ValeurCaracteristique::where('template_id', $templateId)
+            ->whereNotNull('valeur')
+            ->where('valeur', '!=', '')
+            ->distinct()
+            ->pluck('valeur')
+            ->toArray();
+
+        return response()->json([
+            'success' => true,
+            'data' => $valeurs
+        ]);
+    }
 }
