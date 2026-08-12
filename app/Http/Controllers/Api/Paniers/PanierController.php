@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api\Paniers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Utilisateur;
 use App\Services\Paniers\PanierService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -94,6 +96,13 @@ class PanierController extends Controller
     public function ajouter(Request $request)
     {
         try {
+            if (! $request->user() instanceof Utilisateur) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Seuls les clients peuvent ajouter des articles au panier.',
+                ], 403);
+            }
+
             $validated = $request->validate([
                 'produit_id' => ['nullable', 'integer', 'exists:produits,id'],
                 'boutique_id' => ['nullable', 'integer', 'exists:boutique_misa,id'],
