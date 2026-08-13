@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\Admin\AdminPanierController;
 use App\Http\Controllers\Api\BoutiqueMisa\BoutiqueMisaController;
 use App\Http\Controllers\Api\Livreur\LivreurController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\UtilisateurController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
@@ -208,6 +209,10 @@ Route::post('/devis-express', [DevisExpressController::class, 'store']);
 // ROUTES PROTEGEES PAR AUTHENTIFICATION
 // ============================================
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/dashboard/apercu', [DashboardController::class, 'apercu']);
+    Route::get('/dashboard/commandes', [DashboardController::class, 'commandes']);
+    Route::get('/dashboard/factures', [DashboardController::class, 'factures']);
+
     // Produits
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::put('/categories/{id}', [CategoryController::class, 'update']);
@@ -313,6 +318,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('favoris')->group(function () {
         Route::get('/', [FavorisController::class, 'index']);
         Route::post('/', [FavorisController::class, 'store']);
+        Route::delete('/', [FavorisController::class, 'destroyFromRequest']);
         Route::delete('/{produitId}', [FavorisController::class, 'destroy']);
     });
 
