@@ -134,4 +134,14 @@ class FavorisController extends Controller
             ], 500);
         }
     }
+
+    /** Compatibilité avec les pages qui envoient produit_id dans le corps DELETE. */
+    public function destroyFromRequest(Request $request)
+    {
+        $validated = $request->validate([
+            'produit_id' => ['required', 'integer'],
+        ]);
+
+        return $this->destroy($request, (int) $validated['produit_id']);
+    }
 }

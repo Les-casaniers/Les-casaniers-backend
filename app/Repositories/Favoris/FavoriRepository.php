@@ -8,7 +8,7 @@ class FavoriRepository implements FavoriRepositoryInterface
 {
     public function getAllByUser(int $utilisateurId)
     {
-        return Favori::with('produit')
+        return Favori::with('produit.images')
             ->where('utilisateur_id', $utilisateurId)
             ->latest('id')
             ->get();
