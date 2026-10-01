@@ -24,6 +24,7 @@ class CategoryService
 
         if (!empty($data['parent_id'])) {
             $parent = $this->categoryRepository->findById($data['parent_id']);
+
             if ($parent && $parent->type !== $data['type']) {
                 $data['type'] = $parent->type;
             }
@@ -41,6 +42,7 @@ class CategoryService
 
         if (!empty($data['parent_id'])) {
             $parent = $this->categoryRepository->findById($data['parent_id']);
+
             if ($parent && $parent->type !== $data['type']) {
                 $data['type'] = $parent->type;
             }
@@ -78,12 +80,18 @@ class CategoryService
                 'nom' => $category->nom,
                 'id' => $category->id,
             ]);
-            $category = $category->parent_id ? $this->categoryRepository->findById($category->parent_id) : null;
+
+            $category = $category->parent_id
+                ? $this->categoryRepository->findById($category->parent_id)
+                : null;
         }
 
         return $breadcrumbs;
     }
 
+    /**
+     * Récupérer le menu par type
+     */
     public function getMenuByType(string $type)
     {
         return $this->categoryRepository->getRoots()
@@ -91,20 +99,32 @@ class CategoryService
             ->load('enfants');
     }
 
+    /**
+     * Récupérer toutes les catégories
+     */
     public function getAllCategories()
     {
         return $this->categoryRepository->getAll();
     }
 
+    /**
+     * Mettre à jour l'ordre des catégories
+     */
     public function updateOrder(array $orders)
     {
         foreach ($orders as $id => $ordre) {
-            $this->categoryRepository->update($id, ['ordre_tri' => $ordre]);
+            $this->categoryRepository->update($id, [
+                'ordre_tri' => $ordre
+            ]);
         }
+
         return true;
     }
 
-    protected function validateCategory(array $data, int $id = null)
+    /**
+     * Valider les données d'une catégorie
+     */
+    protected function validateCategory(array $data, ?int $id = null)
     {
         $rules = [
             'nom' => 'required|string|max:190',
