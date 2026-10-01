@@ -13,6 +13,9 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
+use Throwable;
 use Laravel\Sanctum\PersonalAccessToken;
 use Carbon\Carbon;
 
@@ -213,11 +216,13 @@ class UtilisateurService
      */
     public function updateProfile(int $id, array $data)
     {
+        $photo = $data['photo'] ?? null;
         $validator = Validator::make($data, [
             'prenom' => 'required|string|max:100',
             'nom' => 'required|string|max:100',
             'email' => 'required|email|max:190|unique:utilisateurs,email,'.$id, // ✅ Supprimé :rfc,dns
             'telephone' => 'nullable|string|max:30',
+            'photo' => 'nullable|image|max:5120',
         ]);
 
         if ($validator->fails()) {
@@ -231,9 +236,28 @@ class UtilisateurService
             'telephone' => isset($data['telephone']) ? trim($data['telephone']) : null,
         ];
 
-        return DB::transaction(function () use ($id, $payload) {
-            return $this->utilisateurRepository->update($id, $payload);
-        });
+        $existingUser = $this->utilisateurRepository->findById($id);
+        $oldPhoto = $existingUser?->photo;
+        if ($photo instanceof UploadedFile) {
+            $payload['photo'] = $photo->store('profile-photos', 'public');
+        }
+
+        try {
+            $utilisateur = DB::transaction(function () use ($id, $payload) {
+                return $this->utilisateurRepository->update($id, $payload);
+            });
+        } catch (Throwable $error) {
+            if (isset($payload['photo'])) {
+                Storage::disk('public')->delete($payload['photo']);
+            }
+            throw $error;
+        }
+
+        if (isset($payload['photo']) && $oldPhoto) {
+            Storage::disk('public')->delete($oldPhoto);
+        }
+
+        return $utilisateur;
     }
 
     /**
