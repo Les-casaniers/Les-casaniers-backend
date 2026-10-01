@@ -24,7 +24,18 @@ class Produit extends Model
         'devise',
         'quantite_stock',
         'est_dispo',
-        'actif'
+        'actif',
+        'atout',
+        // Champs de la ligne produit du catalogue
+        'ean',
+        'usages',
+        'processeur',
+        'ssd',
+        'os',
+        'gpu',
+        'resolution',
+        'ram',
+        'taille',
     ];
 
     protected $casts = [
