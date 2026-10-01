@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Favoris;
 
 use App\Http\Controllers\Controller;
+use App\Models\Utilisateur;
 use App\Services\Favoris\FavoriService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -63,6 +64,13 @@ class FavorisController extends Controller
     public function store(Request $request)
     {
         try {
+            if (! $request->user() instanceof Utilisateur) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Seuls les clients peuvent ajouter des favoris.',
+                ], 403);
+            }
+
             $validated = $request->validate([
                 'produit_id' => ['required', 'integer', 'exists:produits,id'],
             ]);

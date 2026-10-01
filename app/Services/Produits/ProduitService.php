@@ -61,7 +61,7 @@ class ProduitService
             'devise' => 'sometimes|nullable|string|max:10',
             'actif' => 'sometimes|boolean',
             'est_dispo' => 'sometimes|boolean',
-        ]);
+        ] + $this->catalogueRules('sometimes|'));
 
         if ($validator->fails()) {
             throw new ValidationException($validator);
@@ -181,11 +181,28 @@ class ProduitService
             'devise' => 'nullable|string|max:10',
             'actif' => 'boolean',
             'est_dispo' => 'sometimes|boolean',
-        ]);
+        ] + $this->catalogueRules());
 
         if ($validator->fails()) {
             throw new ValidationException($validator);
         }
+    }
+
+    /**
+     * Règles des champs affichés sur la ligne produit du catalogue (EAN, usages, specs).
+     */
+    protected function catalogueRules(string $prefix = ''): array
+    {
+        $rules = [
+            'ean' => $prefix . 'nullable|string|max:32',
+            'usages' => $prefix . 'nullable|string|max:255',
+        ];
+
+        foreach (['processeur', 'ssd', 'os', 'gpu', 'resolution', 'ram', 'taille'] as $field) {
+            $rules[$field] = $prefix . 'nullable|string|max:255';
+        }
+
+        return $rules;
     }
 
     /**
