@@ -24,7 +24,8 @@ class Produit extends Model
         'devise',
         'quantite_stock',
         'est_dispo',
-        'actif'
+        'actif',
+        'conseil_compatibilite'
     ];
 
     protected $casts = [

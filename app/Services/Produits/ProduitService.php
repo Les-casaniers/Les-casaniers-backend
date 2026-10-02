@@ -61,6 +61,7 @@ class ProduitService
             'devise' => 'sometimes|nullable|string|max:10',
             'actif' => 'sometimes|boolean',
             'est_dispo' => 'sometimes|boolean',
+            'conseil_compatibilite' => 'nullable|string|max:500'
         ]);
 
         if ($validator->fails()) {
@@ -181,6 +182,7 @@ class ProduitService
             'devise' => 'nullable|string|max:10',
             'actif' => 'boolean',
             'est_dispo' => 'sometimes|boolean',
+             'conseil_compatibilite' => 'sometimes|nullable|string|max:500',
         ]);
 
         if ($validator->fails()) {
