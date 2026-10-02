@@ -26,6 +26,7 @@ class Produit extends Model
         'est_dispo',
         'actif',
         'atout',
+        'conseil_compatibilite',
         // Champs de la ligne produit du catalogue
         'ean',
         'usages',
