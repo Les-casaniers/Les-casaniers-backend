@@ -18,6 +18,7 @@ class Utilisateur extends Authenticatable
         'nom',
         'email',
         'telephone',
+        'photo',
         'mot_de_passe',
         'statut'
     ];

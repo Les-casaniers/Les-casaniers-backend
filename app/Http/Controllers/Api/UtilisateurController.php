@@ -158,6 +158,10 @@ class UtilisateurController extends Controller
     {
         try {
             $payload = $request->only(['prenom', 'nom', 'email', 'telephone']);
+            $payload['email'] = $payload['email'] ?? $request->user()->email;
+            if ($request->hasFile('photo')) {
+                $payload['photo'] = $request->file('photo');
+            }
             $utilisateur = $this->utilisateurService->updateProfile($request->user()->id, $payload);
 
             return response()->json([
