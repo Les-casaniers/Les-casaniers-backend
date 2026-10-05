@@ -974,23 +974,38 @@ class FactureController extends Controller
                 ], 404);
             }
 
-            if (!$facture->pdf_path) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'PDF non disponible pour cette facture'
-                ], 404);
+            if (!$facture->pdf_path || !Storage::disk('public')->exists($facture->pdf_path)) {
+                $commande = $facture->commande;
+
+                if (!$commande) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Commande associée introuvable pour générer le PDF'
+                    ], 404);
+                }
+
+                $pdfPath = $this->generateFacturePdf($facture, $commande);
+
+                if (!$pdfPath || !Storage::disk('public')->exists($pdfPath)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Impossible de générer le PDF de cette facture'
+                    ], 500);
+                }
+
+                $facture->update(['pdf_path' => $pdfPath]);
             }
 
-            $pdfPath = storage_path('app/public/' . $facture->pdf_path);
+            $absolutePath = Storage::disk('public')->path($facture->pdf_path);
 
-            if (!file_exists($pdfPath)) {
+            if (!is_file($absolutePath)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Fichier PDF non trouvé'
                 ], 404);
             }
 
-            return response()->download($pdfPath, $facture->facture_ref . '.pdf', [
+            return response()->download($absolutePath, $facture->facture_ref . '.pdf', [
                 'Content-Type' => 'application/pdf',
             ]);
 
