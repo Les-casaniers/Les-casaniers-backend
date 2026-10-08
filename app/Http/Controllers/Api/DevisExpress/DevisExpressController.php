@@ -74,33 +74,37 @@ class DevisExpressController extends Controller
                 'budget' => $request->budget,
                 'date_souhaitee' => $request->date_souhaitee,
                 'message' => $request->message,
-                'statut' => 'en_attente'
+                'statut' => 'en_attente',
+                'date_creation' => now(),
+                'date_modification' => now(),
             ]);
 
-            // ENVOI EMAIL AU CLIENT
-            Mail::to($request->email)->send(new DevisExpressConfirmation($devis));
+            try {
+                // ENVOI EMAIL AU CLIENT
+                Mail::to($request->email)->send(new DevisExpressConfirmation($devis));
+            } catch (\Throwable $mailError) {
+                Log::warning('DevisExpress mail client failed: ' . $mailError->getMessage());
+            }
 
-            //ENVOI EMAIL À L'ADMIN (remplacez par l'email de l'admin)
-            $adminEmail = 'onjaniainamapionona@gmail.com';
-            Mail::to($adminEmail)->send(new DevisExpressAdminNotification($devis));
-
-            // Optionnel: envoyer aussi aux admins multiples
-            // $adminEmails = ['admin1@lescasaniers.mg', 'admin2@lescasaniers.mg'];
-            // foreach ($adminEmails as $adminEmail) {
-            //     Mail::to($adminEmail)->send(new DevisExpressAdminNotification($devis));
-            // }
+            try {
+                //ENVOI EMAIL À L'ADMIN (remplacez par l'email de l'admin)
+                $adminEmail = 'onjaniainamapionona@gmail.com';
+                Mail::to($adminEmail)->send(new DevisExpressAdminNotification($devis));
+            } catch (\Throwable $mailError) {
+                Log::warning('DevisExpress mail admin failed: ' . $mailError->getMessage());
+            }
 
             return response()->json([
                 'success' => true,
                 'data' => $devis,
-                'message' => 'Votre demande de devis a été envoyée avec succès. Vous allez recevoir un email de confirmation.'
+                'message' => 'Votre demande de devis a été enregistrée avec succès. Nous la traitons prochainement.'
             ], 201);
         } catch (\Exception $e) {
             Log::error('Erreur DevisExpress: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
-                'message' => 'Une erreur est survenue. Veuillez réessayer.'
+                'message' => 'Une erreur est survenue lors de l\'enregistrement. Veuillez réessayer.'
             ], 500);
         }
     }
